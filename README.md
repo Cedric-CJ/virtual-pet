@@ -1,24 +1,45 @@
-# virtual pet
-Hier sollte sich der Benutzer anmelden und die Möglichkeit haben, zwischen zwei/drei verschiedenen Tieren zu wählen.
-Diese Tiere können benannt werden. Zudem ist es möglich, die virtuellen Tiere zu füttern, trinken zu geben, zu streicheln, zu duschen und mit ihnen zu spielen.
-Über den Tieren befinden sich Statusleisten, die anzeigen, wie sich das Tier fühlt und was es benötigt.
+# pet-frontend
 
+This template should help get you started developing with Vue 3 in Vite.
 
-Milestones:
-M1: Thema überlegt, Paar gefunden, GitHub-
-Repo erstellt, Entity-Klasse überlegt, Spring App
-mit GET-Route gepusht > Deadline: 21. April
+## Recommended IDE Setup
 
-M2: Vue.js-App zu GitHub gepusht, mind. 1 eigene
-Unterkomponente, die etwas mit v-for rendert
--> Deadline: 12. Mai
+[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
 
-M3: Frontend und Backend auf Render deployed,
-Frontend ruft GET-Route auf > Deadline: 26. Mai
+## Type Support for `.vue` Imports in TS
 
-M4: Backend hat REST-Schnittstelle und kann
-Daten in Datenbank speichern, Frontend ruft
-POST-Route auf > Deadline: 16. Juni
+TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
 
-Finale Projekt-Präsentation: 1 .- 3. Juli
--> Deadline: Sonntag, 30. Juni, 23:59 Uhr
+## Customize configuration
+
+See [Vite Configuration Reference](https://vitejs.dev/config/).
+
+## Project Setup
+
+```sh
+npm install
+```
+
+### Compile and Hot-Reload for Development
+
+```sh
+npm run dev
+```
+
+### Type-Check, Compile and Minify for Production
+
+```sh
+npm run build
+```
+
+### Run Unit Tests with [Vitest](https://vitest.dev/)
+
+```sh
+npm run test:unit
+```
+
+### Lint with [ESLint](https://eslint.org/)
+
+```sh
+npm run lint
+```
