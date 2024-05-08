@@ -2,3 +2,7 @@
 /.gradle/
 /build/
 /build/classes/java/main/
+
+#H2 DB#
+*.mv.db
+*.trace.db
