@@ -41,16 +41,55 @@ const handleRegister = async () => {
 <style scoped>
 .register-container {
   max-width: 300px;
-  margin: auto;
+  : center;
+  margin: 300px auto;
   padding: 20px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  background: Black;
+  border-radius: 8px;
 }
 
-.error {
-  color: red;
-}
+  input {
+    display: block;
+    width: 100%;
+    margin: 10px 0;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
 
-.success {
-  color: green;
-}
+  button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+
+  button:hover {
+    background-color: #45a049;
+  }
+
+  .error {
+    color: red;
+  }
+
+  .success {
+    color: green;
+  }
+
+  router-link {
+    display: block;
+    margin-top: 10px;
+    color: #0645ad;
+    text-decoration: none;
+  }
+
+  router-link:hover {
+    text-decoration: underline;
+  }
 </style>

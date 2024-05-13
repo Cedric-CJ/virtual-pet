@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import HaustierSeite from '@/components/Haustier-Seite.vue'
+import HaustierSeite from '@/components/Haustier-Seite2.vue'
 </script>
 
 <template>

@@ -27,17 +27,15 @@ const router = useRouter();
 const handleLogin = async () => {
   try {
     const response = await axios.post('/api/login', loginData.value);
-    console.log('Login-Versuch für:', loginData.value.username);
     if (response.status === 200) {
       message.value = 'Login erfolgreich!';
       isError.value = false;
-      router.push('/pet'); // Erfolgreich eingeloggt, weiterleiten zu '/pet'
+      router.push('/pet');
     } else {
       throw new Error('Anmeldung fehlgeschlagen!');
     }
   } catch (error) {
-    console.error('Login Fehler:', error);
-    message.value = 'Login fehlgeschlagen: ' + (error.response.data.message || 'Unbekannter Fehler');
+    message.value = 'Login fehlgeschlagen: ' + (error.response?.data.message || 'Unbekannter Fehler');
     isError.value = true;
   }
 };
@@ -46,9 +44,36 @@ const handleLogin = async () => {
 <style scoped>
 .login-container {
   max-width: 300px;
-  margin: auto;
+  margin: 300px auto;
   padding: 20px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  background: Black;
+  border-radius: 8px;
+}
+
+input {
+  display: block;
+  width: 100%;
+  margin: 10px 0;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+button:hover {
+  background-color: #45a049;
 }
 
 .error {
@@ -57,5 +82,16 @@ const handleLogin = async () => {
 
 .success {
   color: green;
+}
+
+router-link {
+  display: block;
+  margin-top: 10px;
+  color: #0645ad;
+  text-decoration: none;
+}
+
+router-link:hover {
+  text-decoration: underline;
 }
 </style>
