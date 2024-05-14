@@ -9,10 +9,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/pet")
+@RequestMapping("/api/pet")
 public class PetController {
     @Autowired
     private PetRepository petRepository;
@@ -41,6 +43,18 @@ public class PetController {
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @GetMapping("/dogArt")
+    public ResponseEntity<String> getDogAsciiArt() {
+        Dog dog = new Dog("Beispiel");
+        return ResponseEntity.ok(dog.getAsciiArt());
+    }
+
+    @GetMapping("catArt")
+    public ResponseEntity<String> getCatAsciiArt() {
+        Cat cat = new Cat("Beispiel");
+        return ResponseEntity.ok(cat.getAsciiArt());
     }
 
     @GetMapping("/registration")
@@ -136,5 +150,10 @@ public class PetController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Haustier nicht gefunden: " + petId);
         }
+    }
+    @GetMapping("/top")
+    public ResponseEntity<List<Pet>> getTopPets() {
+        List<Pet> pets = petRepository.findAllByOrderByCreatedDateDesc();
+        return ResponseEntity.ok(pets);
     }
 }

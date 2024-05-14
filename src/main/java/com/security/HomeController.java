@@ -39,10 +39,4 @@ public class HomeController {
                 )
         );
     }
-    @GetMapping("/register")
-    public Map<String, Object> registData() {
-        return Map.of(
-                "register", "lol"
-        );
-    }
 }
