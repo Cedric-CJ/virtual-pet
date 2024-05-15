@@ -114,8 +114,10 @@ const formatDate = (date) => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 25px;
   min-height: 100vh;
+  max-width: 100vw;
+  overflow-x: auto;
 }
 
 @media (min-width: 1024px) {
@@ -128,7 +130,7 @@ const formatDate = (date) => {
   .pet-info {
     flex: 1;
     text-align: center;
-    order: 1;
+    margin-right: 20px;
   }
 
   .stats, .top-pets {
@@ -137,22 +139,17 @@ const formatDate = (date) => {
   }
 }
 
-.pet-info {
-  text-align: center;
-  padding: 20px;
-}
-
 .pet-image {
   max-width: 300px;
-  margin-bottom: 20px;
+  display: block;
+  margin: 0 auto;
 }
 
 .actions {
   display: flex;
-  flex-wrap: wrap;
   justify-content: center;
   gap: 10px;
-  margin-bottom: 20px;
+  margin-top: 20px;
 }
 
 .action-text {
@@ -168,7 +165,8 @@ const formatDate = (date) => {
 }
 
 .stats {
-  width: 100%;
+  flex: 1;
+  min-width: 300px;
   padding: 20px;
 }
 
@@ -195,12 +193,13 @@ const formatDate = (date) => {
   position: absolute;
   right: 5px;
   top: 1px;
-  color: #fff;
+  color: black;
   font-size: 14px;
 }
 
 .top-pets {
-  width: 100%;
+  flex: 1;
+  min-width: 200px;
   padding: 20px;
 }
 
@@ -218,5 +217,26 @@ th, td {
 th {
   background-color: #333;
   color: #fff;
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding: 10px;
+  }
+
+  .stats, .top-pets {
+    padding: 10px;
+    min-width: 100%;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+
+  .action-text {
+    bottom: 10px;
+    left: 10px;
+    transform: translateX(0);
+  }
 }
 </style>

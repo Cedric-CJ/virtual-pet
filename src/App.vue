@@ -24,7 +24,7 @@ const route = useRoute();
 const isExpanded = ref(true);
 
 watch(() => route.path, (newPath) => {
-  if (['/', '/login', '/logout'].includes(newPath)) {
+  if (['/registration', '/login', '/logout'].includes(newPath)) {
     isExpanded.value = true;
   } else {
     isExpanded.value = false; // Für alle anderen Routen soll die Kopfzeile eingeklappt bleiben
@@ -32,13 +32,13 @@ watch(() => route.path, (newPath) => {
 });
 
 const handleMouseOver = () => {
-  if (!['/', '/login', '/logout'].includes(route.path)) {
+  if (!['/registration', '/login', '/logout'].includes(route.path)) {
     isExpanded.value = true;
   }
 };
 
 const handleMouseLeave = () => {
-  if (!['/', '/login', '/logout'].includes(route.path)) {
+  if (!['/registration', '/login', '/logout'].includes(route.path)) {
     isExpanded.value = false;
   }
 };
@@ -54,7 +54,7 @@ header {
   top: 0;
   left: 0;
   width: 100%;
-  background: #0a0a0a; /* Dunkler Hintergrund */
+  background: #0a0a0a;
   color: white;
   transition: max-height 0.5s ease;
   overflow: hidden;
@@ -66,11 +66,11 @@ header {
 }
 
 .collapsed {
-  max-height: 50px; /* Minimalhöhe bei Einklappen */
+  max-height: 10px;
 }
 
 .expanded {
-  max-height: 100vh; /* Maximale Höhe beim Ausklappen */
+  max-height: 100vh;
 }
 
 .header-content {
@@ -80,7 +80,7 @@ header {
 }
 
 .logo img {
-  max-width: 100px; /* Anpassung der Logogröße */
+  max-width: 100px;
   margin-bottom: 10px;
 }
 
@@ -98,7 +98,7 @@ nav a {
 }
 
 nav a:hover {
-  background-color: #555; /* Hintergrundfarbe beim Hover */
+  background-color: #555;
 }
 
 .toggle-arrow {
