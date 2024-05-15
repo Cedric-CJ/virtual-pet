@@ -31,7 +31,7 @@ describe('Registrierungsseite', () => {
     await inputPassword.setValue('passwort123');
     await button.trigger('submit');
 
-    expect(inputUsername.element.value).toBe('neuerBenutzer');
-    expect(inputPassword.element.value).toBe('passwort123');
+    expect((inputUsername.element as HTMLInputElement).value).toBe('neuerBenutzer');
+    expect((inputPassword.element as HTMLInputElement).value).toBe('passwort123');
   });
 });
