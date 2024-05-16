@@ -1,29 +1,31 @@
 <template>
   <div class="pet-creation">
     <h1>Erstelle dein Haustier</h1>
-    <form @submit.prevent="createPet">
-      <div class="pet-parts">
-        <div class="pet-part" v-for="(part, index) in parts" :key="index">
-          <button class="nav-button up" @click="changePart(index, -1)">↑</button>
-          <img :src="part.options[part.current]" :alt="`Pet ${part.name}`" />
-          <button class="nav-button down" @click="changePart(index, 1)">↓</button>
-        </div>
+    <div class="pet-selection">
+      <div class="pet-option" @click="selectPet('dog')">
+        <img
+          src="@/assets/dog/front.png"
+          alt="Hund"
+          :class="{ selected: petData.type === 'dog' }"
+        />
       </div>
-      <input id="petName" v-model="petData.name" placeholder="Name des Haustieres" required>
-      <button type="submit">Erstellen</button>
-    </form>
+      <div class="pet-option" @click="selectPet('cat')">
+        <img
+          src="@/assets/cat/front.png"
+          alt="Katze"
+          :class="{ selected: petData.type === 'cat' }"
+        />
+      </div>
+    </div>
+    <input id="petName" v-model="petData.name" placeholder="Name des Haustieres" required>
+    <button @click="createPet" :disabled="!petData.type || !petData.name">Erstellen</button>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-
-const parts = ref([
-  { name: 'head', options: ['/path/to/dog_head1.png', '/path/to/dog_head2.png'], current: 0 },
-  { name: 'body', options: ['/path/to/dog_body1.png', '/path/to/dog_body2.png'], current: 0 },
-  { name: 'tail', options: ['/path/to/dog_tail1.png', '/path/to/dog_tail2.png'], current: 0 }
-]);
+import axios from 'axios';
 
 const petData = ref({
   name: '',
@@ -31,21 +33,24 @@ const petData = ref({
 });
 const router = useRouter();
 
-const createPet = () => {
-  console.log('Haustierdaten:', petData.value);
-  router.push('/pet');
+const selectPet = (type) => {
+  petData.value.type = type;
 };
 
-const changePart = (index, direction) => {
-  const part = parts.value[index];
-  part.current += direction;
-  if (part.current >= part.options.length) {
-    part.current = 0;
-  } else if (part.current < 0) {
-    part.current = part.options.length - 1;
+const createPet = async () => {
+  if (petData.value.name && petData.value.type) {
+    try {
+      const response = await axios.post('http://localhost:8080/api/pet/create', petData.value);
+      if (response.status === 201) {
+        router.push({ name: 'pet', params: { petData: JSON.stringify(response.data) } });
+      }
+    } catch (error) {
+      console.error('Fehler beim Erstellen des Haustiers:', error);
+    }
   }
 };
 </script>
+
 <style scoped>
 .pet-creation {
   max-width: 600px;
@@ -55,47 +60,77 @@ const changePart = (index, direction) => {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-.pet-parts {
+.pet-selection {
   display: flex;
-  flex-direction: row;
   justify-content: center;
-  align-items: center;
+  gap: 20px;
+  margin-bottom: 20px;
 }
 
-.pet-part {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin: 10px;
-}
-
-.nav-button {
-  background: none;
-  border: none;
+.pet-option {
+  position: relative;
   cursor: pointer;
-  font-size: 24px;
+}
+
+.pet-option img {
+  max-width: 150px;
+  transition: transform 0.3s, border 0.3s;
+}
+
+.pet-option img.selected {
+  transform: scale(1.1);
+  border: 3px solid #4CAF50;
+  border-radius: 10px;
+}
+
+input[type="text"] {
+  width: 70%;
   padding: 10px;
-  color: white; /* Weiße Pfeile */
-}
-
-.image-slot {
-  width: 120px; /* Anpassen nach Bedarf */
-  height: 120px; /* Anpassen nach Bedarf */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-size: cover;
-  background-position: center;
-}
-
-.pet-part img {
-  max-width: 100px;
-  max-height: 100px;
-}
-
-.actions button {
-  padding: 10px 15px;
+  margin-bottom: 20px;
   border: 1px solid #ccc;
-  margin-top: 20px;
+  border-radius: 5px;
+}
+
+button {
+  width: 20%;
+  padding: 10px;
+  border: none;
+  background-color: #4CAF50;
+  color: #fff;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+  margin-left: 5%;
+}
+
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+button:not(:disabled):hover {
+  background-color: #45a049;
+}
+
+.pet-slider:hover {
+  opacity: 1;
+}
+
+.pet-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 25px;
+  height: 25px;
+  background: #4CAF50;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.pet-slider::-moz-range-thumb {
+  width: 25px;
+  height: 25px;
+  background: #4CAF50;
+  cursor: pointer;
+  border-radius: 50%;
 }
 </style>
