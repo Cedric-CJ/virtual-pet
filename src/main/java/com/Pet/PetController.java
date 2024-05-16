@@ -38,23 +38,11 @@ public class PetController {
     @PostMapping("/create")
     public ResponseEntity<?> createPet(@RequestBody Pet pet) {
         try {
-            Pet newPet = petService.createPet(pet.getType(), pet.getName(), pet.getAsciiArt());
+            Pet newPet = petService.createPet(pet.getType(), pet.getName());
             return new ResponseEntity<>(newPet, HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
-    }
-
-    @GetMapping("/dogArt")
-    public ResponseEntity<String> getDogAsciiArt() {
-        Dog dog = new Dog("Beispiel");
-        return ResponseEntity.ok(dog.getAsciiArt());
-    }
-
-    @GetMapping("catArt")
-    public ResponseEntity<String> getCatAsciiArt() {
-        Cat cat = new Cat("Beispiel");
-        return ResponseEntity.ok(cat.getAsciiArt());
     }
 
     @GetMapping("/registration")

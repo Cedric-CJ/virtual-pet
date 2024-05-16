@@ -12,13 +12,13 @@ public class Pet {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    protected String name;
+    private String name;
     private String type;
     private String asciiArt;
-    protected int hunger;
-    protected int durst;
-    protected int energie;
-    protected int komfort;
+    private int hunger;
+    private int durst;
+    private int energie;
+    private int komfort;
     private LocalDate createdDate;
     private int lastFed;
     private int lastWatered;
@@ -27,6 +27,11 @@ public class Pet {
     private int lastShowered;
 
     public Pet() {
+        // Default constructor required by JPA
+    }
+
+    public Pet(String name, String type) {
+        this(name, type, "");
     }
 
     public Pet(String name, String type, String asciiArt) {
@@ -44,6 +49,7 @@ public class Pet {
         this.lastPetted = 0;
         this.lastShowered = 0;
     }
+
     public void tick() {
         if (++lastFed >= 12) { // Annahme: 2x pro Tag, wenn ein "Tick" als eine halber Tag zählt
             hunger -= 10;
@@ -70,35 +76,41 @@ public class Pet {
         energie = Math.max(energie, 0);
         komfort = Math.max(komfort, 0);
     }
-    public void essengeben(){
+
+    public void essengeben() {
         hunger = Math.min(hunger + 50, 100);
         lastFed = 0;
     }
-    public void wassergeben(){
+
+    public void wassergeben() {
         durst = Math.min(durst + 100, 100);
         lastWatered = 0;
     }
-    public void schlafen(){
+
+    public void schlafen() {
         energie = 100;
         lastSlept = 0;
     }
-    public void streicheln(){
+
+    public void streicheln() {
         komfort = Math.min(komfort + 10, 100);
         lastPetted = 0;
     }
-    public void duschen(){
+
+    public void duschen() {
         komfort = Math.min(komfort + 100, 100);
         lastShowered = 0;
     }
-    public String getName(){
-        return name;
-    }
 
-    public void spielen(){
+    public void spielen() {
         komfort = Math.min(komfort + 10, 100);
         lastPetted = 0;
         energie = Math.min(energie - 10, 100);
-    };
+    }
+
+    public String getName() {
+        return name;
+    }
 
     public LocalDate getCreatedDate() {
         return createdDate;
@@ -111,21 +123,27 @@ public class Pet {
     public String getType() {
         return type;
     }
+
     public String getAsciiArt() {
         return asciiArt;
     }
+
     public int getHunger() {
         return hunger;
     }
+
     public int getDurst() {
         return durst;
     }
+
     public int getEnergie() {
         return energie;
     }
+
     public int getKomfort() {
         return komfort;
     }
+
     public Long getId() {
         return id;
     }
