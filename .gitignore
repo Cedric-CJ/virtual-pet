@@ -6,3 +6,4 @@
 #H2 DB#
 *.mv.db
 *.trace.db
+/node_modules/
