@@ -39,13 +39,15 @@ public class WebSecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
-    public WebMvcConfigurer corsConfigurer() {
-        return new WebMvcConfigurer() {
-            @Override
-            public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**").allowedOrigins("*");
-            }
-        };
+    @Configuration
+    public class WebConfig implements WebMvcConfigurer {
+        @Override
+        public void addCorsMappings(CorsRegistry registry) {
+            registry.addMapping("/**") // Erlaube CORS-Requests für alle Pfade
+                    .allowedOrigins("http://localhost:3000") // URL des Frontends
+                    .allowedMethods("GET", "POST", "PUT", "DELETE") // Erlaubte Methoden
+                    .allowedHeaders("*") // Erlaubte Headers
+                    .allowCredentials(true); // Cookies und Authentifizierungsinformationen erlauben
+        }
     }
 }
