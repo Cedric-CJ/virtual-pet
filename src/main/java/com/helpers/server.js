@@ -3,7 +3,7 @@ This is the starting point for the app.
 */
 
 const http = require('http');
-const app = require('./Application.java');
+const app = require('src/main/java/com/security/Application.java');
 
 const port = process.env.PORT || 3000;
 const server = http.createServer(app);
