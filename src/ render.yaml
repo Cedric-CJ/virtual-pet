@@ -8,4 +8,4 @@ services:
         value: prod
     healthCheckPath: /
     runtime: node
-    port: 10000
+    port: 8080
