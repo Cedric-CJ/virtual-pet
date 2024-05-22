@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: my-app
+    buildCommand: ./yarn
+    startCommand: ./gradlew bootRun
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+    healthCheckPath: /
+    runtime: node
