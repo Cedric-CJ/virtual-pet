@@ -1,7 +1,7 @@
 services:
   - type: web
     name: my-app
-    buildCommand: ./gradlew bootRun
+    buildCommand: chmod +x ./gradlew && ./gradlew bootRun
     startCommand: ./gradlew bootRun
     envVars:
       - key: SPRING_PROFILES_ACTIVE
