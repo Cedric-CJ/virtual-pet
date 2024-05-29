@@ -72,7 +72,7 @@ const route = useRoute();
 
 const getTopPets = async () => {
   try {
-    const response = await axios.get('https://localhost:8080/home');
+    const response = await axios.get('https://virtual-pet-backend.onrender.com/home');
     pets.value = response.data.map(pet => ({
       name: pet.username,
       daysAlive: pet.daysAlive
