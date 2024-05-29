@@ -73,10 +73,11 @@ const route = useRoute();
 const getTopPets = async () => {
   try {
     const response = await axios.get(API_URL);
-    pets.value = response.data.map(pet => ({
-      name: pet.username,
-      daysAlive: pet.daysAlive
-    }));
+    pets.value = [{
+      name: response.data.username,
+      daysAlive: response.data.daysAlive
+    }];
+    console.log(response.data);
   } catch (error) {
     console.error('Error fetching top pets:', error.response ? error.response.data : error);
   }
@@ -84,6 +85,7 @@ const getTopPets = async () => {
 
 onMounted(() => {
   getTopPets();
+  console.log(response.data);
   const petParams = route.params.petData ? JSON.parse(route.params.petData) : { type: 'dog', name: 'Unbenannt' };
   petData.value.name = petParams.name;
   petData.value.type = petParams.type;
