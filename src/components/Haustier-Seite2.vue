@@ -54,10 +54,6 @@ import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useRoute } from 'vue-router';
 
-import { ref, onMounted } from 'vue';
-import axios from 'axios';
-import { useRoute } from 'vue-router';
-
 const API_URL = 'https://virtual-pet-backend.onrender.com/home';
 const pets = ref([]);
 const petData = ref({
