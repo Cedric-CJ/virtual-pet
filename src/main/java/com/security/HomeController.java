@@ -3,6 +3,7 @@ package com.security;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,6 +27,7 @@ public class HomeController {
         }
     }
 
+    @CrossOrigin
     @GetMapping("/home")
     public Map<String, Object> homeData() {
         return Map.of(
