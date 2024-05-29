@@ -54,7 +54,7 @@ import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useRoute } from 'vue-router';
 
-const API_URL = 'http://localhost:8080/api/pets/top';
+const API_URL = 'https://virtual-pet-backend.onrender.com/home';
 const pets = ref([]);
 const petData = ref({
   name: '',
@@ -70,6 +70,18 @@ const actionText = ref('');
 const currentImage = ref('');
 const route = useRoute();
 
+const getTopPets = async () => {
+  try {
+    const response = await axios.get(API_URL + 'topPets');
+    pets.value = response.data.map(pet => ({
+      username: pet.username,
+      daysAlive: pet.daysAlive
+    }));
+  } catch (error) {
+    console.error('Error fetching top pets:', error);
+  }
+};
+
 onMounted(() => {
   const petParams = route.params.petData ? JSON.parse(route.params.petData) : { type: 'dog', name: 'Unbenannt' };
   petData.value.name = petParams.name;
@@ -77,15 +89,6 @@ onMounted(() => {
   currentImage.value = petParams.type === 'dog' ? 'src/assets/dog/front.png' : 'src/assets/cat/front.png';
   getTopPets();
 });
-
-const getTopPets = async () => {
-  try {
-    const response = await axios.get(API_URL);
-    pets.value = response.data;
-  } catch (error) {
-    console.error('Error fetching top pets:', error);
-  }
-};
 
 const performAction = (action) => {
   const actions = {
