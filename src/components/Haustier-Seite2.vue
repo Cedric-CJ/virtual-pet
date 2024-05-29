@@ -40,7 +40,7 @@
         <tr v-for="(pet, index) in pets" :key="index">
           <td>{{ index + 1 }}</td>
           <td>{{ pet.name }}</td>
-          <td>{{ pet.createdDate | formatDate }}</td>
+          <td>{{ pet.daysAlive }}</td>
         </tr>
         </tbody>
       </table>
@@ -54,7 +54,11 @@ import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useRoute } from 'vue-router';
 
-const URL_API = 'https://virtual-pet-backend.onrender.com/';
+import { ref, onMounted } from 'vue';
+import axios from 'axios';
+import { useRoute } from 'vue-router';
+
+const API_URL = 'https://virtual-pet-backend.onrender.com/home';
 const pets = ref([]);
 const petData = ref({
   name: '',
@@ -72,7 +76,7 @@ const route = useRoute();
 
 const getTopPets = async () => {
   try {
-    const response = await axios.get('https://virtual-pet-backend.onrender.com/home');
+    const response = await axios.get(API_URL);
     pets.value = response.data.map(pet => ({
       name: pet.username,
       daysAlive: pet.daysAlive
@@ -82,13 +86,12 @@ const getTopPets = async () => {
   }
 };
 
-
 onMounted(() => {
   getTopPets();
   const petParams = route.params.petData ? JSON.parse(route.params.petData) : { type: 'dog', name: 'Unbenannt' };
   petData.value.name = petParams.name;
   petData.value.type = petParams.type;
-  currentImage.value = petParams.type === 'dog' ? 'src/assets/dog/front.png' : 'src/assets/cat/front.png';
+  currentImage.value = petParams.type === 'dog' ? '/src/assets/dog/front.png' : '/src/assets/cat/front.png';
   getTopPets();
 });
 
