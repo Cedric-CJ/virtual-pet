@@ -27,7 +27,6 @@ public class HomeController {
         }
     }
 
-    @CrossOrigin
     @GetMapping("/home")
     public Map<String, Object> homeData() {
         return Map.of(
