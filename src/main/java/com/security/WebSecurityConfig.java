@@ -44,7 +44,7 @@ public class WebSecurityConfig {
         @Override
         public void addCorsMappings(CorsRegistry registry) {
             registry.addMapping("/**") // Erlaube CORS-Requests für alle Pfade
-                    .allowedOrigins("http://localhost:3000") // URL des Frontends
+                    .allowedOrigins("http://localhost:3000", "https://virtual-pet-bcky.onrender.com") // URL des Frontends
                     .allowedMethods("GET", "POST", "PUT", "DELETE") // Erlaubte Methoden
                     .allowedHeaders("*") // Erlaubte Headers
                     .allowCredentials(true); // Cookies und Authentifizierungsinformationen erlauben
