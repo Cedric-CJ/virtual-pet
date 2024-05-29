@@ -1,19 +1,7 @@
-#
-# Build stage
-#
-
-FROM gradle:jdk-21-and-22 AS build
+FROM gradle:jdk21-jammy AS build
 COPY --chown=gradle:gradle . /home/gradle/src
 WORKDIR /home/gradle/src
-RUN gradle build
-
-# Add this line to print out the directory structure
-RUN ls -R /home/gradle/src
-
-LABEL org.name="Cedric"
-#
-# Package stage
-#
+RUN gradle build --no-daemon
 
 FROM eclipse-temurin:21-jdk-jammy
 COPY --from=build /home/gradle/src/build/libs/Web-app-0.0.1-SNAPSHOT.jar app.jar
