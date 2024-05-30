@@ -4,14 +4,14 @@
     <div class="pet-selection">
       <div class="pet-option" @click="selectPet('dog')">
         <img
-          src="@/assets/dog/front.png"
+          src="@/assets/dogfront.png"
           alt="Hund"
           :class="{ selected: petData.type === 'dog' }"
         />
       </div>
       <div class="pet-option" @click="selectPet('cat')">
         <img
-          src="@/assets/cat/front.png"
+          src="@/assets/catfront.png"
           alt="Katze"
           :class="{ selected: petData.type === 'cat' }"
         />
