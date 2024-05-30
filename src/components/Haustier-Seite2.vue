@@ -29,20 +29,20 @@
     <div class="top-pets">
       <h3>Top 10 Tiere</h3>
       <table>
-        <thead>
+        <head>
         <tr>
           <th>#</th>
           <th>Name</th>
           <th>Tage</th>
         </tr>
-        </thead>
-        <tbody>
+        </head>
+        <body>
         <tr v-for="(pet, index) in pets" :key="index">
           <td>{{ index + 1 }}</td>
           <td>{{ pet.name }}</td>
           <td>{{ pet.daysAlive }}</td>
         </tr>
-        </tbody>
+        </body>
       </table>
     </div>
   </div>
@@ -89,7 +89,7 @@ onMounted(() => {
   const petParams = route.params.petData ? JSON.parse(route.params.petData) : { type: 'dog', name: 'Unbenannt' };
   petData.value.name = petParams.name;
   petData.value.type = petParams.type;
-  currentImage.value = petParams.type === 'dog' ? '/src/assets/dog/front.png' : '/src/assets/cat/front.png';
+  currentImage.value = petParams.type === 'dog' ? '/src/assets/dogfront.png' : '/src/assets/catfront.png';
   getTopPets();
 });
 
@@ -97,28 +97,28 @@ const performAction = (action) => {
   const actions = {
     feed: () => {
       petData.value.stats.hunger = Math.min(petData.value.stats.hunger + 50, 100);
-      changeImage(petData.value.type === 'dog' ? 'src/assets/dog/essen.png' : 'src/assets/cat/essen.png');
+      changeImage(petData.value.type === 'dog' ? 'src/assets/dogessen.png' : 'src/assets/catessen.png');
     },
     water: () => {
       petData.value.stats.durst = Math.min(petData.value.stats.durst + 100, 100);
-      changeImage(petData.value.type === 'dog' ? 'src/assets/dog/trinken.png' : 'src/assets/cat/trinken.png');
+      changeImage(petData.value.type === 'dog' ? 'src/assets/dogtrinken.png' : 'src/assets/cattrinken.png');
     },
     sleep: () => {
       petData.value.stats.energie = 100;
-      changeImage(petData.value.type === 'dog' ? 'src/assets/dog/schlafen.png' : 'src/assets/cat/schlafen.png');
+      changeImage(petData.value.type === 'dog' ? 'src/assets/dogschlafen.png' : 'src/assets/catschlafen.png');
     },
     pet: () => {
       petData.value.stats.komfort = Math.min(petData.value.stats.komfort + 10, 100);
-      changeImage(petData.value.type === 'dog' ? 'src/assets/dog/streicheln.png' : 'src/assets/cat/streicheln.png');
+      changeImage(petData.value.type === 'dog' ? 'src/assets/dogstreicheln.png' : 'src/assets/catstreicheln.png');
     },
     clean: () => {
       petData.value.stats.komfort = Math.min(petData.value.stats.komfort + 100, 100);
-      changeImage(petData.value.type === 'dog' ? 'src/assets/dog/duschen.png' : 'src/assets/cat/duschen.png');
+      changeImage(petData.value.type === 'dog' ? 'src/assets/dogduschen.png' : 'src/assets/catduschen.png');
     },
     play: () => {
       petData.value.stats.energie = Math.max(petData.value.stats.energie - 10, 0);
       petData.value.stats.komfort = Math.min(petData.value.stats.komfort + 10, 100);
-      changeImage(petData.value.type === 'dog' ? 'src/assets/dog/spielen.png' : 'src/assets/cat/spielen.png');
+      changeImage(petData.value.type === 'dog' ? 'src/assets/dogspielen.png' : 'src/assets/catspielen.png');
     }
   };
   actions[action]();
@@ -126,7 +126,7 @@ const performAction = (action) => {
 };
 
 const changeImage = (newImage) => {
-  const frontImage = petData.value.type === 'dog' ? 'src/assets/dog/front.png' : 'src/assets/cat/front.png';
+  const frontImage = petData.value.type === 'dog' ? 'src/assets/dogfront.png' : 'src/assets/catfront.png';
   currentImage.value = newImage;
   setTimeout(() => {
     currentImage.value = frontImage;

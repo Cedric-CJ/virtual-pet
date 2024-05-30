@@ -28,12 +28,15 @@ const handleRegister = async () => {
     const response = await axios.post('/api/registration', registerData.value);
     console.log('Registrierungsantwort:', response.data);
     if (response.status === 200) {
+      message.value = 'Registrierung erfolgreich!';
+      isError.value = false;
       router.push('/login'); // Bei Erfolg weiterleiten
     } else {
-      throw new Error('Registrierung fehlgeschlagen!');
+      throw new Error(response.data);
     }
   } catch (error) {
-    console.error('Fehler bei der Registrierung:', error);
+    console.error('Fehler bei der Registrierung:' + (error.response?.data || 'Unbekannter Fehler');
+    isError.value = true;
   }
 };
 </script>
