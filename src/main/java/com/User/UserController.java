@@ -23,7 +23,11 @@ public class UserController {
             return ResponseEntity.badRequest().body("Benutzername ist bereits vergeben.");
         }
         newUser.setPassword(bCryptPasswordEncoder.encode(newUser.getPassword()));
-        userRepository.save(newUser);
-        return ResponseEntity.ok("Benutzer erfolgreich registriert");
+        ApplicationUser savedUser = userRepository.save(newUser);
+        if (savedUser.getId() != null) {
+            return ResponseEntity.ok("Benutzer erfolgreich registriert");
+        } else {
+            return ResponseEntity.status(500).body("Fehler bei der Registrierung");
+        }
     }
 }
