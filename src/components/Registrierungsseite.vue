@@ -35,7 +35,7 @@ const handleRegister = async () => {
       throw new Error(response.data);
     }
   } catch (error) {
-    console.error('Fehler bei der Registrierung:' + (error.response?.data || 'Unbekannter Fehler');
+    console.error('Fehler bei der Registrierung:' + (error.response?.data || 'Unbekannter Fehler'));
     isError.value = true;
   }
 };
