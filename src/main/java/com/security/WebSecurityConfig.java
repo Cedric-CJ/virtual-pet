@@ -21,7 +21,7 @@ public class WebSecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/db-console/**", "/greeting/**", "/login", "/register", "/home", "/js/**", "/pet", "/api/**").permitAll()
+                        .requestMatchers("/public/**", "/home", "/pet", "/api/**").permitAll()
                         .anyRequest().authenticated());
                 //.formLogin(formLogin -> formLogin
                 //        .loginPage("/login.html")
