@@ -1,5 +1,5 @@
 # virtual pet
-Hier sollte sich der Benutzer anmelden und die Möglichkeit haben, zwischen zwei/drei verschiedenen Tieren zu wählen.
+Hier sollte sich der Benutzer anmelden und die Möglichkeit haben, zwischen zwei verschiedenen Tieren zu wählen.
 Diese Tiere können benannt werden. Zudem ist es möglich, die virtuellen Tiere zu füttern, trinken zu geben, zu streicheln, zu duschen und mit ihnen zu spielen.
 Über den Tieren befinden sich Statusleisten, die anzeigen, wie sich das Tier fühlt und was es benötigt.
 
