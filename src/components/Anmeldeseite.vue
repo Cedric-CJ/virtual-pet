@@ -28,17 +28,18 @@ const handleLogin = async () => {
   try {
     const response = await axios.post('/api/login', loginData.value);
     if (response.status === 200) {
-      message.value = 'Login erfolgreich!';
+      message.value = response.data.includes('hat bereits ein Haustier') ? 'Anmeldung erfolgreich! Sie haben bereits ein Haustier.' : 'Anmeldung erfolgreich!';
       isError.value = false;
-      router.push('/pet');
+      router.push('/pet'); // Bei Erfolg weiterleiten
     } else {
-      throw new Error('Anmeldung fehlgeschlagen!');
+      throw new Error(response.data);
     }
   } catch (error) {
     message.value = 'Login fehlgeschlagen: ' + (error.response?.data.message || 'Unbekannter Fehler');
     isError.value = true;
   }
 };
+
 </script>
 
 <style scoped>
