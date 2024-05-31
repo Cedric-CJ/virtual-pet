@@ -26,18 +26,22 @@ public class UserController {
         String checkUserQuery = "SELECT COUNT(*) FROM application_user WHERE username = ?";
         int count = jdbcTemplate.queryForObject(checkUserQuery, new Object[]{newUser.getUsername()}, Integer.class);
 
+        System.out.println("Benutzername überprüfen: " + count);
         if (count > 0) {
             return ResponseEntity.badRequest().body("Benutzername ist bereits vergeben.");
         }
 
         String hashedPassword = bCryptPasswordEncoder.encode(newUser.getPassword());
         String insertUserQuery = "INSERT INTO application_user (username, password) VALUES (?, ?)";
-        jdbcTemplate.update(insertUserQuery, newUser.getUsername(), hashedPassword);
+        int rowsAffected = jdbcTemplate.update(insertUserQuery, newUser.getUsername(), hashedPassword);
+
+        System.out.println("Zeilen betroffen: " + rowsAffected);
 
         // Überprüfen, ob der Benutzer bereits ein Haustier hat
         String checkPetQuery = "SELECT COUNT(*) FROM application_pet WHERE username = ?";
         int petCount = jdbcTemplate.queryForObject(checkPetQuery, new Object[]{newUser.getUsername()}, Integer.class);
 
+        System.out.println("Haustier überprüfen: " + petCount);
         if (petCount > 0) {
             return ResponseEntity.ok("Benutzer erfolgreich registriert und hat bereits ein Haustier");
         }
@@ -53,6 +57,8 @@ public class UserController {
         String findUserQuery = "SELECT password FROM application_user WHERE username = ?";
         try {
             String storedHashedPassword = jdbcTemplate.queryForObject(findUserQuery, new Object[]{username}, String.class);
+
+            System.out.println("Gespeichertes gehashtes Passwort: " + storedHashedPassword);
 
             if (storedHashedPassword == null || !bCryptPasswordEncoder.matches(password, storedHashedPassword)) {
                 return ResponseEntity.badRequest().body("Ungültiger Benutzername oder Passwort.");
