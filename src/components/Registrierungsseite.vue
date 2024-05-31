@@ -31,7 +31,7 @@ const handleRegister = async () => {
       message.value = response.data.includes('hat bereits ein Haustier') ? 'Registrierung erfolgreich! Sie haben bereits ein Haustier.' : 'Registrierung erfolgreich!';
       isError.value = false;
       console.log('Registrierung erfolgreich:', response.data);
-      router.push('/login'); // Bei Erfolg weiterleiten
+      //router.push('/login'); // Bei Erfolg weiterleiten
     } else {
       throw new Error(response.data);
     }
