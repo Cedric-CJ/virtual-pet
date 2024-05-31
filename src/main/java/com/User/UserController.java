@@ -7,6 +7,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
@@ -19,20 +21,31 @@ public class UserController {
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
+
     @PostMapping("/api/registration")
     public ResponseEntity<?> registerUser(@RequestBody ApplicationUser newUser) {
-        String checkUserQuery = "SELECT COUNT(*) FROM application_user WHERE username = ?";
-        int count = jdbcTemplate.queryForObject(checkUserQuery, new Object[]{newUser.getUsername()}, Integer.class);
+        logger.info("Erhaltene Daten: {} - {}", newUser.getUsername(), newUser.getPassword());
 
-        if (count > 0) {
-            return ResponseEntity.badRequest().body("Benutzername ist bereits vergeben.");
+        try {
+            String checkUserQuery = "SELECT COUNT(*) FROM application_user WHERE username = ?";
+            int count = jdbcTemplate.queryForObject(checkUserQuery, new Object[]{newUser.getUsername()}, Integer.class);
+
+            if (count > 0) {
+                logger.warn("Benutzername ist bereits vergeben.");
+                return ResponseEntity.badRequest().body("Benutzername ist bereits vergeben.");
+            }
+
+            String hashedPassword = bCryptPasswordEncoder.encode(newUser.getPassword());
+            String insertUserQuery = "INSERT INTO application_user (username, password) VALUES (?, ?)";
+            jdbcTemplate.update(insertUserQuery, newUser.getUsername(), hashedPassword);
+
+            logger.info("Benutzer erfolgreich registriert");
+            return ResponseEntity.ok("Benutzer erfolgreich registriert");
+        } catch (Exception e) {
+            logger.error("Fehler bei der Registrierung", e);
+            return ResponseEntity.status(500).body("Fehler bei der Registrierung");
         }
-
-        String hashedPassword = bCryptPasswordEncoder.encode(newUser.getPassword());
-        String insertUserQuery = "INSERT INTO application_user (username, password) VALUES (?, ?)";
-        jdbcTemplate.update(insertUserQuery, newUser.getUsername(), hashedPassword);
-
-        return ResponseEntity.ok("Benutzer erfolgreich registriert");
     }
 
     @PostMapping("/api/login")
@@ -40,18 +53,29 @@ public class UserController {
         String username = loginData.get("username");
         String password = loginData.get("password");
 
-        String findUserQuery = "SELECT password FROM application_user WHERE username = ?";
         try {
+            String findUserQuery = "SELECT password FROM application_user WHERE username = ?";
             String storedHashedPassword = jdbcTemplate.queryForObject(findUserQuery, new Object[]{username}, String.class);
 
             if (storedHashedPassword == null || !bCryptPasswordEncoder.matches(password, storedHashedPassword)) {
+                logger.warn("Ungültiger Benutzername oder Passwort.");
                 return ResponseEntity.badRequest().body("Ungültiger Benutzername oder Passwort.");
             }
 
+            // Überprüfen, ob der Benutzer bereits ein Haustier hat
+            String checkPetQuery = "SELECT COUNT(*) FROM application_pet WHERE username = ?";
+            int petCount = jdbcTemplate.queryForObject(checkPetQuery, new Object[]{username}, Integer.class);
+
+            if (petCount > 0) {
+                return ResponseEntity.ok("Anmeldung erfolgreich und Benutzer hat bereits ein Haustier");
+            }
+
+            logger.info("Anmeldung erfolgreich");
             return ResponseEntity.ok("Anmeldung erfolgreich");
 
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Ungültiger Benutzername oder Passwort.");
+            logger.error("Fehler bei der Anmeldung", e);
+            return ResponseEntity.status(500).body("Ungültiger Benutzername oder Passwort.");
         }
     }
 }
