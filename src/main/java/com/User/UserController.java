@@ -38,10 +38,16 @@ public class UserController {
 
             String hashedPassword = bCryptPasswordEncoder.encode(newUser.getPassword());
             String insertUserQuery = "INSERT INTO application_user (username, password) VALUES (?, ?)";
-            jdbcTemplate.update(insertUserQuery, newUser.getUsername(), hashedPassword);
+            int rowsAffected = jdbcTemplate.update(insertUserQuery, newUser.getUsername(), hashedPassword);
 
-            logger.info("Benutzer erfolgreich registriert");
-            return ResponseEntity.ok("Benutzer erfolgreich registriert");
+            if (rowsAffected > 0) {
+                logger.info("Benutzer erfolgreich registriert");
+                return ResponseEntity.ok("Benutzer erfolgreich registriert");
+            } else {
+                logger.error("Benutzer konnte nicht registriert werden");
+                return ResponseEntity.status(500).body("Fehler bei der Registrierung");
+            }
+
         } catch (Exception e) {
             logger.error("Fehler bei der Registrierung", e);
             return ResponseEntity.status(500).body("Fehler bei der Registrierung");
