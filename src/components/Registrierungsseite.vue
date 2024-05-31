@@ -24,11 +24,13 @@ const isError = ref(false);
 const router = useRouter();
 
 const handleRegister = async () => {
+  console.log('Sende Registrierungsanfrage mit Daten:', registerData.value);
   try {
     const response = await axios.post('/api/registration', registerData.value);
     if (response.status === 200) {
       message.value = response.data.includes('hat bereits ein Haustier') ? 'Registrierung erfolgreich! Sie haben bereits ein Haustier.' : 'Registrierung erfolgreich!';
       isError.value = false;
+      console.log('Registrierung erfolgreich:', response.data);
       router.push('/login'); // Bei Erfolg weiterleiten
     } else {
       throw new Error(response.data);
@@ -36,9 +38,9 @@ const handleRegister = async () => {
   } catch (error) {
     message.value = 'Registrierung fehlgeschlagen: ' + (error.response?.data || 'Unbekannter Fehler');
     isError.value = true;
+    console.error('Registrierungsfehler:', error.response?.data || error);
   }
 };
-
 </script>
 
 <style scoped>
