@@ -1,8 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import Anmeldeseite from '@/components/Anmeldeseite.vue'
 import HaustierErstellungsseite from '@/components/Haustier-Erstellungsseite.vue'
-import Registrierungsseite from '@/components/Registrierungsseite.vue'
 import HaustierSeite2 from '@/components/Haustier-Seite2.vue'
+import Anmelde_und_Registrierungsseite from "@/components/Anmelde_und_Registrierungsseite.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -15,12 +14,7 @@ const router = createRouter({
     {
       path: '/login',
       name: 'Login',
-      component: Anmeldeseite
-    },
-    {
-      path: '/registration',
-      name: 'Registration',
-      component: Registrierungsseite
+      component: Anmelde_und_Registrierungsseite
     },
     {
       path: '/pet',

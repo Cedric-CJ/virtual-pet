@@ -12,6 +12,7 @@
         <button @click="performAction('pet')">Streicheln</button>
         <button @click="performAction('clean')">Duschen</button>
         <button @click="performAction('play')">Spielen</button>
+        <button @click="saveAndLogout">Speichern und Abmelden</button>
       </div>
       <transition name="fade">
         <p v-if="actionText" class="action-text">{{ actionText }}</p>
@@ -29,32 +30,31 @@
     <div class="top-pets">
       <h3>Top 10 Tiere</h3>
       <table>
-        <head>
+        <thead>
         <tr>
           <th>#</th>
           <th>Name</th>
           <th>Tage</th>
         </tr>
-        </head>
-        <body>
+        </thead>
+        <tbody>
         <tr v-for="(pet, index) in pets" :key="index">
           <td>{{ index + 1 }}</td>
           <td>{{ pet.name }}</td>
           <td>{{ pet.daysAlive }}</td>
         </tr>
-        </body>
+        </tbody>
       </table>
     </div>
   </div>
 </template>
 
-
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
-const API_URL = 'https://virtual-pet-backend.onrender.com/home';
+const API_URL = 'https://virtual-pet-backend.onrender.com/api';
 const pets = ref([]);
 const petData = ref({
   name: '',
@@ -69,27 +69,42 @@ const petData = ref({
 const actionText = ref('');
 const currentImage = ref('');
 const route = useRoute();
+const router = useRouter();
 
 const getTopPets = async () => {
   try {
-    const response = await axios.get(API_URL);
-    pets.value = [{
-      name: response.data.username,
-      daysAlive: response.data.daysAlive
-    }];
-    console.log(response.data);
+    const response = await axios.get(`${API_URL}/pet/top`);
+    pets.value = response.data.map((pet, index) => ({
+      name: pet.name,
+      daysAlive: pet.daysAlive,
+      index: index + 1
+    }));
   } catch (error) {
     console.error('Error fetching top pets:', error.response ? error.response.data : error);
   }
 };
 
+const getPetData = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/pet/${route.params.petId}`);
+    petData.value = response.data;
+  } catch (error) {
+    console.error('Error fetching pet data:', error.response ? error.response.data : error);
+  }
+};
+
+const saveAndLogout = async () => {
+  try {
+    const response = await axios.post(`${API_URL}/pet/save`, petData.value);
+    console.log('Pet data saved:', response.data);
+    router.push('/login');
+  } catch (error) {
+    console.error('Error saving pet data:', error.response ? error.response.data : error);
+  }
+};
+
 onMounted(() => {
-  getTopPets();
-  console.log(response.data);
-  const petParams = route.params.petData ? JSON.parse(route.params.petData) : { type: 'dog', name: 'Unbenannt' };
-  petData.value.name = petParams.name;
-  petData.value.type = petParams.type;
-  currentImage.value = petParams.type === 'dog' ? '/src/assets/dogfront.png' : '/src/assets/catfront.png';
+  getPetData();
   getTopPets();
 });
 
@@ -146,11 +161,6 @@ const updateActionText = (action) => {
   setTimeout(() => {
     actionText.value = '';
   }, 3000);
-};
-
-const formatDate = (date) => {
-  const d = new Date(date);
-  return d.toLocaleDateString();
 };
 </script>
 
