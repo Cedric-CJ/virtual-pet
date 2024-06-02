@@ -27,6 +27,11 @@ public class UserController {
     public ResponseEntity<?> registerUser(@RequestBody ApplicationUser newUser) {
         logger.info("Erhaltene Daten: {} - {}", newUser.getUsername(), newUser.getPassword());
 
+        if (newUser.getUsername() == null || newUser.getPassword() == null || newUser.getUsername().isEmpty() || newUser.getPassword().isEmpty()) {
+            logger.warn("Benutzername oder Passwort sind leer.");
+            return ResponseEntity.badRequest().body("Benutzername und Passwort dürfen nicht leer sein.");
+        }
+
         try {
             String checkUserQuery = "SELECT COUNT(*) FROM application_user WHERE username = ?";
             int count = jdbcTemplate.queryForObject(checkUserQuery, new Object[]{newUser.getUsername()}, Integer.class);
