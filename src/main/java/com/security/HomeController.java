@@ -20,7 +20,7 @@ public class HomeController {
     public class GreetingController {
 
         private static final String template = "Hello, %s!";
-
+        @CrossOrigin
         @GetMapping("/greeting")
         public String greeting(@RequestParam(value = "name", defaultValue = "World") String name) {
             return String.format(template, name);

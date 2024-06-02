@@ -25,6 +25,7 @@ public class PetController {
     @Autowired
     public UserRepository userRepository;
 
+    @CrossOrigin
     @GetMapping("/{id}")
     public ResponseEntity<Pet> getPetById(@PathVariable Long id) {
         try {
@@ -34,7 +35,7 @@ public class PetController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
-
+    @CrossOrigin
     @PostMapping("/create")
     public ResponseEntity<?> createPet(@RequestBody Pet pet) {
         try {
@@ -44,13 +45,13 @@ public class PetController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
-
+    @CrossOrigin
     @GetMapping("/registration")
     public String showRegistrationPage(Model model) {
         model.addAttribute("User", new ApplicationUser());
         return "register";
     }
-
+    @CrossOrigin
     @PostMapping("/registration_process")
     public String handleRegistrationRequest(@RequestBody ApplicationUser applicationUser) {
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
@@ -59,7 +60,7 @@ public class PetController {
         userRepository.save(applicationUser);
         return "registrationSuccessful";
     }
-
+    @CrossOrigin
     @GetMapping("/pet")
     public ResponseEntity<?> getPetDetails(@RequestParam Long petId) {
         try {
@@ -69,7 +70,7 @@ public class PetController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("status", "error", "message", e.getMessage()));
         }
     }
-
+    @CrossOrigin
     @GetMapping("/{name}")
     public ResponseEntity<?> getPet(@PathVariable Long petId) {
         try{
@@ -79,7 +80,7 @@ public class PetController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("status", "error", "message", e.getMessage()));
         }
     }
-
+    @CrossOrigin
     @PostMapping("/{name}/feed")
     public ResponseEntity<String> essen(@PathVariable Long petId) {
         try {
@@ -89,7 +90,7 @@ public class PetController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Haustier nicht gefunden: " + petId);
         }
     }
-
+    @CrossOrigin
     @PostMapping("/{name}/water")
     public ResponseEntity<String> trinken(@PathVariable Long petId) {
         try {
@@ -99,7 +100,7 @@ public class PetController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Haustier nicht gefunden: " + petId);
         }
     }
-
+    @CrossOrigin
     @PostMapping("/{name}/sleep")
     public ResponseEntity<String> schlafen(@PathVariable Long petId) {
         try {
@@ -109,7 +110,7 @@ public class PetController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Haustier nicht gefunden: " + petId);
         }
     }
-
+    @CrossOrigin
     @PostMapping("/{name}/pet")
     public ResponseEntity<String> streicheln(@PathVariable Long petId) {
         try {
@@ -119,7 +120,7 @@ public class PetController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Haustier nicht gefunden: " + petId);
         }
     }
-
+    @CrossOrigin
     @PostMapping("/{name}/clean")
     public ResponseEntity<String> duschen(@PathVariable Long petId) {
         try {
@@ -129,7 +130,7 @@ public class PetController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Haustier nicht gefunden: " + petId);
         }
     }
-
+    @CrossOrigin
     @PostMapping("/{name}/play")
     public ResponseEntity<String> spielen(@PathVariable Long petId) {
         try {
@@ -139,6 +140,7 @@ public class PetController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Haustier nicht gefunden: " + petId);
         }
     }
+    @CrossOrigin
     @GetMapping("/top")
     public ResponseEntity<List<Pet>> getTopPets() {
         List<Pet> pets = petRepository.findAllByOrderByCreatedDateDesc();

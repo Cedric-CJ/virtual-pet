@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,6 +24,7 @@ public class UserController {
 
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
+    @CrossOrigin
     @PostMapping("/api/registration")
     public ResponseEntity<?> registerUser(@RequestBody ApplicationUser newUser) {
         logger.info("Erhaltene Daten: {} - {}", newUser.getUsername(), newUser.getPassword());
@@ -59,6 +61,7 @@ public class UserController {
         }
     }
 
+    @CrossOrigin
     @PostMapping("/api/login")
     public ResponseEntity<?> loginUser(@RequestBody Map<String, String> loginData) {
         String username = loginData.get("username");
