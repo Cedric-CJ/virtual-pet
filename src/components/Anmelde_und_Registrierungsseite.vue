@@ -11,7 +11,8 @@
       <div class="animated-border">
         <button @click="handleRegister" class="submit-btn animated-text">Registrieren</button>
       </div>
-      <p v-if="message" :class="{ error: isError, success: !isError }">{{ message }}</p>
+      <!-- Zeige die Nachricht nur in der Registrierungsansicht -->
+      <p v-if="message && !isLogin" :class="{ error: isError, success: !isError }">{{ message }}</p>
     </div>
     <div class="login" :class="{ 'slide-up': !isLogin }">
       <div class="center">
@@ -26,12 +27,14 @@
           <button @click="handleLogin" class="submit-btn animated-text">Anmelden</button>
         </div>
       </div>
-      <p v-if="message" :class="{ error: isError, success: !isError }">{{ message }}</p>
+      <!-- Zeige die Nachricht nur in der Loginansicht -->
+      <p v-if="message && isLogin" :class="{ error: isError, success: !isError }">{{ message }}</p>
     </div>
   </div>
 </template>
+
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 
@@ -76,8 +79,8 @@ const handleLogin = async () => {
 const toggleForm = () => {
   isLogin.value = !isLogin.value;
 };
-
 </script>
+
 <style scoped>
 html, body {
   position: relative;
