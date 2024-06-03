@@ -35,6 +35,7 @@ public class PetController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
+
     @CrossOrigin
     @PostMapping("/create")
     public ResponseEntity<?> createPet(@RequestBody Pet pet) {
@@ -45,101 +46,18 @@ public class PetController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
+
     @CrossOrigin
-    @GetMapping("/registration")
-    public String showRegistrationPage(Model model) {
-        model.addAttribute("User", new ApplicationUser());
-        return "register";
-    }
-    @CrossOrigin
-    @PostMapping("/registration_process")
-    public String handleRegistrationRequest(@RequestBody ApplicationUser applicationUser) {
-        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        String encodedPassword = passwordEncoder.encode(applicationUser.getPassword());
-        applicationUser.setPassword(encodedPassword);
-        userRepository.save(applicationUser);
-        return "registrationSuccessful";
-    }
-    @CrossOrigin
-    @GetMapping("/pet")
-    public ResponseEntity<?> getPetDetails(@RequestParam Long petId) {
+    @PostMapping("/save")
+    public ResponseEntity<?> savePet(@RequestBody Pet pet) {
         try {
-            Pet pet = petService.getPetDetails(petId);
-            return ResponseEntity.ok().body(Map.of("status", "success", "data", pet));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("status", "error", "message", e.getMessage()));
-        }
-    }
-    @CrossOrigin
-    @GetMapping("/{name}")
-    public ResponseEntity<?> getPet(@PathVariable Long petId) {
-        try{
-            Pet pet = petService.getPetDetails(petId);
-            return ResponseEntity.ok().body(Map.of("status", "success", "data", pet));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("status", "error", "message", e.getMessage()));
-        }
-    }
-    @CrossOrigin
-    @PostMapping("/{name}/feed")
-    public ResponseEntity<String> essen(@PathVariable Long petId) {
-        try {
-            petService.essen(petId);
-            return ResponseEntity.ok("Haustier gefüttert: " + petId);
+            petRepository.save(pet);
+            return ResponseEntity.ok("Pet data saved successfully");
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Haustier nicht gefunden: " + petId);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to save pet data");
         }
     }
-    @CrossOrigin
-    @PostMapping("/{name}/water")
-    public ResponseEntity<String> trinken(@PathVariable Long petId) {
-        try {
-            petService.trinken(petId);
-            return ResponseEntity.ok("Wasser gegeben an: " + petId);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Haustier nicht gefunden: " + petId);
-        }
-    }
-    @CrossOrigin
-    @PostMapping("/{name}/sleep")
-    public ResponseEntity<String> schlafen(@PathVariable Long petId) {
-        try {
-            petService.schlafen(petId);
-            return ResponseEntity.ok("Haustier schläft jetzt: " + petId);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Haustier nicht gefunden: " + petId);
-        }
-    }
-    @CrossOrigin
-    @PostMapping("/{name}/pet")
-    public ResponseEntity<String> streicheln(@PathVariable Long petId) {
-        try {
-            petService.streicheln(petId);
-            return ResponseEntity.ok("Haustier gestreichelt: " + petId);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Haustier nicht gefunden: " + petId);
-        }
-    }
-    @CrossOrigin
-    @PostMapping("/{name}/clean")
-    public ResponseEntity<String> duschen(@PathVariable Long petId) {
-        try {
-            petService.duschen(petId);
-            return ResponseEntity.ok("Haustier geduscht: " + petId);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Haustier nicht gefunden: " + petId);
-        }
-    }
-    @CrossOrigin
-    @PostMapping("/{name}/play")
-    public ResponseEntity<String> spielen(@PathVariable Long petId) {
-        try {
-            petService.spielen(petId);
-            return ResponseEntity.ok("Haustier spielt: " + petId);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Haustier nicht gefunden: " + petId);
-        }
-    }
+
     @CrossOrigin
     @GetMapping("/top")
     public ResponseEntity<List<Pet>> getTopPets() {
