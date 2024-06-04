@@ -8,8 +8,9 @@
       <h1>Herzlich Willkommen</h1>
       <nav>
         <RouterLink to="/login">Login</RouterLink>
-        <RouterLink to="/pet">Pet</RouterLink>
+        <RouterLink to="/pet">#Pet</RouterLink>
         <RouterLink to="/logout">Abmelden</RouterLink>
+        <RouterLink to="/create">#Erstellen</RouterLink>
       </nav>
       <a href="#" @click="toggleDarkMode">Dark Mode</a>
     </div>

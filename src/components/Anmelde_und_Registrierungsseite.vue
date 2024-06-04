@@ -11,7 +11,6 @@
       <div class="animated-border">
         <button @click="handleRegister" class="submit-btn animated-text">Registrieren</button>
       </div>
-      <!-- Zeige die Nachricht nur in der Registrierungsansicht -->
       <p v-if="message && !isLogin" :class="{ error: isError, success: !isError }">{{ message }}</p>
     </div>
     <div class="login" :class="{ 'slide-up': !isLogin }">
@@ -27,7 +26,6 @@
           <button @click="handleLogin" class="submit-btn animated-text">Anmelden</button>
         </div>
       </div>
-      <!-- Zeige die Nachricht nur in der Loginansicht -->
       <p v-if="message && isLogin" :class="{ error: isError, success: !isError }">{{ message }}</p>
     </div>
   </div>

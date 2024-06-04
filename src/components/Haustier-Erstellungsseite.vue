@@ -1,24 +1,26 @@
 <template>
   <div class="pet-creation">
+    <div class h1>
     <h1>Erstelle dein Haustier</h1>
+    </div>
     <div class="pet-selection">
       <div class="pet-option" @click="selectPet('dog')">
         <img
-          src="@/assets/dogfront.png"
-          alt="Hund"
-          :class="{ selected: petData.type === 'dog' }"
+            src="@/assets/dogpositiv.png"
+            alt="Hund"
+            :class="{ selected: petData.type === 'dog' }"
         />
       </div>
       <div class="pet-option" @click="selectPet('cat')">
         <img
-          src="@/assets/catfront.png"
-          alt="Katze"
-          :class="{ selected: petData.type === 'cat' }"
+            src="@/assets/catpositiv.png"
+            alt="Katze"
+            :class="{ selected: petData.type === 'cat' }"
         />
       </div>
     </div>
-    <input id="petName" v-model="petData.name" placeholder="Name des Haustieres" required>
-    <button @click="createPet" :disabled="!petData.type || !petData.name">Erstellen</button>
+    <input id="petName" v-model="petData.name" placeholder="Name des Haustieres" required @input="handleInput">
+    <button @click="createPet" :disabled="!petData.type || !petData.name" :class="{ 'glow-button': petData.name }">Erstellen</button>
   </div>
 </template>
 
@@ -37,13 +39,23 @@ const selectPet = (type) => {
   petData.value.type = type;
 };
 
-const createPet = async () => {
+const handleInput = (event) => {
+  if (event.target.value) {
+    document.querySelector('button').classList.add('glow-button');
+  } else {
+    document.querySelector('button').classList.remove('glow-button');
+  }
+};
+
+const createPet = async (event) => {
   if (petData.value.name && petData.value.type) {
     try {
       const response = await axios.post('http://localhost:8080/api/pet/create', petData.value);
       if (response.status === 201) {
         router.push({ name: 'pet', params: { petData: JSON.stringify(response.data) } });
       }
+      // Trigger Ripple Effect
+      event.target.dispatchEvent(new CustomEvent('change-page', { bubbles: true, clientX: event.clientX, clientY: event.clientY }));
     } catch (error) {
       console.error('Fehler beim Erstellen des Haustiers:', error);
     }
@@ -53,11 +65,11 @@ const createPet = async () => {
 
 <style scoped>
 .pet-creation {
-  max-width: 600px;
+  max-width: 100%;
   margin: auto;
   padding: 20px;
   text-align: center;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  font-size: calc(16px + 0.5vw);
 }
 
 .pet-selection {
@@ -65,22 +77,25 @@ const createPet = async () => {
   justify-content: center;
   gap: 20px;
   margin-bottom: 20px;
+  flex-wrap: wrap;
 }
 
 .pet-option {
   position: relative;
   cursor: pointer;
+  flex: 1 1 100px;
+  max-width: 150px;
 }
 
 .pet-option img {
-  max-width: 150px;
-  transition: transform 0.3s, border 0.3s;
+  width: 100%;
+  height: auto;
+  transition: transform 0.3s, filter 0.3s;
 }
 
 .pet-option img.selected {
   transform: scale(1.1);
-  border: 3px solid #4CAF50;
-  border-radius: 10px;
+  filter: drop-shadow(0 0 10px #4CAF50);
 }
 
 input[type="text"] {
@@ -112,25 +127,7 @@ button:not(:disabled):hover {
   background-color: #45a049;
 }
 
-.pet-slider:hover {
-  opacity: 1;
-}
-
-.pet-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 25px;
-  height: 25px;
-  background: #4CAF50;
-  cursor: pointer;
-  border-radius: 50%;
-}
-
-.pet-slider::-moz-range-thumb {
-  width: 25px;
-  height: 25px;
-  background: #4CAF50;
-  cursor: pointer;
-  border-radius: 50%;
+button.glow-button {
+  box-shadow: 0 0 10px 2px rgba(0, 255, 0, 0.6);
 }
 </style>
