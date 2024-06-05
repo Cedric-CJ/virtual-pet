@@ -68,12 +68,18 @@ const handleLogin = async () => {
     const response = await axios.post('/api/login', loginData.value);
     console.log('Antwort vom Server:', response);
     if (response.status === 200) {
-      message.value = response.data.includes('hat bereits ein Haustier') ? 'Anmeldung erfolgreich! Sie haben bereits ein Haustier.' : 'Anmeldung erfolgreich!';
+      message.value = response.data.message;
       isError.value = false;
       console.log('Anmeldung erfolgreich:', message.value);
+      localStorage.setItem('token', response.data.token);
       setTimeout(() => {
-        console.log('Weiterleitung zur /pet-Seite');
-        router.push('/pet');
+        if (response.data.hasPet) {
+          console.log('Weiterleitung zur /pet-Seite');
+          router.push('/pet');
+        } else {
+          console.log('Weiterleitung zur /create-Seite');
+          router.push('/create');
+        }
       }, 3000);
     } else {
       throw new Error(response.data);
@@ -240,5 +246,4 @@ html, body {
   0% { background-position: 0 0; }
   100% { background-position: 400% 0; }
 }
-
 </style>
