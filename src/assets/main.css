@@ -91,7 +91,7 @@ nav a:hover {
 
 /* Dark Mode Styles */
 body.dark-mode .navbar {
-    background-color: #333;
+    background-color: transparent;
 }
 
 body.dark-mode .dropdown {
