@@ -44,31 +44,42 @@ const isError = ref(false);
 const router = useRouter();
 
 const handleRegister = async () => {
+  console.log('Start der Registrierung:', registerData.value);
   try {
     const response = await axios.post('/api/registration', registerData.value);
+    console.log('Antwort vom Server:', response);
     if (response.status === 200) {
       message.value = response.data.includes('hat bereits ein Haustier') ? 'Registrierung erfolgreich! Sie haben bereits ein Haustier.' : 'Registrierung erfolgreich!';
       isError.value = false;
+      console.log('Registrierung erfolgreich:', message.value);
     } else {
       throw new Error(response.data);
     }
   } catch (error) {
+    console.error('Fehler bei der Registrierung:', error);
     message.value = 'Registrierung fehlgeschlagen: ' + (error.response?.data || 'Unbekannter Fehler');
     isError.value = true;
   }
 };
 
 const handleLogin = async () => {
+  console.log('Start des Logins:', loginData.value);
   try {
     const response = await axios.post('/api/login', loginData.value);
+    console.log('Antwort vom Server:', response);
     if (response.status === 200) {
       message.value = response.data.includes('hat bereits ein Haustier') ? 'Anmeldung erfolgreich! Sie haben bereits ein Haustier.' : 'Anmeldung erfolgreich!';
       isError.value = false;
-      router.push('/pet');
+      console.log('Anmeldung erfolgreich:', message.value);
+      setTimeout(() => {
+        console.log('Weiterleitung zur /pet-Seite');
+        router.push('/pet');
+      }, 3000);
     } else {
       throw new Error(response.data);
     }
   } catch (error) {
+    console.error('Fehler beim Login:', error);
     message.value = 'Login fehlgeschlagen: ' + (error.response?.data.message || 'Unbekannter Fehler');
     isError.value = true;
   }
