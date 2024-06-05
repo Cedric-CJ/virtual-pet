@@ -7,7 +7,7 @@ body.light-mode {
     --dropdown-bg: #ffffff;
     --link-color: black;
     --link-hover-bg: #ddd;
-    --logo-bg: rgba(255, 255, 255, 0); /* Hintergrundfarbe für das Logo im Light Mode */
+    --logo-bg: Transparent; /* Hintergrundfarbe für das Logo im Light Mode */
     background-color: #ffffff;
     color: #000000;
 }
@@ -16,7 +16,7 @@ body.dark-mode {
     --dropdown-bg: #333;
     --link-color: #fff;
     --link-hover-bg: #555;
-    --logo-bg: rgb(18, 18, 18); /* Hintergrundfarbe für das Logo im Dark Mode */
+    --logo-bg: Transparent; /* Hintergrundfarbe für das Logo im Dark Mode */
     background-color: #121212;
     color: #ffffff;
 }

@@ -1,7 +1,7 @@
 <template>
   <div class="pet-creation">
-    <div class h1>
-    <h1>Erstelle dein Haustier</h1>
+    <div class="h1">
+      <h1>Erstelle dein Haustier</h1>
     </div>
     <div class="pet-selection">
       <div class="pet-option" @click="selectPet('dog')">
@@ -21,9 +21,9 @@
     </div>
     <input id="petName" v-model="petData.name" placeholder="Name des Haustieres" required @input="handleInput">
     <button @click="createPet" :disabled="!petData.type || !petData.name" :class="{ 'glow-button': petData.name }">Erstellen</button>
+    <div class="explosion" ref="explosion"></div>
   </div>
 </template>
-
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
@@ -34,6 +34,7 @@ const petData = ref({
   type: ''
 });
 const router = useRouter();
+const explosion = ref(null);
 
 const selectPet = (type) => {
   petData.value.type = type;
@@ -52,17 +53,23 @@ const createPet = async (event) => {
     try {
       const response = await axios.post('http://localhost:8080/api/pet/create', petData.value);
       if (response.status === 201) {
-        router.push({ name: 'pet', params: { petData: JSON.stringify(response.data) } });
+        // Trigger Explosion Animation
+        const explosionElement = explosion.value;
+        explosionElement.style.left = `${event.clientX - (explosionElement.clientWidth / 2)}px`;
+        explosionElement.style.top = `${event.clientY - (explosionElement.clientHeight / 2)}px`;
+        explosionElement.classList.add('explosion-active');
+
+        // Wait for the animation to finish before routing
+        setTimeout(() => {
+          router.push({ name: '/pet', params: { petData: JSON.stringify(response.data) } });
+        }, 500); // The duration of the explosion animation
       }
-      // Trigger Ripple Effect
-      event.target.dispatchEvent(new CustomEvent('change-page', { bubbles: true, clientX: event.clientX, clientY: event.clientY }));
     } catch (error) {
       console.error('Fehler beim Erstellen des Haustiers:', error);
     }
   }
 };
 </script>
-
 <style scoped>
 .pet-creation {
   max-width: 100%;
@@ -89,7 +96,6 @@ const createPet = async (event) => {
 
 .pet-option img {
   width: 100%;
-  height: auto;
   transition: transform 0.3s, filter 0.3s;
 }
 
@@ -129,5 +135,31 @@ button:not(:disabled):hover {
 
 button.glow-button {
   box-shadow: 0 0 10px 2px rgba(0, 255, 0, 0.6);
+}
+
+@keyframes explosion {
+  0% {
+    opacity: 1;
+    transform: scale(0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(3);
+  }
+}
+
+.explosion {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background: radial-gradient(circle, rgba(255, 255, 0, 1) 0%, rgba(255, 0, 0, 1) 50%, rgba(0, 0, 0, 0) 70%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.explosion-active {
+  animation: explosion 0.5s ease-out forwards;
 }
 </style>

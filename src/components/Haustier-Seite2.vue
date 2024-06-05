@@ -1,18 +1,19 @@
 <template>
   <div class="main-content">
     <div class="pet-info">
-      <transition name="fade">
-        <img v-if="currentImage" :src="currentImage" alt="Pet" class="pet-image" key="currentImage">
-      </transition>
+      <div class="pet-image-wrapper">
+        <transition name="fade">
+          <img v-if="currentImage" :src="currentImage" alt="Pet" class="pet-image" key="currentImage">
+        </transition>
+      </div>
       <h1>{{ petData.name }}</h1>
       <div class="actions">
-        <button @click="performAction('feed')">Füttern</button>
-        <button @click="performAction('water')">Wasser geben</button>
-        <button @click="performAction('sleep')">Schlafen</button>
-        <button @click="performAction('pet')">Streicheln</button>
+        <button :class="{ 'alert-button': petData.stats.hunger < 20 }" @click="performAction('feed')">Füttern</button>
+        <button :class="{ 'alert-button': petData.stats.durst < 20 }" @click="performAction('water')">Wasser geben</button>
+        <button :class="{ 'alert-button': petData.stats.energie < 20 }" @click="performAction('sleep')">Schlafen</button>
+        <button :class="{ 'alert-button': petData.stats.komfort < 20 }" @click="performAction('pet')">Streicheln</button>
         <button @click="performAction('clean')">Duschen</button>
         <button @click="performAction('play')">Spielen</button>
-        <button @click="saveAndLogout">Speichern und Abmelden</button>
       </div>
       <transition name="fade">
         <p v-if="actionText" class="action-text">{{ actionText }}</p>
@@ -48,7 +49,6 @@
     </div>
   </div>
 </template>
-
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
@@ -57,13 +57,13 @@ import { useRoute, useRouter } from 'vue-router';
 const API_URL = 'https://virtual-pet-backend.onrender.com/api';
 const pets = ref([]);
 const petData = ref({
-  name: '',
-  type: '',
+  name: 'testpet',
+  type: 'dog',
   stats: {
-    energie: 80,
-    hunger: 20,
-    durst: 35,
-    komfort: 75
+    Energie: 80,
+    Hunger: 20,
+    Durst: 35,
+    Komfort: 75
   }
 });
 const actionText = ref('');
@@ -93,19 +93,19 @@ const getPetData = async () => {
   }
 };
 
-const saveAndLogout = async () => {
-  try {
-    const response = await axios.post(`${API_URL}/pet/save`, petData.value);
-    console.log('Pet data saved:', response.data);
-    router.push('/login');
-  } catch (error) {
-    console.error('Error saving pet data:', error.response ? error.response.data : error);
-  }
+const reduceStatsOverTime = () => {
+  setInterval(() => {
+    petData.value.stats.energie = Math.max(petData.value.stats.energie - 5, 0);
+    petData.value.stats.hunger = Math.max(petData.value.stats.hunger - 5, 0);
+    petData.value.stats.durst = Math.max(petData.value.stats.durst - 5, 0);
+    petData.value.stats.komfort = Math.max(petData.value.stats.komfort - 5, 0);
+  }, 3600000); // Alle 1 Stunde
 };
 
 onMounted(() => {
   getPetData();
   getTopPets();
+  reduceStatsOverTime();
 });
 
 const performAction = (action) => {
@@ -163,8 +163,12 @@ const updateActionText = (action) => {
   }, 3000);
 };
 </script>
-
 <style scoped>
+body {
+  font-family: 'Arial', sans-serif;
+  transition: background-color 0.3s, color 0.3s;
+}
+
 .main-content {
   display: flex;
   flex-direction: column;
@@ -174,6 +178,7 @@ const updateActionText = (action) => {
   min-height: 100vh;
   max-width: 100vw;
   overflow-x: auto;
+  position: relative;
 }
 
 @media (min-width: 1024px) {
@@ -195,18 +200,25 @@ const updateActionText = (action) => {
   }
 }
 
+.pet-image-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 300px;
+}
+
 .pet-image {
-  max-width: 50%;
-  height: auto;
+  max-width: 150%;
+  max-height: 150%;
   display: block;
-  margin: 0 auto;
 }
 
 .actions {
   display: flex;
   justify-content: center;
   gap: 10px;
-  margin-top: 20px;
+  margin-top: 100px;
 }
 
 .action-text {
@@ -222,9 +234,19 @@ const updateActionText = (action) => {
 }
 
 .stats {
-  flex: 1;
-  min-width: 300px;
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  min-width: 200px;
   padding: 20px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+body.dark-mode .stats {
+  background-color: #333;
+  color: #fff;
 }
 
 .stat-bar {
@@ -255,9 +277,19 @@ const updateActionText = (action) => {
 }
 
 .top-pets {
-  flex: 1;
-  min-width: 200px;
+  position: absolute;
+  top: 160px;
+  right: 20px;
+  min-width: 300px;
   padding: 20px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+body.dark-mode .top-pets {
+  background-color: #333;
+  color: #fff;
 }
 
 table {
@@ -276,6 +308,11 @@ th {
   color: #fff;
 }
 
+.alert-button {
+  background-color: red;
+  color: white;
+}
+
 @media (max-width: 768px) {
   .main-content {
     padding: 10px;
@@ -284,6 +321,8 @@ th {
   .stats, .top-pets {
     padding: 10px;
     min-width: 100%;
+    position: static;
+    margin: 10px 0;
   }
 
   .actions {
