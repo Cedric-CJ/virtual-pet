@@ -20,7 +20,7 @@ public class WebSecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/public/**", "/home", "/pet", "/api/**").permitAll()
+                        .requestMatchers("/public/**", "/api/pet/**", "/pet", "/api/**").permitAll()
                         .anyRequest().authenticated());
         return http.build();
     }
