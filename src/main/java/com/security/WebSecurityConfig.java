@@ -20,11 +20,7 @@ public class WebSecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "https://virtual-pet-backend.onrender.com/public/**",
-                                "https://virtual-pet-backend.onrender.com/api/pet/**",
-                                "https://virtual-pet-backend.onrender.com/pet",
-                                "https://virtual-pet-backend.onrender.com/api/**").permitAll()
+                        .requestMatchers("/public/**", "/api/pet/**", "/pet", "/api/**").permitAll()
                         .anyRequest().authenticated());
         return http.build();
     }
@@ -32,9 +28,9 @@ public class WebSecurityConfig {
 
         @Override
         public void addCorsMappings(CorsRegistry registry) {
-            registry.addMapping("/api/**")
+            registry.addMapping("https://virtual-pet-backend.onrender.com/api/**")
                     // Erlaube Anfragen von mehreren Ursprüngen
-                    .allowedOrigins("http://localhost:3000", "https://virtual-pet-backend.onrender.com")
+                    .allowedOrigins("http://localhost:3000", "https://virtual-pet-bcky.onrender.com")
                     .allowedMethods("GET", "POST", "PUT", "DELETE")
                     .allowedHeaders("*")
                     .allowCredentials(true);
