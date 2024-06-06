@@ -11,7 +11,8 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 
 @RestController
-@CrossOrigin("/api")
+@RequestMapping("/api")
+@CrossOrigin(origins = {"http://localhost:3000", "https://virtual-pet-bcky.onrender.com"})
 public class UserController {
 
     @Autowired
