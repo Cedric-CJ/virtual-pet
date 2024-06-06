@@ -7,3 +7,4 @@
 *.mv.db
 *.trace.db
 /node_modules/
+.idea
