@@ -24,21 +24,22 @@ public class WebSecurityConfig {
                         .anyRequest().authenticated());
         return http.build();
     }
-    public class WebConfig implements WebMvcConfigurer {
+    public WebMvcConfigurer corsConfigurer() {
+        return new WebMvcConfigurer() {
+            @Override
+            public void addCorsMappings(CorsRegistry registry) {
+                registry.addMapping("/api/**")
+                        // Erlaube Anfragen von mehreren Ursprüngen
+                        .allowedOrigins("http://localhost:3000", "https://virtual-pet-bcky.onrender.com")
+                        .allowedMethods("GET", "POST", "PUT", "DELETE")
+                        .allowedHeaders("*")
+                        .allowCredentials(true);
+            }
+        };
+    }
 
-        @Override
-        public void addCorsMappings(CorsRegistry registry) {
-            registry.addMapping("https://virtual-pet-backend.onrender.com/api/**")
-                    // Erlaube Anfragen von mehreren Ursprüngen
-                    .allowedOrigins("http://localhost:3000", "https://virtual-pet-bcky.onrender.com")
-                    .allowedMethods("GET", "POST", "PUT", "DELETE")
-                    .allowedHeaders("*")
-                    .allowCredentials(true);
-        }
-
-        @Bean
-        public PasswordEncoder passwordEncoder() {
-            return new BCryptPasswordEncoder();
-        }
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }
