@@ -4,17 +4,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
 @RestController
-@CrossOrigin(origins = {"http://localhost:3000", "https://virtual-pet-bcky.onrender.com"})
+@CrossOrigin("/api")
 public class UserController {
 
     @Autowired
@@ -25,8 +22,8 @@ public class UserController {
 
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
-    @CrossOrigin("https://virtual-pet-bcky.onrender.com/api/registration")
-    @PostMapping("https://virtual-pet-backend.onrender.com/api/registration")
+    @CrossOrigin
+    @PostMapping("/registration")
     public ResponseEntity<?> registerUser(@RequestBody ApplicationUser newUser) {
         logger.info("Erhaltene Daten: {} - {}", newUser.getUsername(), newUser.getPassword());
 
@@ -62,8 +59,8 @@ public class UserController {
         }
     }
 
-    @CrossOrigin("https://virtual-pet-bcky.onrender.com/api/login")
-    @PostMapping("https://virtual-pet-backend.onrender.com/api/login")
+    @CrossOrigin
+    @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody Map<String, String> loginData) {
         String username = loginData.get("username");
         String password = loginData.get("password");
