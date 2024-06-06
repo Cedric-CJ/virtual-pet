@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
-@CrossOrigin(origins = {"http://localhost:3000", "https://virtual-pet-backend.onrender.com"})
+@CrossOrigin(origins = {"http://localhost:3000", "https://virtual-pet-bcky.onrender.com"})
 public class PetController {
     @Autowired
     private PetRepository petRepository;
@@ -26,7 +26,7 @@ public class PetController {
     public UserRepository userRepository;
 
     @CrossOrigin
-    @GetMapping("https://virtual-pet-backend.onrender.com/api/pet/{id}")
+    @GetMapping("/api/pet/{id}")
     public ResponseEntity<Pet> getPetById(@PathVariable Long id) {
         try {
             Pet pet = petService.getPetDetails(id);
@@ -37,7 +37,7 @@ public class PetController {
     }
 
     @CrossOrigin
-    @PostMapping("https://virtual-pet-backend.onrender.com/api/pet/create")
+    @PostMapping("/api/pet/create")
     public ResponseEntity<?> createPet(@RequestBody Pet pet) {
         try {
             Pet newPet = petService.createPet(pet.getType(), pet.getName());
@@ -48,7 +48,7 @@ public class PetController {
     }
 
     @CrossOrigin
-    @PostMapping("https://virtual-pet-backend.onrender.com/api/pet/save")
+    @PostMapping("/api/pet/save")
     public ResponseEntity<?> savePet(@RequestBody Pet pet) {
         try {
             petRepository.save(pet);
@@ -59,7 +59,7 @@ public class PetController {
     }
 
     @CrossOrigin
-    @GetMapping("https://virtual-pet-backend.onrender.com/api/pet/top")
+    @GetMapping("/api/pet/top")
     public ResponseEntity<List<Pet>> getTopPets() {
         List<Pet> pets = petRepository.findAllByOrderByCreatedDateDesc();
         return ResponseEntity.ok(pets);
