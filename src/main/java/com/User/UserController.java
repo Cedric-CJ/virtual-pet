@@ -23,7 +23,7 @@ public class UserController {
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     @CrossOrigin
-    @PostMapping("https://virtual-pet-backend.onrender.com/api/registration")
+    @PostMapping("/api/registration")
     public ResponseEntity<?> registerUser(@RequestBody ApplicationUser newUser) {
         logger.info("Erhaltene Daten: {} - {}", newUser.getUsername(), newUser.getPassword());
 
@@ -60,7 +60,7 @@ public class UserController {
     }
 
     @CrossOrigin
-    @PostMapping("https://virtual-pet-backend.onrender.com/api/login")
+    @PostMapping("api/login")
     public ResponseEntity<?> loginUser(@RequestBody Map<String, String> loginData) {
         String username = loginData.get("username");
         String password = loginData.get("password");
