@@ -12,7 +12,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = {"http://localhost:3000", "https://virtual-pet-bcky.onrender.com"})
+@CrossOrigin(origins = {"http://localhost:5173", "https://virtual-pet-bcky.onrender.com"})
 public class UserController {
 
     @Autowired

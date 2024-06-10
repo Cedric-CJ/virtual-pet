@@ -6,5 +6,8 @@
 #H2 DB#
 *.mv.db
 *.trace.db
-/node_modules/
+node_modules
 .idea
+.vscode
+.vite
+dist
