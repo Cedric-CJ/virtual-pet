@@ -7,7 +7,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.util.Map;
 
 @RestController
@@ -22,7 +21,7 @@ public class UserController {
 
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
-    @PostMapping("registration")
+    @PostMapping("/registration")
     public ResponseEntity<?> registerUser(@RequestBody ApplicationUser newUser) {
         logger.info("Erhaltene Daten: {} - {}", newUser.getUsername(), newUser.getPassword());
 
@@ -58,7 +57,7 @@ public class UserController {
         }
     }
 
-    @PostMapping("login")
+    @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody Map<String, String> loginData) {
         String username = loginData.get("username");
         String password = loginData.get("password");

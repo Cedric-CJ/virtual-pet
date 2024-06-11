@@ -1,20 +1,14 @@
 package com.Pet;
 
-import com.User.ApplicationUser;
 import com.User.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
-@CrossOrigin("/api/pet")
 @RestController
+@RequestMapping("/api")
 public class PetController {
     @Autowired
     private PetRepository petRepository;
@@ -25,7 +19,6 @@ public class PetController {
     @Autowired
     public UserRepository userRepository;
 
-    @CrossOrigin
     @GetMapping("/{id}")
     public ResponseEntity<Pet> getPetById(@PathVariable Long id) {
         try {
@@ -36,7 +29,6 @@ public class PetController {
         }
     }
 
-    @CrossOrigin
     @PostMapping("/create")
     public ResponseEntity<?> createPet(@RequestBody Pet pet) {
         try {
@@ -47,7 +39,6 @@ public class PetController {
         }
     }
 
-    @CrossOrigin
     @PostMapping("/save")
     public ResponseEntity<?> savePet(@RequestBody Pet pet) {
         try {
@@ -58,7 +49,6 @@ public class PetController {
         }
     }
 
-    @CrossOrigin
     @GetMapping("/top")
     public ResponseEntity<List<Pet>> getTopPets() {
         List<Pet> pets = petRepository.findAllByOrderByCreatedDateDesc();
