@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 
 @RestController
-@CrossOrigin(origins = {"http://localhost:5173", "https://virtual-pet-bcky.onrender.com"})
+@RequestMapping("/api")
 public class UserController {
 
     @Autowired
@@ -22,8 +22,7 @@ public class UserController {
 
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
-    @CrossOrigin
-    @PostMapping("/api/registration")
+    @PostMapping("registration")
     public ResponseEntity<?> registerUser(@RequestBody ApplicationUser newUser) {
         logger.info("Erhaltene Daten: {} - {}", newUser.getUsername(), newUser.getPassword());
 
@@ -59,8 +58,7 @@ public class UserController {
         }
     }
 
-    @CrossOrigin
-    @PostMapping("api/login")
+    @PostMapping("login")
     public ResponseEntity<?> loginUser(@RequestBody Map<String, String> loginData) {
         String username = loginData.get("username");
         String password = loginData.get("password");
