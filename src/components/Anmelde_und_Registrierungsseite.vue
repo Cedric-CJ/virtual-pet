@@ -45,9 +45,17 @@ const router = useRouter();
 
 const handleRegister = async () => {
   console.log('Start der Registrierung:', registerData.value);
+
+  const baseUrl = import.meta.env.VITE_BACKEND_BASE_URL || 'http://localhost:8080';
+  console.log('Base URL:', baseUrl);
+
+  const endpoint = `${baseUrl}/api/registration`;
+  console.log('Endpoint:', endpoint);
+
   try {
-    const response = await axios.post("https://virtual-pet-backend.onrender.com/api/registration", registerData.value);
+    const response = await axios.post(endpoint, registerData.value);
     console.log('Antwort vom Server:', response);
+
     if (response.status === 200) {
       message.value = response.data.includes('hat bereits ein Haustier') ? 'Registrierung erfolgreich! Sie haben bereits ein Haustier.' : 'Registrierung erfolgreich!';
       isError.value = false;
