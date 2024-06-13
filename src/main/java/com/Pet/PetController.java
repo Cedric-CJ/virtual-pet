@@ -22,7 +22,7 @@ public class PetController {
 
     private static final Logger logger = LoggerFactory.getLogger(PetController.class);
 
-    @PostMapping("/createPet")
+    @PostMapping("/create")
     public ResponseEntity<?> createPet(@RequestBody Pet pet) {
         logger.info("Erhaltene Daten: {} - {}", pet.getName(), pet.getType());
 
@@ -40,7 +40,7 @@ public class PetController {
         }
     }
 
-    @PostMapping("/savePet")
+    @PostMapping("/save")
     public ResponseEntity<?> savePet(@RequestBody Pet pet) {
         logger.info("Speichern der Daten für Haustier: {}", pet.getName());
 
@@ -62,7 +62,7 @@ public class PetController {
         }
     }
 
-    @GetMapping("/topPets")
+    @GetMapping("/top")
     public ResponseEntity<List<Pet>> getTopPets() {
         try {
             String findTopPetsQuery = "SELECT * FROM application_pet ORDER BY created_date DESC";
