@@ -1,7 +1,6 @@
 package com.Pet;
 
 import jakarta.persistence.*;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -19,10 +18,10 @@ public class Pet {
     private String name;
 
     private String type;
-    private int hunger;
-    private int durst;
-    private int energie;
-    private int komfort;
+    private int hunger = 5;
+    private int durst = 5;
+    private int energie = 5;
+    private int komfort = 5;
 
     @Column(name = "created_date")
     private LocalDate createdDate;
@@ -44,23 +43,6 @@ public class Pet {
 
     // Default constructor
     public Pet() {}
-
-    // Constructor with all fields
-    public Pet(String username, String name, String type, int hunger, int durst, int energie, int komfort, LocalDate createdDate, LocalDateTime lastFed, LocalDateTime lastWatered, LocalDateTime lastSlept, LocalDateTime lastPetted, LocalDateTime lastShowered) {
-        this.username = username;
-        this.name = name;
-        this.type = type;
-        this.hunger = hunger;
-        this.durst = durst;
-        this.energie = energie;
-        this.komfort = komfort;
-        this.createdDate = createdDate;
-        this.lastFed = lastFed;
-        this.lastWatered = lastWatered;
-        this.lastSlept = lastSlept;
-        this.lastPetted = lastPetted;
-        this.lastShowered = lastShowered;
-    }
 
     // Getters and setters for all fields
     public String getUsername() {

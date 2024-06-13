@@ -1,7 +1,6 @@
 package com.Pet;
 
 import org.springframework.jdbc.core.RowMapper;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -12,6 +11,7 @@ public class PetRowMapper implements RowMapper<Pet> {
     @Override
     public Pet mapRow(ResultSet rs, int rowNum) throws SQLException {
         Pet pet = new Pet();
+        pet.setUsername(rs.getString("username"));
         pet.setName(rs.getString("name"));
         pet.setType(rs.getString("type"));
         pet.setHunger(rs.getInt("hunger"));
@@ -24,7 +24,6 @@ public class PetRowMapper implements RowMapper<Pet> {
         pet.setLastSlept(rs.getObject("last_slept", LocalDateTime.class));
         pet.setLastPetted(rs.getObject("last_petted", LocalDateTime.class));
         pet.setLastShowered(rs.getObject("last_showered", LocalDateTime.class));
-        pet.setUsername(rs.getString("username"));
         return pet;
     }
 }
