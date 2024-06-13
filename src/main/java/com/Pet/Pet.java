@@ -6,6 +6,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 public class Pet {
@@ -19,11 +20,11 @@ public class Pet {
     private int energie;
     private int komfort;
     private LocalDate createdDate;
-    private int lastFed;
-    private int lastWatered;
-    private int lastSlept;
-    private int lastPetted;
-    private int lastShowered;
+    private LocalDateTime lastFed;
+    private LocalDateTime lastWatered;
+    private LocalDateTime lastSlept;
+    private LocalDateTime lastPetted;
+    private LocalDateTime lastShowered;
 
     public Pet() {}
 
@@ -31,15 +32,15 @@ public class Pet {
         this.name = name;
         this.type = type;
         this.createdDate = LocalDate.now();
-        this.hunger = 0;
-        this.durst = 0;
-        this.energie = 0;
-        this.komfort = 0;
-        this.lastFed = 0;
-        this.lastWatered = 0;
-        this.lastSlept = 0;
-        this.lastPetted = 0;
-        this.lastShowered = 0;
+        this.hunger = 500;
+        this.durst = 50;
+        this.energie = 500;
+        this.komfort = 500;
+        this.lastFed = LocalDateTime.now();
+        this.lastWatered = LocalDateTime.now();
+        this.lastSlept = LocalDateTime.now();
+        this.lastPetted = LocalDateTime.now();
+        this.lastShowered = LocalDateTime.now();
     }
 
     public Long getId() {
@@ -106,43 +107,43 @@ public class Pet {
         this.createdDate = createdDate;
     }
 
-    public int getLastFed() {
+    public LocalDateTime getLastFed() {
         return lastFed;
     }
 
-    public void setLastFed(int lastFed) {
+    public void setLastFed(LocalDateTime lastFed) {
         this.lastFed = lastFed;
     }
 
-    public int getLastWatered() {
+    public LocalDateTime getLastWatered() {
         return lastWatered;
     }
 
-    public void setLastWatered(int lastWatered) {
+    public void setLastWatered(LocalDateTime lastWatered) {
         this.lastWatered = lastWatered;
     }
 
-    public int getLastSlept() {
+    public LocalDateTime getLastSlept() {
         return lastSlept;
     }
 
-    public void setLastSlept(int lastSlept) {
+    public void setLastSlept(LocalDateTime lastSlept) {
         this.lastSlept = lastSlept;
     }
 
-    public int getLastPetted() {
+    public LocalDateTime getLastPetted() {
         return lastPetted;
     }
 
-    public void setLastPetted(int lastPetted) {
+    public void setLastPetted(LocalDateTime lastPetted) {
         this.lastPetted = lastPetted;
     }
 
-    public int getLastShowered() {
+    public LocalDateTime getLastShowered() {
         return lastShowered;
     }
 
-    public void setLastShowered(int lastShowered) {
+    public void setLastShowered(LocalDateTime lastShowered) {
         this.lastShowered = lastShowered;
     }
 }

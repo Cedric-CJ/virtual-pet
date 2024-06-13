@@ -17,11 +17,11 @@ public class PetRowMapper implements RowMapper<Pet> {
         pet.setEnergie(rs.getInt("energie"));
         pet.setKomfort(rs.getInt("komfort"));
         pet.setCreatedDate(rs.getDate("created_date").toLocalDate());
-        pet.setLastFed(rs.getInt("lastFed"));
-        pet.setLastWatered(rs.getInt("lastWatered"));
-        pet.setLastSlept(rs.getInt("lastSlept"));
-        pet.setLastPetted(rs.getInt("lastPetted"));
-        pet.setLastShowered(rs.getInt("lastShowered"));
+        pet.setLastFed(rs.getTimestamp("lastFed").toLocalDateTime());
+        pet.setLastWatered(rs.getTimestamp("lastWatered").toLocalDateTime());
+        pet.setLastSlept(rs.getTimestamp("lastSlept").toLocalDateTime());
+        pet.setLastPetted(rs.getTimestamp("lastPetted").toLocalDateTime());
+        pet.setLastShowered(rs.getTimestamp("lastShowered").toLocalDateTime());
         return pet;
     }
 }

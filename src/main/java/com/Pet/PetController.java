@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -32,8 +33,11 @@ public class PetController {
         }
 
         try {
-            Pet newPet = petService.createPet(pet.getType(), pet.getName());
-            return new ResponseEntity<>(newPet, HttpStatus.CREATED);
+            // Save the pet in the database
+            String insertPetQuery = "INSERT INTO application_pet (name, type, hunger, durst, energie, komfort, created_date, lastFed, lastWatered, lastSlept, lastPetted, lastShowered) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            jdbcTemplate.update(insertPetQuery, pet.getName(), pet.getType(), pet.getHunger(), pet.getDurst(), pet.getEnergie(), pet.getKomfort(), pet.getCreatedDate(), pet.getLastFed(), pet.getLastWatered(), pet.getLastSlept(), pet.getLastPetted(), pet.getLastShowered());
+
+            return new ResponseEntity<>(pet, HttpStatus.CREATED);
         } catch (Exception e) {
             logger.error("Fehler bei der Erstellung des Haustiers", e);
             return ResponseEntity.status(500).body("Fehler bei der Erstellung des Haustiers");
