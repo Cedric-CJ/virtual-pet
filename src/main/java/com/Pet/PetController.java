@@ -1,57 +1,92 @@
 package com.Pet;
 
-import com.User.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.List;
 
 @RestController
 @RequestMapping("/api")
 public class PetController {
+
     @Autowired
-    private PetRepository petRepository;
+    private JdbcTemplate jdbcTemplate;
 
     @Autowired
     private PetService petService;
 
-    @Autowired
-    public UserRepository userRepository;
+    private static final Logger logger = LoggerFactory.getLogger(PetController.class);
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Pet> getPetById(@PathVariable Long id) {
-        try {
-            Pet pet = petService.getPetDetails(id);
-            return ResponseEntity.ok(pet);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        }
-    }
-
-    @PostMapping("/create")
+    @PostMapping("/createPet")
     public ResponseEntity<?> createPet(@RequestBody Pet pet) {
+        logger.info("Erhaltene Daten: {} - {}", pet.getName(), pet.getType());
+
+        if (pet.getName() == null || pet.getType() == null || pet.getName().isEmpty() || pet.getType().isEmpty()) {
+            logger.warn("Name oder Typ des Haustiers sind leer.");
+            return ResponseEntity.badRequest().body("Name und Typ des Haustiers dürfen nicht leer sein.");
+        }
+
         try {
             Pet newPet = petService.createPet(pet.getType(), pet.getName());
             return new ResponseEntity<>(newPet, HttpStatus.CREATED);
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    @PostMapping("/save")
-    public ResponseEntity<?> savePet(@RequestBody Pet pet) {
-        try {
-            petRepository.save(pet);
-            return ResponseEntity.ok("Pet data saved successfully");
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to save pet data");
+            logger.error("Fehler bei der Erstellung des Haustiers", e);
+            return ResponseEntity.status(500).body("Fehler bei der Erstellung des Haustiers");
         }
     }
 
-    @GetMapping("/top")
+    @PostMapping("/savePet")
+    public ResponseEntity<?> savePet(@RequestBody Pet pet) {
+        logger.info("Speichern der Daten für Haustier: {}", pet.getName());
+
+        try {
+            String updatePetQuery = "UPDATE application_pet SET hunger = ?, durst = ?, energie = ?, komfort = ?, lastFed = ?, lastWatered = ?, lastSlept = ?, lastPetted = ?, lastShowered = ? WHERE id = ?";
+            int rowsAffected = jdbcTemplate.update(updatePetQuery, pet.getHunger(), pet.getDurst(), pet.getEnergie(), pet.getKomfort(), pet.getLastFed(), pet.getLastWatered(), pet.getLastSlept(), pet.getLastPetted(), pet.getLastShowered(), pet.getId());
+
+            if (rowsAffected > 0) {
+                logger.info("Haustierdaten erfolgreich gespeichert");
+                return ResponseEntity.ok("Haustierdaten erfolgreich gespeichert");
+            } else {
+                logger.error("Fehler beim Speichern der Haustierdaten");
+                return ResponseEntity.status(500).body("Fehler beim Speichern der Haustierdaten");
+            }
+
+        } catch (Exception e) {
+            logger.error("Fehler beim Speichern der Haustierdaten", e);
+            return ResponseEntity.status(500).body("Fehler beim Speichern der Haustierdaten");
+        }
+    }
+
+    @GetMapping("/topPets")
     public ResponseEntity<List<Pet>> getTopPets() {
-        List<Pet> pets = petRepository.findAllByOrderByCreatedDateDesc();
-        return ResponseEntity.ok(pets);
+        try {
+            String findTopPetsQuery = "SELECT * FROM application_pet ORDER BY created_date DESC";
+            List<Pet> pets = jdbcTemplate.query(findTopPetsQuery, new PetRowMapper());
+
+            return ResponseEntity.ok(pets);
+        } catch (Exception e) {
+            logger.error("Fehler beim Abrufen der Top-Haustiere", e);
+            return ResponseEntity.status(500).body(null);
+        }
+    }
+
+    @GetMapping("/pet/{id}")
+    public ResponseEntity<?> getPetById(@PathVariable Long id) {
+        logger.info("Abrufen von Haustier mit ID: {}", id);
+
+        try {
+            String findPetByIdQuery = "SELECT * FROM application_pet WHERE id = ?";
+            Pet pet = jdbcTemplate.queryForObject(findPetByIdQuery, new Object[]{id}, new PetRowMapper());
+
+            return ResponseEntity.ok(pet);
+        } catch (Exception e) {
+            logger.error("Fehler beim Abrufen des Haustiers", e);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Haustier nicht gefunden");
+        }
     }
 }

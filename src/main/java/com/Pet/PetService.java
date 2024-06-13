@@ -25,46 +25,4 @@ public class PetService {
         return petRepository.findById(petId)
                 .orElseThrow(() -> new RuntimeException("Haustier nicht gefunden: " + petId));
     }
-
-    @Transactional
-    public void essen(Long petId) {
-        Pet pet = getPetDetails(petId);
-        pet.essengeben();
-        petRepository.save(pet);
-    }
-
-    @Transactional
-    public void trinken(Long petId) {
-        Pet pet = getPetDetails(petId);
-        pet.wassergeben();
-        petRepository.save(pet);
-    }
-
-    @Transactional
-    public void schlafen(Long petId) {
-        Pet pet = getPetDetails(petId);
-        pet.schlafen();
-        petRepository.save(pet);
-    }
-
-    @Transactional
-    public void streicheln(Long petId) {
-        Pet pet = getPetDetails(petId);
-        pet.streicheln();
-        petRepository.save(pet);
-    }
-
-    @Transactional
-    public void spielen(Long petId) {
-        Pet pet = getPetDetails(petId);
-        pet.spielen();
-        petRepository.save(pet);
-    }
-
-    @Transactional
-    public void duschen(Long petId) {
-        Pet pet = getPetDetails(petId);
-        pet.duschen();
-        petRepository.save(pet);
-    }
 }

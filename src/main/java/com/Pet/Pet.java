@@ -14,7 +14,6 @@ public class Pet {
     private Long id;
     private String name;
     private String type;
-    private String asciiArt;
     private int hunger;
     private int durst;
     private int energie;
@@ -26,23 +25,16 @@ public class Pet {
     private int lastPetted;
     private int lastShowered;
 
-    public Pet() {
-        // Default constructor required by JPA
-    }
+    public Pet() {}
 
-    public Pet(String name, String type) {
-        this(name, type, "");
-    }
-
-    public Pet(String name, String type, String asciiArt) {
+    public Pet(String name, String type ) {
         this.name = name;
         this.type = type;
-        this.asciiArt = asciiArt;
         this.createdDate = LocalDate.now();
-        this.hunger = 500;
+        this.hunger = 50;
         this.durst = 50;
-        this.energie = 500;
-        this.komfort = 500;
+        this.energie = 50;
+        this.komfort = 50;
         this.lastFed = 0;
         this.lastWatered = 0;
         this.lastSlept = 0;
@@ -50,66 +42,60 @@ public class Pet {
         this.lastShowered = 0;
     }
 
-    public void tick() {
-        if (++lastFed >= 12) { // Annahme: 2x pro Tag, wenn ein "Tick" als eine halber Tag zählt
-            hunger -= 10;
-            lastFed = 0;
-        }
-        if (++lastWatered >= 24) { // 1x pro Tag
-            durst -= 20;
-            lastWatered = 0;
-        }
-        if (++lastSlept >= 24) { // 1x pro Tag
-            energie -= 15;
-            lastSlept = 0;
-        }
-        if (++lastPetted >= 8) { // 3x pro Tag
-            komfort -= 5;
-            lastPetted = 0;
-        }
-        if (++lastShowered >= 168) { // 1x pro Woche, wenn ein "Tick" als eine Stunde zählt
-            komfort -= 10;
-            lastShowered = 0;
-        }
-        hunger = Math.max(hunger, 0);
-        durst = Math.max(durst, 0);
-        energie = Math.max(energie, 0);
-        komfort = Math.max(komfort, 0);
+    public Long getId() {
+        return id;
     }
 
-    public void essengeben() {
-        hunger = Math.min(hunger + 50, 100);
-        lastFed = 0;
-    }
-
-    public void wassergeben() {
-        durst = Math.min(durst + 100, 100);
-        lastWatered = 0;
-    }
-
-    public void schlafen() {
-        energie = 100;
-        lastSlept = 0;
-    }
-
-    public void streicheln() {
-        komfort = Math.min(komfort + 10, 100);
-        lastPetted = 0;
-    }
-
-    public void duschen() {
-        komfort = Math.min(komfort + 100, 100);
-        lastShowered = 0;
-    }
-
-    public void spielen() {
-        komfort = Math.min(komfort + 10, 100);
-        lastPetted = 0;
-        energie = Math.min(energie - 10, 100);
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getName() {
         return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public int getHunger() {
+        return hunger;
+    }
+
+    public void setHunger(int hunger) {
+        this.hunger = hunger;
+    }
+
+    public int getDurst() {
+        return durst;
+    }
+
+    public void setDurst(int durst) {
+        this.durst = durst;
+    }
+
+    public int getEnergie() {
+        return energie;
+    }
+
+    public void setEnergie(int energie) {
+        this.energie = energie;
+    }
+
+    public int getKomfort() {
+        return komfort;
+    }
+
+    public void setKomfort(int komfort) {
+        this.komfort = komfort;
     }
 
     public LocalDate getCreatedDate() {
@@ -120,31 +106,43 @@ public class Pet {
         this.createdDate = createdDate;
     }
 
-    public String getType() {
-        return type;
+    public int getLastFed() {
+        return lastFed;
     }
 
-    public String getAsciiArt() {
-        return asciiArt;
+    public void setLastFed(int lastFed) {
+        this.lastFed = lastFed;
     }
 
-    public int getHunger() {
-        return hunger;
+    public int getLastWatered() {
+        return lastWatered;
     }
 
-    public int getDurst() {
-        return durst;
+    public void setLastWatered(int lastWatered) {
+        this.lastWatered = lastWatered;
     }
 
-    public int getEnergie() {
-        return energie;
+    public int getLastSlept() {
+        return lastSlept;
     }
 
-    public int getKomfort() {
-        return komfort;
+    public void setLastSlept(int lastSlept) {
+        this.lastSlept = lastSlept;
     }
 
-    public Long getId() {
-        return id;
+    public int getLastPetted() {
+        return lastPetted;
+    }
+
+    public void setLastPetted(int lastPetted) {
+        this.lastPetted = lastPetted;
+    }
+
+    public int getLastShowered() {
+        return lastShowered;
+    }
+
+    public void setLastShowered(int lastShowered) {
+        this.lastShowered = lastShowered;
     }
 }
