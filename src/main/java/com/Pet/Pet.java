@@ -31,10 +31,10 @@ public class Pet {
         this.name = name;
         this.type = type;
         this.createdDate = LocalDate.now();
-        this.hunger = 50;
-        this.durst = 50;
-        this.energie = 50;
-        this.komfort = 50;
+        this.hunger = 0;
+        this.durst = 0;
+        this.energie = 0;
+        this.komfort = 0;
         this.lastFed = 0;
         this.lastWatered = 0;
         this.lastSlept = 0;
