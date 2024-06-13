@@ -23,23 +23,29 @@ public class PetController {
     private static final Logger logger = LoggerFactory.getLogger(PetController.class);
 
     @PostMapping("/create")
-    public ResponseEntity<?> createPet(@RequestBody Pet pet) {
-        logger.info("Erhaltene Daten: {} - {}", pet.getName(), pet.getType());
+    public ResponseEntity<?> createPet(@RequestBody Pet newPet) {
+        logger.info("Received data: {} - {}", newPet.getName(), newPet.getType());
 
-        if (pet.getName() == null || pet.getType() == null || pet.getName().isEmpty() || pet.getType().isEmpty()) {
-            logger.warn("Name oder Typ des Haustiers sind leer.");
-            return ResponseEntity.badRequest().body("Name und Typ des Haustiers dürfen nicht leer sein.");
+        if (newPet.getName() == null || newPet.getType() == null || newPet.getName().isEmpty() || newPet.getType().isEmpty()) {
+            logger.warn("Name or Type is empty.");
+            return ResponseEntity.badRequest().body("Name and Type cannot be empty.");
         }
 
         try {
-            // Save the pet in the database
-            String insertPetQuery = "INSERT INTO application_pet (name, type, hunger, durst, energie, komfort, created_date, lastFed, lastWatered, lastSlept, lastPetted, lastShowered) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-            jdbcTemplate.update(insertPetQuery, pet.getName(), pet.getType(), pet.getHunger(), pet.getDurst(), pet.getEnergie(), pet.getKomfort(), pet.getCreatedDate(), pet.getLastFed(), pet.getLastWatered(), pet.getLastSlept(), pet.getLastPetted(), pet.getLastShowered());
+            String insertPetQuery = "INSERT INTO application_pet (name, type, hunger, durst, energie, komfort, created_date, last_fed, last_watered, last_slept, last_petted, last_showered) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            int rowsAffected = jdbcTemplate.update(insertPetQuery, newPet.getName(), newPet.getType(), newPet.getHunger(), newPet.getDurst(), newPet.getEnergie(), newPet.getKomfort(), newPet.getCreatedDate(), newPet.getLastFed(), newPet.getLastWatered(), newPet.getLastSlept(), newPet.getLastPetted(), newPet.getLastShowered());
 
-            return new ResponseEntity<>(pet, HttpStatus.CREATED);
+            if (rowsAffected > 0) {
+                logger.info("Pet successfully created");
+                return ResponseEntity.ok("Pet successfully created");
+            } else {
+                logger.error("Pet could not be created");
+                return ResponseEntity.status(500).body("Error creating pet");
+            }
+
         } catch (Exception e) {
-            logger.error("Fehler bei der Erstellung des Haustiers", e);
-            return ResponseEntity.status(500).body("Fehler bei der Erstellung des Haustiers");
+            logger.error("Error creating pet", e);
+            return ResponseEntity.status(500).body("Error creating pet: " + e.getMessage());
         }
     }
 

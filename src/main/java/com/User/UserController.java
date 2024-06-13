@@ -62,20 +62,30 @@ public class UserController {
         String username = loginData.get("username");
         String password = loginData.get("password");
 
+        logger.info("Login attempt for username: {}", username);
+
         try {
             String findUserQuery = "SELECT password FROM application_user WHERE username = ?";
             String storedHashedPassword = jdbcTemplate.queryForObject(findUserQuery, new Object[]{username}, String.class);
+            logger.debug("Stored hashed password for user {}: {}", username, storedHashedPassword);
 
-            if (storedHashedPassword == null || !bCryptPasswordEncoder.matches(password, storedHashedPassword)) {
-                logger.warn("Ungültiger Benutzername oder Passwort.");
+            if (storedHashedPassword == null) {
+                logger.warn("Benutzer nicht gefunden: {}", username);
+                return ResponseEntity.badRequest().body("Ungültiger Benutzername oder Passwort.");
+            }
+
+            if (!bCryptPasswordEncoder.matches(password, storedHashedPassword)) {
+                logger.warn("Ungültiges Passwort für Benutzer: {}", username);
                 return ResponseEntity.badRequest().body("Ungültiger Benutzername oder Passwort.");
             }
 
             // Überprüfen, ob der Benutzer bereits ein Haustier hat
             String checkPetQuery = "SELECT COUNT(*) FROM application_pet WHERE username = ?";
             int petCount = jdbcTemplate.queryForObject(checkPetQuery, new Object[]{username}, Integer.class);
+            logger.debug("Pet count for user {}: {}", username, petCount);
 
             if (petCount > 0) {
+                logger.info("Anmeldung erfolgreich und Benutzer hat bereits ein Haustier");
                 return ResponseEntity.ok("Anmeldung erfolgreich und Benutzer hat bereits ein Haustier");
             }
 
@@ -83,8 +93,11 @@ public class UserController {
             return ResponseEntity.ok("Anmeldung erfolgreich");
 
         } catch (Exception e) {
-            logger.error("Fehler bei der Anmeldung", e);
-            return ResponseEntity.status(500).body("Ungültiger Benutzername oder Passwort.");
+            logger.error("Fehler bei der Anmeldung für Benutzer: " + username, e);
+            if (e instanceof org.springframework.jdbc.BadSqlGrammarException) {
+                logger.error("SQL Error: ", e.getMessage());
+            }
+            return ResponseEntity.status(500).body("Fehler bei der Anmeldung: " + e.getMessage());
         }
     }
 }
