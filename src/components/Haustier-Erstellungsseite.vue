@@ -19,22 +19,46 @@
         />
       </div>
     </div>
-    <input id="petName" v-model="petData.name" placeholder="Name des Haustieres" required @input="handleInput">
-    <button @click="createPet" :disabled="!petData.type || !petData.name" :class="{ 'glow-button': petData.name }">Erstellen</button>
+    <input
+        id="petName"
+        v-model="petData.name"
+        placeholder="Name des Haustieres"
+        required
+        @input="handleInput"
+    />
+    <button
+        @click="createPet"
+        :disabled="!petData.type || !petData.name"
+        :class="{ 'glow-button': petData.name }"
+    >
+      Erstellen
+    </button>
     <div class="explosion" ref="explosion"></div>
   </div>
 </template>
+
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 
+// Assuming you have a way to get the current username
+const getCurrentUsername = () => {
+  // Implement the logic to get the current username
+  return "currentUsername"; // Placeholder: replace with actual logic
+};
+
 const petData = ref({
   name: '',
-  type: ''
+  type: '',
+  username: ''
 });
 const router = useRouter();
 const explosion = ref(null);
+
+onMounted(() => {
+  petData.value.username = getCurrentUsername();
+});
 
 const selectPet = (type) => {
   petData.value.type = type;
@@ -49,10 +73,10 @@ const handleInput = (event) => {
 };
 
 const createPet = async (event) => {
-  if (petData.value.name && petData.value.type) {
+  if (petData.value.name && petData.value.type && petData.value.username) {
     try {
-      const response = await axios.post('http://localhost:8080/api/pet/create', petData.value);
-      if (response.status === 201) {
+      const response = await axios.post('http://localhost:8080/api/create', petData.value);
+      if (response.status === 200) {
         // Trigger Explosion Animation
         const explosionElement = explosion.value;
         explosionElement.style.left = `${event.clientX - (explosionElement.clientWidth / 2)}px`;
@@ -61,7 +85,7 @@ const createPet = async (event) => {
 
         // Wait for the animation to finish before routing
         setTimeout(() => {
-          router.push({ name: '/pet', params: { petData: JSON.stringify(response.data) } });
+          router.push({ name: 'pet', params: { petData: JSON.stringify(response.data) } });
         }, 500); // The duration of the explosion animation
       }
     } catch (error) {
@@ -70,6 +94,7 @@ const createPet = async (event) => {
   }
 };
 </script>
+
 <style scoped>
 .pet-creation {
   max-width: 100%;
@@ -154,7 +179,12 @@ button.glow-button {
   height: 100%;
   top: 0;
   left: 0;
-  background: radial-gradient(circle, rgba(255, 255, 0, 1) 0%, rgba(255, 0, 0, 1) 50%, rgba(0, 0, 0, 0) 70%);
+  background: radial-gradient(
+      circle,
+      rgba(255, 255, 0, 1) 0%,
+      rgba(255, 0, 0, 1) 50%,
+      rgba(0, 0, 0, 0) 70%
+  );
   opacity: 0;
   pointer-events: none;
 }
