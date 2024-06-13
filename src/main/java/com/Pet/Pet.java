@@ -1,54 +1,74 @@
 package com.Pet;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "application_pet")
+@IdClass(PetId.class)
 public class Pet {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "username")
+    private String username;
+
+    @Id
+    @Column(name = "name")
     private String name;
+
     private String type;
     private int hunger;
     private int durst;
     private int energie;
     private int komfort;
+
+    @Column(name = "created_date")
     private LocalDate createdDate;
+
+    @Column(name = "last_fed")
     private LocalDateTime lastFed;
+
+    @Column(name = "last_watered")
     private LocalDateTime lastWatered;
+
+    @Column(name = "last_slept")
     private LocalDateTime lastSlept;
+
+    @Column(name = "last_petted")
     private LocalDateTime lastPetted;
+
+    @Column(name = "last_showered")
     private LocalDateTime lastShowered;
 
+    // Default constructor
     public Pet() {}
 
-    public Pet(String name, String type ) {
+    // Constructor with all fields
+    public Pet(String username, String name, String type, int hunger, int durst, int energie, int komfort, LocalDate createdDate, LocalDateTime lastFed, LocalDateTime lastWatered, LocalDateTime lastSlept, LocalDateTime lastPetted, LocalDateTime lastShowered) {
+        this.username = username;
         this.name = name;
         this.type = type;
-        this.createdDate = LocalDate.now();
-        this.hunger = 500;
-        this.durst = 50;
-        this.energie = 500;
-        this.komfort = 500;
-        this.lastFed = LocalDateTime.now();
-        this.lastWatered = LocalDateTime.now();
-        this.lastSlept = LocalDateTime.now();
-        this.lastPetted = LocalDateTime.now();
-        this.lastShowered = LocalDateTime.now();
+        this.hunger = hunger;
+        this.durst = durst;
+        this.energie = energie;
+        this.komfort = komfort;
+        this.createdDate = createdDate;
+        this.lastFed = lastFed;
+        this.lastWatered = lastWatered;
+        this.lastSlept = lastSlept;
+        this.lastPetted = lastPetted;
+        this.lastShowered = lastShowered;
     }
 
-    public Long getId() {
-        return id;
+    // Getters and setters for all fields
+    public String getUsername() {
+        return username;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getName() {

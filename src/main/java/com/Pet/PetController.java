@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -31,9 +33,12 @@ public class PetController {
             return ResponseEntity.badRequest().body("Name and Type cannot be empty.");
         }
 
+        // Set the current date and time for createdDate
+        newPet.setCreatedDate(LocalDate.now());
+
         try {
-            String insertPetQuery = "INSERT INTO application_pet (name, type, hunger, durst, energie, komfort, created_date, last_fed, last_watered, last_slept, last_petted, last_showered) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-            int rowsAffected = jdbcTemplate.update(insertPetQuery, newPet.getName(), newPet.getType(), newPet.getHunger(), newPet.getDurst(), newPet.getEnergie(), newPet.getKomfort(), newPet.getCreatedDate(), newPet.getLastFed(), newPet.getLastWatered(), newPet.getLastSlept(), newPet.getLastPetted(), newPet.getLastShowered());
+            String insertPetQuery = "INSERT INTO application_pet (username, name, type, hunger, durst, energie, komfort, created_date, last_fed, last_watered, last_slept, last_petted, last_showered) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            int rowsAffected = jdbcTemplate.update(insertPetQuery, newPet.getUsername(), newPet.getName(), newPet.getType(), newPet.getHunger(), newPet.getDurst(), newPet.getEnergie(), newPet.getKomfort(), newPet.getCreatedDate(), newPet.getLastFed(), newPet.getLastWatered(), newPet.getLastSlept(), newPet.getLastPetted(), newPet.getLastShowered());
 
             if (rowsAffected > 0) {
                 logger.info("Pet successfully created");
@@ -51,23 +56,41 @@ public class PetController {
 
     @PostMapping("/save")
     public ResponseEntity<?> savePet(@RequestBody Pet pet) {
-        logger.info("Speichern der Daten für Haustier: {}", pet.getName());
+        logger.info("Saving data for pet: {}", pet);
+
+        // Set the current date and time for last* fields
+        LocalDateTime now = LocalDateTime.now();
+        pet.setLastFed(now);
+        pet.setLastWatered(now);
+        pet.setLastSlept(now);
+        pet.setLastPetted(now);
+        pet.setLastShowered(now);
+
+        // Log the current data for the given id
+        try {
+            String findPetByIdQuery = "SELECT * FROM application_pet WHERE username = ? AND name = ?";
+            Pet existingPet = jdbcTemplate.queryForObject(findPetByIdQuery, new Object[]{pet.getUsername(), pet.getName()}, new PetRowMapper());
+            logger.debug("Existing pet data: {}", existingPet);
+        } catch (Exception e) {
+            logger.error("Error finding pet with username {} and name {}: {}", pet.getUsername(), pet.getName(), e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Pet not found with username " + pet.getUsername() + " and name " + pet.getName());
+        }
 
         try {
-            String updatePetQuery = "UPDATE application_pet SET hunger = ?, durst = ?, energie = ?, komfort = ?, lastFed = ?, lastWatered = ?, lastSlept = ?, lastPetted = ?, lastShowered = ? WHERE id = ?";
-            int rowsAffected = jdbcTemplate.update(updatePetQuery, pet.getHunger(), pet.getDurst(), pet.getEnergie(), pet.getKomfort(), pet.getLastFed(), pet.getLastWatered(), pet.getLastSlept(), pet.getLastPetted(), pet.getLastShowered(), pet.getId());
+            String updatePetQuery = "UPDATE application_pet SET hunger = ?, durst = ?, energie = ?, komfort = ?, last_fed = ?, last_watered = ?, last_slept = ?, last_petted = ?, last_showered = ? WHERE username = ? AND name = ?";
+            int rowsAffected = jdbcTemplate.update(updatePetQuery, pet.getHunger(), pet.getDurst(), pet.getEnergie(), pet.getKomfort(), pet.getLastFed(), pet.getLastWatered(), pet.getLastSlept(), pet.getLastPetted(), pet.getLastShowered(), pet.getUsername(), pet.getName());
 
             if (rowsAffected > 0) {
-                logger.info("Haustierdaten erfolgreich gespeichert");
-                return ResponseEntity.ok("Haustierdaten erfolgreich gespeichert");
+                logger.info("Pet data successfully saved");
+                return ResponseEntity.ok("Pet data successfully saved");
             } else {
-                logger.error("Fehler beim Speichern der Haustierdaten");
-                return ResponseEntity.status(500).body("Fehler beim Speichern der Haustierdaten");
+                logger.error("Error saving pet data: No rows affected");
+                return ResponseEntity.status(500).body("Error saving pet data: No rows affected");
             }
 
         } catch (Exception e) {
-            logger.error("Fehler beim Speichern der Haustierdaten", e);
-            return ResponseEntity.status(500).body("Fehler beim Speichern der Haustierdaten");
+            logger.error("Error saving pet data: ", e);
+            return ResponseEntity.status(500).body("Error saving pet data: " + e.getMessage());
         }
     }
 
@@ -79,23 +102,23 @@ public class PetController {
 
             return ResponseEntity.ok(pets);
         } catch (Exception e) {
-            logger.error("Fehler beim Abrufen der Top-Haustiere", e);
+            logger.error("Error retrieving top pets", e);
             return ResponseEntity.status(500).body(null);
         }
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getPetById(@PathVariable Long id) {
-        logger.info("Abrufen von Haustier mit ID: {}", id);
+    @GetMapping("/{username}/{name}")
+    public ResponseEntity<?> getPetById(@PathVariable String username, @PathVariable String name) {
+        logger.info("Retrieving pet with username: {} and name: {}", username, name);
 
         try {
-            String findPetByIdQuery = "SELECT * FROM application_pet WHERE id = ?";
-            Pet pet = jdbcTemplate.queryForObject(findPetByIdQuery, new Object[]{id}, new PetRowMapper());
+            String findPetByIdQuery = "SELECT * FROM application_pet WHERE username = ? AND name = ?";
+            Pet pet = jdbcTemplate.queryForObject(findPetByIdQuery, new Object[]{username, name}, new PetRowMapper());
 
             return ResponseEntity.ok(pet);
         } catch (Exception e) {
-            logger.error("Fehler beim Abrufen des Haustiers", e);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Haustier nicht gefunden");
+            logger.error("Error retrieving pet", e);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Pet not found");
         }
     }
 }

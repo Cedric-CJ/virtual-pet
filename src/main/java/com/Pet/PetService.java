@@ -16,8 +16,11 @@ public class PetService {
     }
 
     @Transactional
-    public Pet createPet(String type, String name) {
-        Pet newPet = new Pet(name, type);
+    public Pet createPet(String type, String name, String username) {
+        Pet newPet = new Pet();
+        newPet.setType(type);
+        newPet.setName(name);
+        newPet.setUsername(username);
         return petRepository.save(newPet);
     }
 
