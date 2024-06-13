@@ -51,6 +51,49 @@ public class PetController {
         }
     }
 
+    @PostMapping("/feed")
+    public ResponseEntity<?> feedPet(@RequestBody Pet pet) {
+        return performAction(pet, "feed");
+    }
+
+    @PostMapping("/water")
+    public ResponseEntity<?> waterPet(@RequestBody Pet pet) {
+        return performAction(pet, "water");
+    }
+
+    @PostMapping("/sleep")
+    public ResponseEntity<?> sleepPet(@RequestBody Pet pet) {
+        return performAction(pet, "sleep");
+    }
+
+    @PostMapping("/pet")
+    public ResponseEntity<?> petPet(@RequestBody Pet pet) {
+        return performAction(pet, "pet");
+    }
+
+    @PostMapping("/clean")
+    public ResponseEntity<?> cleanPet(@RequestBody Pet pet) {
+        return performAction(pet, "clean");
+    }
+
+    @PostMapping("/play")
+    public ResponseEntity<?> playPet(@RequestBody Pet pet) {
+        return performAction(pet, "play");
+    }
+
+    private ResponseEntity<?> performAction(Pet pet, String action) {
+        logger.info("Performing action: {} for pet: {}", action, pet);
+
+        try {
+            Pet updatedPet = petService.performAction(pet, action);
+            logger.info("Action {} performed successfully", action);
+            return ResponseEntity.ok(updatedPet);
+        } catch (Exception e) {
+            logger.error("Error performing action {}: ", action, e);
+            return ResponseEntity.status(500).body("Error performing action " + action + ": " + e.getMessage());
+        }
+    }
+
     @GetMapping("/top")
     public ResponseEntity<List<Pet>> getTopPets() {
         try {

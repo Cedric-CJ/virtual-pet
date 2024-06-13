@@ -78,14 +78,47 @@ public class PetService {
         // Preserve the original createdDate
         pet.setCreatedDate(existingPet.getCreatedDate());
 
-        // Update the last* fields with the current time
-        LocalDateTime now = LocalDateTime.now();
-        pet.setLastFed(now);
-        pet.setLastWatered(now);
-        pet.setLastSlept(now);
-        pet.setLastPetted(now);
-        pet.setLastShowered(now);
-
         return petRepository.save(pet);
+    }
+
+    @Transactional
+    public Pet performAction(Pet pet, String action) {
+        // Find existing pet to ensure it exists and we have the latest data
+        PetId petId = new PetId(pet.getUsername(), pet.getName());
+        Pet existingPet = petRepository.findById(petId)
+                .orElseThrow(() -> new RuntimeException("Haustier nicht gefunden: " + petId));
+
+        LocalDateTime now = LocalDateTime.now();
+
+        switch (action) {
+            case "feed":
+                existingPet.setHunger(Math.min(existingPet.getHunger() + 50, 100));
+                existingPet.setLastFed(now);
+                break;
+            case "water":
+                existingPet.setDurst(Math.min(existingPet.getDurst() + 100, 100));
+                existingPet.setLastWatered(now);
+                break;
+            case "sleep":
+                existingPet.setEnergie(100);
+                existingPet.setLastSlept(now);
+                break;
+            case "pet":
+                existingPet.setKomfort(Math.min(existingPet.getKomfort() + 10, 100));
+                existingPet.setLastPetted(now);
+                break;
+            case "clean":
+                existingPet.setKomfort(Math.min(existingPet.getKomfort() + 100, 100));
+                existingPet.setLastShowered(now);
+                break;
+            case "play":
+                existingPet.setEnergie(Math.max(existingPet.getEnergie() - 10, 0));
+                existingPet.setKomfort(Math.min(existingPet.getKomfort() + 10, 100));
+                break;
+            default:
+                throw new IllegalArgumentException("Unrecognized action: " + action);
+        }
+
+        return petRepository.save(existingPet);
     }
 }
