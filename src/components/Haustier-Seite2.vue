@@ -69,7 +69,6 @@ const petData = ref({
 const actionText = ref('');
 const currentImage = ref('');
 const route = useRoute();
-const router = useRouter();
 
 const getTopPets = async () => {
   try {
@@ -108,26 +107,32 @@ onMounted(() => {
   reduceStatsOverTime();
 });
 
-const performAction = (action) => {
+const performAction = async (action) => {
+  const now = new Date().toISOString(); // Current time in ISO format
   const actions = {
     feed: () => {
       petData.value.stats.hunger = Math.min(petData.value.stats.hunger + 50, 100);
+      petData.value.lastFed = now;
       changeImage(petData.value.type === 'dog' ? 'src/assets/dogessen.png' : 'src/assets/catessen.png');
     },
     water: () => {
       petData.value.stats.durst = Math.min(petData.value.stats.durst + 100, 100);
+      petData.value.lastWatered = now;
       changeImage(petData.value.type === 'dog' ? 'src/assets/dogtrinken.png' : 'src/assets/cattrinken.png');
     },
     sleep: () => {
       petData.value.stats.energie = 100;
+      petData.value.lastSlept = now;
       changeImage(petData.value.type === 'dog' ? 'src/assets/dogschlafen.png' : 'src/assets/catschlafen.png');
     },
     pet: () => {
       petData.value.stats.komfort = Math.min(petData.value.stats.komfort + 10, 100);
+      petData.value.lastPetted = now;
       changeImage(petData.value.type === 'dog' ? 'src/assets/dogstreicheln.png' : 'src/assets/catstreicheln.png');
     },
     clean: () => {
       petData.value.stats.komfort = Math.min(petData.value.stats.komfort + 100, 100);
+      petData.value.lastShowered = now;
       changeImage(petData.value.type === 'dog' ? 'src/assets/dogduschen.png' : 'src/assets/catduschen.png');
     },
     play: () => {
@@ -138,6 +143,13 @@ const performAction = (action) => {
   };
   actions[action]();
   updateActionText(action);
+
+  // Save the updated pet data
+  try {
+    await axios.post(`${API_URL}/pet/save`, petData.value);
+  } catch (error) {
+    console.error('Error saving pet data:', error.response ? error.response.data : error);
+  }
 };
 
 const changeImage = (newImage) => {
