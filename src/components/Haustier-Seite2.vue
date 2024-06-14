@@ -49,10 +49,11 @@
     </div>
   </div>
 </template>
+
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 
 const API_URL = 'https://virtual-pet-backend.onrender.com/api';
 const pets = ref([]);
@@ -69,10 +70,18 @@ const petData = ref({
 const actionText = ref('');
 const currentImage = ref('');
 const route = useRoute();
+const token = localStorage.getItem('authToken'); // Annahme: Authentifizierungs-Token wird in localStorage gespeichert
+
+const axiosInstance = axios.create({
+  baseURL: API_URL,
+  headers: {
+    'Authorization': `Bearer ${token}`
+  }
+});
 
 const getTopPets = async () => {
   try {
-    const response = await axios.get(`${API_URL}/pet/top`);
+    const response = await axiosInstance.get('/top');
     pets.value = response.data.map((pet, index) => ({
       name: pet.name,
       daysAlive: pet.daysAlive,
@@ -85,7 +94,7 @@ const getTopPets = async () => {
 
 const getPetData = async () => {
   try {
-    const response = await axios.get(`${API_URL}/pet/${route.params.petId}`);
+    const response = await axiosInstance.get(`/pet/${route.params.petId}`);
     petData.value = response.data;
   } catch (error) {
     console.error('Error fetching pet data:', error.response ? error.response.data : error);
@@ -102,7 +111,11 @@ const reduceStatsOverTime = () => {
 };
 
 onMounted(() => {
-  getPetData();
+  if (route.params.petId) {
+    getPetData();
+  } else {
+    console.error('No pet ID provided');
+  }
   getTopPets();
   reduceStatsOverTime();
 });
@@ -146,7 +159,7 @@ const performAction = async (action) => {
 
   // Save the updated pet data
   try {
-    await axios.post(`${API_URL}/pet/save`, petData.value);
+    await axiosInstance.post('/pet/save', petData.value);
   } catch (error) {
     console.error('Error saving pet data:', error.response ? error.response.data : error);
   }
