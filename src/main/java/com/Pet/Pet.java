@@ -10,8 +10,8 @@ import java.time.LocalDateTime;
 public class Pet {
 
     @Id
-    @Column(name = "username")
-    private String username;
+    @Column(name = "user_id")
+    private String userId;
 
     @Id
     @Column(name = "name")
@@ -45,12 +45,12 @@ public class Pet {
     public Pet() {}
 
     // Getters and setters for all fields
-    public String getUsername() {
-        return username;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public String getName() {

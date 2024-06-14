@@ -21,11 +21,11 @@ public class PetService {
     }
 
     @Transactional
-    public Pet createPet(String type, String name, String username) {
+    public Pet createPet(String type, String name, String userId) {
         Pet newPet = new Pet();
         newPet.setType(type);
         newPet.setName(name);
-        newPet.setUsername(username);
+        newPet.setUserId(userId);
 
         // Initialize default stats
         newPet.setHunger(5);
@@ -45,10 +45,10 @@ public class PetService {
         return petRepository.save(newPet);
     }
 
-    public Pet getPetDetails(String username, String name) {
-        PetId petId = new PetId(username, name);
+    public Pet getPetDetails(String userId, String name) {
+        PetId petId = new PetId(userId, name);
         Pet pet = petRepository.findById(petId)
-                .orElseThrow(() -> new RuntimeException("Haustier nicht gefunden: " + username + " " + name));
+                .orElseThrow(() -> new RuntimeException("Haustier nicht gefunden: " + userId + " " + name));
 
         updateStats(pet);
         return pet;
@@ -71,7 +71,7 @@ public class PetService {
     @Transactional
     public Pet savePet(Pet pet) {
         // Find existing pet to ensure the created_date is not overwritten
-        PetId petId = new PetId(pet.getUsername(), pet.getName());
+        PetId petId = new PetId(pet.getUserId(), pet.getName());
         Pet existingPet = petRepository.findById(petId)
                 .orElseThrow(() -> new RuntimeException("Haustier nicht gefunden: " + petId));
 
@@ -84,7 +84,7 @@ public class PetService {
     @Transactional
     public Pet performAction(Pet pet, String action) {
         // Find existing pet to ensure it exists and we have the latest data
-        PetId petId = new PetId(pet.getUsername(), pet.getName());
+        PetId petId = new PetId(pet.getUserId(), pet.getName());
         Pet existingPet = petRepository.findById(petId)
                 .orElseThrow(() -> new RuntimeException("Haustier nicht gefunden: " + petId));
 

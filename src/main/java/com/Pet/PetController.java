@@ -22,19 +22,15 @@ public class PetController {
 
     @PostMapping("/create")
     public ResponseEntity<?> createPet(@RequestBody Pet newPet) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String username = auth.getName();  // get logged in username
-        newPet.setUsername(username);
+        logger.info("Received data: {} - {} - {}", newPet.getUserId(), newPet.getName(), newPet.getType());
 
-        logger.info("Received data: {} - {} - {}", newPet.getUsername(), newPet.getName(), newPet.getType());
-
-        if (newPet.getName() == null || newPet.getType() == null || newPet.getName().isEmpty() || newPet.getType().isEmpty()) {
-            logger.warn("Name or Type is empty.");
-            return ResponseEntity.badRequest().body("Name and Type cannot be empty.");
+        if (newPet.getName() == null || newPet.getType() == null || newPet.getName().isEmpty() || newPet.getType().isEmpty() || newPet.getUserId() == null) {
+            logger.warn("Name, Type, or UserID is empty.");
+            return ResponseEntity.badRequest().body("Name, Type, and UserID cannot be empty.");
         }
 
         try {
-            Pet createdPet = petService.createPet(newPet.getType(), newPet.getName(), newPet.getUsername());
+            Pet createdPet = petService.createPet(newPet.getType(), newPet.getName(), newPet.getUserId());
             logger.info("Pet successfully created");
             return ResponseEntity.ok(createdPet);
         } catch (Exception e) {
