@@ -1,26 +1,28 @@
-package com.Pet;
+package com.HTW.Pet;
 
 import java.io.Serializable;
 import java.util.Objects;
 
 public class PetId implements Serializable {
-    private String username;
+    private Long userId;
     private String name;
 
+    // Default constructor
     public PetId() {}
 
-    public PetId(String username, String name) {
-        this.username = username;
+    // Parameterized constructor
+    public PetId(Long userId, String name) {
+        this.userId = userId;
         this.name = name;
     }
 
-    // Getters, setters, equals, and hashCode methods
-    public String getUsername() {
-        return username;
+    // Getters and setters
+    public Long getUserId() {
+        return userId;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
     public String getName() {
@@ -31,16 +33,17 @@ public class PetId implements Serializable {
         this.name = name;
     }
 
+    // Override equals and hashCode methods
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PetId petId = (PetId) o;
-        return Objects.equals(username, petId.username) && Objects.equals(name, petId.name);
+        return Objects.equals(userId, petId.userId) && Objects.equals(name, petId.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(username, name);
+        return Objects.hash(userId, name);
     }
 }

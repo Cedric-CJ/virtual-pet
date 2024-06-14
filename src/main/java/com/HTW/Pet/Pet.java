@@ -1,4 +1,4 @@
-package com.Pet;
+package com.HTW.Pet;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
@@ -11,7 +11,7 @@ public class Pet {
 
     @Id
     @Column(name = "user_id")
-    private String userId;
+    private Long userId;
 
     @Id
     @Column(name = "name")
@@ -44,12 +44,12 @@ public class Pet {
     // Default constructor
     public Pet() {}
 
-    // Getters and setters for all fields
-    public String getUserId() {
+    // Getters and setters
+    public Long getUserId() {
         return userId;
     }
 
-    public void setUserId(String userId) {
+    public void setUserId(Long userId) {
         this.userId = userId;
     }
 

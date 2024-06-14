@@ -1,4 +1,4 @@
-package com.User;
+package com.HTW.User;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

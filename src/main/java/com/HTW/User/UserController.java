@@ -1,4 +1,4 @@
-package com.User;
+package com.HTW.User;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
