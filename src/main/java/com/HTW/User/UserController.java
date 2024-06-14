@@ -73,7 +73,8 @@ public class UserController {
         try {
             String findUserQuery = "SELECT id, password FROM application_user WHERE username = ?";
             Map<String, Object> userRecord = jdbcTemplate.queryForMap(findUserQuery, username);
-            Integer userId = (Integer) userRecord.get("id");
+
+            Long userId = ((Number) userRecord.get("id")).longValue(); // Hier wird Long anstelle von Integer verwendet
             String storedHashedPassword = (String) userRecord.get("password");
             logger.debug("Stored hashed password for user {}: {}", username, storedHashedPassword);
 
@@ -100,11 +101,11 @@ public class UserController {
             logger.info("Anmeldung erfolgreich und Benutzer hat bereits ein Haustier: {}", petCount > 0);
             return ResponseEntity.ok(response);
 
+        } catch (org.springframework.dao.IncorrectResultSizeDataAccessException e) {
+            logger.error("Benutzer nicht gefunden oder zu viele Ergebnisse für Benutzer: {}", username, e);
+            return ResponseEntity.badRequest().body("Ungültiger Benutzername oder Passwort.");
         } catch (Exception e) {
             logger.error("Fehler bei der Anmeldung für Benutzer: " + username, e);
-            if (e instanceof org.springframework.jdbc.BadSqlGrammarException) {
-                logger.error("SQL Error: ", e.getMessage());
-            }
             return ResponseEntity.status(500).body("Fehler bei der Anmeldung: " + e.getMessage());
         }
     }
