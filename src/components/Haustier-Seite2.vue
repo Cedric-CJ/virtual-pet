@@ -57,13 +57,13 @@ import { useRoute, useRouter } from 'vue-router';
 const API_URL = 'https://virtual-pet-backend.onrender.com/api';
 const pets = ref([]);
 const petData = ref({
-  name: 'testpet',
-  type: 'dog',
+  name: '',
+  type: '',
   stats: {
-    Energie: 80,
-    Hunger: 20,
-    Durst: 35,
-    Komfort: 75
+    Energie: 0,
+    Hunger: 0,
+    Durst: 0,
+    Komfort: 0
   }
 });
 const actionText = ref('');
@@ -94,10 +94,10 @@ const getPetData = async () => {
 
 const reduceStatsOverTime = () => {
   setInterval(() => {
-    petData.value.stats.energie = Math.max(petData.value.stats.energie - 5, 0);
-    petData.value.stats.hunger = Math.max(petData.value.stats.hunger - 5, 0);
-    petData.value.stats.durst = Math.max(petData.value.stats.durst - 5, 0);
-    petData.value.stats.komfort = Math.max(petData.value.stats.komfort - 5, 0);
+    petData.value.stats.Energie = Math.max(petData.value.stats.Energie - 5, 0);
+    petData.value.stats.Hunger = Math.max(petData.value.stats.Hunger - 5, 0);
+    petData.value.stats.Durst = Math.max(petData.value.stats.Durst - 5, 0);
+    petData.value.stats.Komfort = Math.max(petData.value.stats.Komfort - 5, 0);
   }, 3600000); // Alle 1 Stunde
 };
 
@@ -111,33 +111,33 @@ const performAction = async (action) => {
   const now = new Date().toISOString(); // Current time in ISO format
   const actions = {
     feed: () => {
-      petData.value.stats.hunger = Math.min(petData.value.stats.hunger + 50, 100);
+      petData.value.stats.Hunger = Math.min(petData.value.stats.Hunger + 50, 100);
       petData.value.lastFed = now;
       changeImage(petData.value.type === 'dog' ? 'src/assets/dogessen.png' : 'src/assets/catessen.png');
     },
     water: () => {
-      petData.value.stats.durst = Math.min(petData.value.stats.durst + 100, 100);
+      petData.value.stats.Durst = Math.min(petData.value.stats.Durst + 100, 100);
       petData.value.lastWatered = now;
       changeImage(petData.value.type === 'dog' ? 'src/assets/dogtrinken.png' : 'src/assets/cattrinken.png');
     },
     sleep: () => {
-      petData.value.stats.energie = 100;
+      petData.value.stats.Energie = 100;
       petData.value.lastSlept = now;
       changeImage(petData.value.type === 'dog' ? 'src/assets/dogschlafen.png' : 'src/assets/catschlafen.png');
     },
     pet: () => {
-      petData.value.stats.komfort = Math.min(petData.value.stats.komfort + 10, 100);
+      petData.value.stats.Komfort = Math.min(petData.value.stats.Komfort + 10, 100);
       petData.value.lastPetted = now;
       changeImage(petData.value.type === 'dog' ? 'src/assets/dogstreicheln.png' : 'src/assets/catstreicheln.png');
     },
     clean: () => {
-      petData.value.stats.komfort = Math.min(petData.value.stats.komfort + 100, 100);
+      petData.value.stats.Komfort = Math.min(petData.value.stats.Komfort + 100, 100);
       petData.value.lastShowered = now;
       changeImage(petData.value.type === 'dog' ? 'src/assets/dogduschen.png' : 'src/assets/catduschen.png');
     },
     play: () => {
-      petData.value.stats.energie = Math.max(petData.value.stats.energie - 10, 0);
-      petData.value.stats.komfort = Math.min(petData.value.stats.komfort + 10, 100);
+      petData.value.stats.Energie = Math.max(petData.value.stats.Energie - 10, 0);
+      petData.value.stats.Komfort = Math.min(petData.value.stats.Komfort + 10, 100);
       changeImage(petData.value.type === 'dog' ? 'src/assets/dogspielen.png' : 'src/assets/catspielen.png');
     }
   };
@@ -175,6 +175,7 @@ const updateActionText = (action) => {
   }, 3000);
 };
 </script>
+
 <style scoped>
 body {
   font-family: 'Arial', sans-serif;

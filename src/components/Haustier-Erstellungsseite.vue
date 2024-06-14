@@ -46,7 +46,7 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
-import { useUserStore } from '@/store'; // Verwenden Sie den richtigen Pfad
+import { useUserStore } from '@/store';
 
 const petData = ref({
   name: '',
@@ -100,6 +100,8 @@ const createPet = async (event: Event) => {
           loading.value = false;
           message.value = 'Haustier erfolgreich erstellt!';
           messageType.value = 'success';
+          if (messageType.value === 'success') {
+            router.push('/pet')};
         }, 500);
       } else {
         console.error('Unexpected response status:', response.status);
