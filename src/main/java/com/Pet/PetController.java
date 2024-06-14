@@ -3,6 +3,8 @@ package com.Pet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +22,11 @@ public class PetController {
 
     @PostMapping("/create")
     public ResponseEntity<?> createPet(@RequestBody Pet newPet) {
-        logger.info("Received data: {} - {}", newPet.getName(), newPet.getType());
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();  // get logged in username
+        newPet.setUsername(username);
+
+        logger.info("Received data: {} - {} - {}", newPet.getUsername(), newPet.getName(), newPet.getType());
 
         if (newPet.getName() == null || newPet.getType() == null || newPet.getName().isEmpty() || newPet.getType().isEmpty()) {
             logger.warn("Name or Type is empty.");
