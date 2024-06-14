@@ -17,13 +17,22 @@ public class Pet {
     @Column(name = "name")
     private String name;
 
+    @Column(name = "type", nullable = false)
     private String type;
+
+    @Column(name = "hunger", nullable = false)
     private int hunger = 5;
+
+    @Column(name = "durst", nullable = false)
     private int durst = 5;
+
+    @Column(name = "energie", nullable = false)
     private int energie = 5;
+
+    @Column(name = "komfort", nullable = false)
     private int komfort = 5;
 
-    @Column(name = "created_date")
+    @Column(name = "created_date", nullable = false)
     private LocalDate createdDate;
 
     @Column(name = "last_fed")
@@ -40,6 +49,9 @@ public class Pet {
 
     @Column(name = "last_showered")
     private LocalDateTime lastShowered;
+
+    @Column(name = "username", nullable = false)
+    private String username;
 
     // Default constructor
     public Pet() {}
@@ -147,5 +159,13 @@ public class Pet {
 
     public void setLastShowered(LocalDateTime lastShowered) {
         this.lastShowered = lastShowered;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 }

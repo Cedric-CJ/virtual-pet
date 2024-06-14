@@ -1,5 +1,6 @@
 package com.HTW.Pet;
 
+import com.HTW.User.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,8 +12,12 @@ import java.util.List;
 
 @Service
 public class PetService {
+
     @Autowired
     private PetRepository petRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     private static final int STATS_DECREASE_RATE = 5; // Stats decrease by 5 every hour
 
@@ -26,6 +31,10 @@ public class PetService {
         newPet.setType(type);
         newPet.setName(name);
         newPet.setUserId(userId);
+
+        // Get the username from the user table
+        String username = userRepository.findUsernameById(userId);
+        newPet.setUsername(username);
 
         // Initialize default stats
         newPet.setHunger(5);
