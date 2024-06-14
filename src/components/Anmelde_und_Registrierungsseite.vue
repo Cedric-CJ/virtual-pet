@@ -1,13 +1,17 @@
 <template>
   <div :class="['form-structor']">
+    <div v-if="isLoading" class="loading-overlay">
+      <div class="spinner"></div>
+      <p v-if="isTimeout">Server ist gerade schwer zu erreichen, bitte warten Sie noch einen Moment.</p>
+    </div>
     <div class="signup" :class="{ 'slide-up': isLogin }">
       <h2 class="form-title" @click="toggleForm">
         Registrieren
       </h2>
-      <div class="form-holder">
-        <input type="text" v-model="registerData.username" placeholder="Benutzername" class="input" required>
-        <input type="password" v-model="registerData.password" placeholder="Passwort" class="input" required>
-      </div>
+      <form @submit.prevent="handleRegister" class="form-holder">
+        <input type="text" v-model="registerData.username" placeholder="Benutzername" class="input" required @keydown.enter="$event.target.nextElementSibling.focus()">
+        <input type="password" v-model="registerData.password" placeholder="Passwort" class="input" required @keydown.enter="handleRegister">
+      </form>
       <div class="animated-border">
         <button @click="handleRegister" class="submit-btn animated-text">Registrieren</button>
       </div>
@@ -18,10 +22,10 @@
         <h2 class="form-title" @click="toggleForm">
           Anmelden
         </h2>
-        <div class="form-holder">
-          <input type="text" v-model="loginData.username" placeholder="Benutzername" class="input" required>
-          <input type="password" v-model="loginData.password" placeholder="Passwort" class="input" required>
-        </div>
+        <form @submit.prevent="handleLogin" class="form-holder">
+          <input type="text" v-model="loginData.username" placeholder="Benutzername" class="input" required @keydown.enter="$event.target.nextElementSibling.focus()">
+          <input type="password" v-model="loginData.password" placeholder="Passwort" class="input" required @keydown.enter="handleLogin">
+        </form>
         <div class="animated-border">
           <button @click="handleLogin" class="submit-btn animated-text">Anmelden</button>
         </div>
@@ -31,71 +35,81 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
+import { useUserStore } from '@/store'; // Verwenden Sie den richtigen Pfad
 
 const isLogin = ref(true);
 const loginData = ref({ username: '', password: '' });
 const registerData = ref({ username: '', password: '' });
 const message = ref('');
 const isError = ref(false);
+const isLoading = ref(false);
+const isTimeout = ref(false);
 const router = useRouter();
+const store = useUserStore();
 
 const handleRegister = async () => {
-  console.log('Start der Registrierung:', registerData.value);
-
-  const baseUrl = import.meta.env.VITE_BACKEND_BASE_URL || 'http://localhost:8080';
-  console.log('Base URL:', baseUrl);
-
-  const endpoint = `${baseUrl}/api/registration`;
-  console.log('Endpoint:', endpoint);
+  isLoading.value = true;
+  isTimeout.value = false;
+  const timeout = setTimeout(() => {
+    isTimeout.value = true;
+  }, 5000);
 
   try {
-    const response = await axios.post(endpoint, registerData.value);
-    console.log('Antwort vom Server:', response);
+    const response = await axios.post(`${import.meta.env.VITE_BACKEND_BASE_URL || 'http://localhost:8080'}/api/registration`, registerData.value);
 
     if (response.status === 200) {
-      message.value = response.data.includes('hat bereits ein Haustier') ? 'Registrierung erfolgreich! Sie haben bereits ein Haustier.' : 'Registrierung erfolgreich!';
+      message.value = 'Registrierung erfolgreich!';
       isError.value = false;
-      console.log('Registrierung erfolgreich:', message.value);
+      const userId = response.data.userId;
+      store.updateUserId(userId);
     } else {
       throw new Error(response.data);
     }
   } catch (error) {
-    console.error('Fehler bei der Registrierung:', error);
     message.value = 'Registrierung fehlgeschlagen: ' + (error.response?.data || 'Unbekannter Fehler');
     isError.value = true;
+  } finally {
+    clearTimeout(timeout);
+    isLoading.value = false;
   }
 };
 
 const handleLogin = async () => {
-  console.log('Start des Logins:', loginData.value);
+  isLoading.value = true;
+  isTimeout.value = false;
+  const timeout = setTimeout(() => {
+    isTimeout.value = true;
+  }, 5000);
+
   try {
     const response = await axios.post("https://virtual-pet-backend.onrender.com/api/login", loginData.value);
-    console.log('Antwort vom Server:', response);
     if (response.status === 200) {
       message.value = response.data.message;
       isError.value = false;
-      console.log('Anmeldung erfolgreich:', message.value);
       localStorage.setItem('token', response.data.token);
+      const userId = response.data.userId;
+      store.updateUserId(userId); // Benutzer-ID im Pinia Store speichern
+      isLoading.value = false;
       setTimeout(() => {
         if (response.data.hasPet) {
-          console.log('Weiterleitung zur /pet-Seite');
           router.push('/pet');
         } else {
-          console.log('Weiterleitung zur /create-Seite');
           router.push('/create');
         }
-      }, 3000);
+      }, 2000); // Verzögerung vor dem Seitenwechsel
     } else {
       throw new Error(response.data);
     }
   } catch (error) {
-    console.error('Fehler beim Login:', error);
     message.value = 'Login fehlgeschlagen: ' + (error.response?.data.message || 'Unbekannter Fehler');
     isError.value = true;
+    isLoading.value = false;
+  } finally {
+    clearTimeout(timeout);
   }
 };
 
@@ -125,6 +139,35 @@ html, body {
   text-align: center;
   justify-content: center;
   align-items: center;
+}
+
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+
+.spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-left-color: #000;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .form-structor::before, .form-structor::after {
@@ -160,6 +203,7 @@ html, body {
   padding: 20px;
   border-radius: 15px;
 }
+
 .signup.slide-up, .login.slide-up {
   top: 5%;
   transform: translate(-50%, 0%);
@@ -172,6 +216,7 @@ html, body {
   visibility: hidden;
   background-color: rgba(255, 255, 255, 0)
 }
+
 .signup .submit-btn, .login .submit-btn {
   background-color: var(--button-background);
   color: var(--button-text);
@@ -190,10 +235,12 @@ html, body {
   position: relative;
   z-index: 1;
 }
+
 .signup.slide-up .submit-btn, .login.slide-up .submit-btn {
   opacity: 0;
   visibility: hidden;
 }
+
 .signup .form-title, .login .form-title {
   color: var(--text-color);
   font-size: 1.7em;
@@ -215,9 +262,11 @@ html, body {
   background-color: var(--input-background);
   color: var(--input-text);
 }
+
 .signup .input:last-child, .login .input:last-child {
   border-bottom: 0;
 }
+
 .signup .input::-webkit-input-placeholder, .login .input::-webkit-input-placeholder {
   color: rgba(0, 0, 0, 1);
 }
@@ -251,7 +300,11 @@ html, body {
 }
 
 @keyframes textAnimation {
-  0% { background-position: 0 0; }
-  100% { background-position: 400% 0; }
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 400% 0;
+  }
 }
 </style>

@@ -25,72 +25,91 @@
         placeholder="Name des Haustieres"
         required
         @input="handleInput"
+        @keydown.enter="createPet"
     />
     <button
         @click="createPet"
-        :disabled="!petData.type || !petData.name"
+        :disabled="!petData.type || !petData.name || loading"
         :class="{ 'glow-button': petData.name }"
     >
-      Erstellen
+      <span v-if="!loading">Erstellen</span>
+      <span v-else class="loader"></span>
     </button>
     <div class="explosion" ref="explosion"></div>
+    <div v-if="message" class="message" :class="{'error': messageType === 'error', 'success': messageType === 'success'}">
+      {{ message }}
+    </div>
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
-
-// Assuming you have a way to get the current username
-const getCurrentUsername = () => {
-  // Implement the logic to get the current username
-  return "currentUsername"; // Placeholder: replace with actual logic
-};
+import { useUserStore } from '@/store'; // Verwenden Sie den richtigen Pfad
 
 const petData = ref({
   name: '',
   type: '',
-  username: ''
+  userId: ''
 });
 const router = useRouter();
 const explosion = ref(null);
+const loading = ref(false);
+const message = ref('');
+const messageType = ref('');
+const store = useUserStore();
 
 onMounted(() => {
-  petData.value.username = getCurrentUsername();
+  petData.value.userId = store.getUserId;
+  console.log('UserId set to:', petData.value.userId);
 });
 
-const selectPet = (type) => {
+const selectPet = (type: string) => {
   petData.value.type = type;
+  console.log('Pet type selected:', type);
 };
 
-const handleInput = (event) => {
-  if (event.target.value) {
-    document.querySelector('button').classList.add('glow-button');
+const handleInput = (event: Event) => {
+  if ((event.target as HTMLInputElement).value) {
+    document.querySelector('button')?.classList.add('glow-button');
   } else {
-    document.querySelector('button').classList.remove('glow-button');
+    document.querySelector('button')?.classList.remove('glow-button');
   }
 };
 
-const createPet = async (event) => {
-  if (petData.value.name && petData.value.type && petData.value.username) {
+const createPet = async (event: Event) => {
+  console.log('CreatePet method called');
+  event.preventDefault();
+  if (petData.value.name && petData.value.type && petData.value.userId) {
+    loading.value = true;
+    message.value = '';
     try {
-      const response = await axios.post('http://localhost:8080/api/create', petData.value);
+      console.log('Sending data to backend:', petData.value);
+      const response = await axios.post(`${import.meta.env.VITE_BACKEND_BASE_URL || 'http://localhost:8080'}/api/create`, petData.value);
       if (response.status === 200) {
-        // Trigger Explosion Animation
         const explosionElement = explosion.value;
-        explosionElement.style.left = `${event.clientX - (explosionElement.clientWidth / 2)}px`;
-        explosionElement.style.top = `${event.clientY - (explosionElement.clientHeight / 2)}px`;
+        explosionElement.style.left = `${(event as MouseEvent).clientX - (explosionElement.clientWidth / 2)}px`;
+        explosionElement.style.top = `${(event as MouseEvent).clientY - (explosionElement.clientHeight / 2)}px`;
         explosionElement.classList.add('explosion-active');
 
-        // Wait for the animation to finish before routing
         setTimeout(() => {
           router.push({ name: 'pet', params: { petData: JSON.stringify(response.data) } });
-        }, 500); // The duration of the explosion animation
+          loading.value = false;
+          message.value = 'Haustier erfolgreich erstellt!';
+          messageType.value = 'success';
+        }, 500);
+      } else {
+        console.error('Unexpected response status:', response.status);
       }
     } catch (error) {
       console.error('Fehler beim Erstellen des Haustiers:', error);
+      message.value = 'Fehler beim Erstellen des Haustiers';
+      messageType.value = 'error';
+      loading.value = false;
     }
+  } else {
+    console.warn('Pet data is incomplete:', petData.value);
   }
 };
 </script>
@@ -147,6 +166,7 @@ button {
   border-radius: 5px;
   transition: background-color 0.3s;
   margin-left: 5%;
+  position: relative;
 }
 
 button:disabled {
@@ -160,6 +180,22 @@ button:not(:disabled):hover {
 
 button.glow-button {
   box-shadow: 0 0 10px 2px rgba(0, 255, 0, 0.6);
+}
+
+.loader {
+  border: 4px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 4px solid #3498db;
+  width: 12px;
+  height: 12px;
+  -webkit-animation: spin 1s linear infinite;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 @keyframes explosion {
@@ -191,5 +227,21 @@ button.glow-button {
 
 .explosion-active {
   animation: explosion 0.5s ease-out forwards;
+}
+
+.message {
+  margin-top: 20px;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.message.success {
+  background-color: #dff0d8;
+  color: #3c763d;
+}
+
+.message.error {
+  background-color: #f2dede;
+  color: #a94442;
 }
 </style>
