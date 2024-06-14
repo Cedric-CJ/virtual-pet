@@ -1,10 +1,10 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import HaustierErstellungsseite from '@/components/Haustier-Erstellungsseite.vue'
-import HaustierSeite2 from '@/components/Haustier-Seite2.vue'
-import Anmelde_und_Registrierungsseite from "@/components/Anmelde_und_Registrierungsseite.vue";
+import { createRouter, createWebHashHistory } from 'vue-router';
+import HaustierErstellungsseite from '@/components/Haustier-Erstellungsseite.vue';
+import HaustierSeite2 from '@/components/Haustier-Seite2.vue';
+import Anmelde_und_Registrierungsseite from '@/components/Anmelde_und_Registrierungsseite.vue';
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHashHistory(),
   routes: [
     {
       path: '/create',
@@ -22,6 +22,6 @@ const router = createRouter({
       component: HaustierSeite2
     }
   ]
-})
+});
 
-export default router
+export default router;
