@@ -11,18 +11,18 @@
           <RouterLink to="/pet">#Pet</RouterLink>
           <RouterLink to="/logout">Abmelden</RouterLink>
           <button class="dropdown-button" @click="saveAndLogout">Speichern und Abmelden</button>
+          <a href="#" @click="toggleDarkMode" class="dark-mode-link">Dark Mode</a>
         </nav>
-        <a href="#" @click="toggleDarkMode">Dark Mode</a>
       </div>
     </transition>
   </div>
   <RouterView/>
 </template>
 
-
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
+import axios from 'axios';
 
 const dropdownVisible = ref(false);
 
@@ -35,18 +35,19 @@ const toggleDarkMode = () => {
   const newMode = currentMode === 'dark-mode' ? 'light-mode' : 'dark-mode';
   document.body.classList.remove(currentMode);
   document.body.classList.add(newMode);
+  localStorage.setItem('mode', newMode); // Speichern des aktuellen Modus in localStorage
   dropdownVisible.value = false; // Dropdown schließen, nachdem der Modus umgeschaltet wurde
 };
 
 const router = useRouter();
 
-const closeDropdownOnRouteChange = () => {
-  dropdownVisible.value = false;
-};
-
 onMounted(() => {
+  // Prüfen und anwenden des Modus beim Laden der Seite
+  const savedMode = localStorage.getItem('mode') || 'light-mode';
+  document.body.classList.add(savedMode);
+
   router.beforeEach((to, from, next) => {
-    closeDropdownOnRouteChange();
+    dropdownVisible.value = false;
     next();
   });
 });
@@ -111,7 +112,7 @@ nav {
   align-items: center;
 }
 
-nav a, .dropdown-button {
+nav a, .dropdown-button, .dark-mode-link {
   text-decoration: none;
   color: var(--link-color, black);
   padding: 10px;
@@ -123,26 +124,8 @@ nav a, .dropdown-button {
   transition: background-color 0.3s;
 }
 
-nav a:hover, .dropdown-button:hover {
+nav a:hover, .dropdown-button:hover, .dark-mode-link:hover {
   background-color: var(--link-hover-bg, #ddd);
-}
-
-.dropdown a {
-  text-decoration: none;
-  color: var(--link-color, black);
-  padding: 10px;
-  width: 100%;
-  text-align: center;
-}
-
-.dropdown a:hover {
-  background-color: var(--link-hover-bg, #ddd);
-}
-
-.dropdown-button {
-  background: none;
-  border: none;
-  cursor: pointer;
 }
 
 /* Dark Mode Variables */
