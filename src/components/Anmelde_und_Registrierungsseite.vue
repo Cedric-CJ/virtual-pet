@@ -23,8 +23,8 @@
           Anmelden
         </h2>
         <form @submit.prevent="handleLogin" class="form-holder">
-          <input type="text" v-model="registerData.username" placeholder="Benutzername" class="input" required @keydown.enter="focusNextInput">
-          <input type="password" v-model="registerData.password" placeholder="Passwort" class="input" required @keydown.enter="handleRegister">
+          <input type="text" v-model="loginData.username" placeholder="Benutzername" class="input" required @keydown.enter="focusNextInput">
+          <input type="password" v-model="loginData.password" placeholder="Passwort" class="input" required @keydown.enter="handleLogin">
         </form>
         <div class="animated-border">
           <button @click="handleLogin" class="submit-btn animated-text">Anmelden</button>
@@ -98,7 +98,7 @@ const handleLogin = async () => {
   }, 5000);
 
   try {
-    const response = await axios.post("https://virtual-pet-backend.onrender.com/api/registration", registerData.value);
+    const response = await axios.post("https://virtual-pet-backend.onrender.com/api/login", loginData.value);
     if (response.status === 200) {
       message.value = response.data.message;
       isError.value = false;
