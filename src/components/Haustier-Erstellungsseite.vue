@@ -86,7 +86,7 @@ const createPet = async (event: Event) => {
     message.value = '';
     try {
       console.log('Sending data to backend:', petData.value);
-      const response = await axios.post(`${import.meta.env.VITE_BACKEND_BASE_URL || 'http://localhost:8080'}/api/create`, petData.value);
+      const response = await axios.post("https://virtual-pet-backend.onrender.com/api/create", petData.value);
       if (response.status === 200) {
         const explosionElement = explosion.value;
         if (explosionElement) {
