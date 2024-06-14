@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.Map;
+import java.util.HashMap;
 
 @RestController
 @RequestMapping("/api")
@@ -44,8 +45,13 @@ public class UserController {
             int rowsAffected = jdbcTemplate.update(insertUserQuery, newUser.getUsername(), hashedPassword);
 
             if (rowsAffected > 0) {
-                logger.info("Benutzer erfolgreich registriert");
-                return ResponseEntity.ok("Benutzer erfolgreich registriert");
+                String getUserIdQuery = "SELECT id FROM application_user WHERE username = ?";
+                Integer userId = jdbcTemplate.queryForObject(getUserIdQuery, new Object[]{newUser.getUsername()}, Integer.class);
+                logger.info("Benutzer erfolgreich registriert mit ID: {}", userId);
+                Map<String, Object> response = new HashMap<>();
+                response.put("message", "Benutzer erfolgreich registriert");
+                response.put("userId", userId);
+                return ResponseEntity.ok(response);
             } else {
                 logger.error("Benutzer konnte nicht registriert werden");
                 return ResponseEntity.status(500).body("Fehler bei der Registrierung");
@@ -65,8 +71,10 @@ public class UserController {
         logger.info("Login attempt for username: {}", username);
 
         try {
-            String findUserQuery = "SELECT password FROM application_user WHERE username = ?";
-            String storedHashedPassword = jdbcTemplate.queryForObject(findUserQuery, new Object[]{username}, String.class);
+            String findUserQuery = "SELECT id, password FROM application_user WHERE username = ?";
+            Map<String, Object> userRecord = jdbcTemplate.queryForMap(findUserQuery, username);
+            Integer userId = (Integer) userRecord.get("id");
+            String storedHashedPassword = (String) userRecord.get("password");
             logger.debug("Stored hashed password for user {}: {}", username, storedHashedPassword);
 
             if (storedHashedPassword == null) {
@@ -84,13 +92,13 @@ public class UserController {
             int petCount = jdbcTemplate.queryForObject(checkPetQuery, new Object[]{username}, Integer.class);
             logger.debug("Pet count for user {}: {}", username, petCount);
 
-            if (petCount > 0) {
-                logger.info("Anmeldung erfolgreich und Benutzer hat bereits ein Haustier");
-                return ResponseEntity.ok("Anmeldung erfolgreich und Benutzer hat bereits ein Haustier");
-            }
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Anmeldung erfolgreich");
+            response.put("userId", userId);
+            response.put("hasPet", petCount > 0);
 
-            logger.info("Anmeldung erfolgreich");
-            return ResponseEntity.ok("Anmeldung erfolgreich");
+            logger.info("Anmeldung erfolgreich und Benutzer hat bereits ein Haustier: {}", petCount > 0);
+            return ResponseEntity.ok(response);
 
         } catch (Exception e) {
             logger.error("Fehler bei der Anmeldung für Benutzer: " + username, e);
