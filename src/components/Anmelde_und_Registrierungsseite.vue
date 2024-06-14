@@ -9,7 +9,7 @@
         Registrieren
       </h2>
       <form @submit.prevent="handleRegister" class="form-holder">
-        <input type="text" v-model="registerData.username" placeholder="Benutzername" class="input" required @keydown.enter="$event.target.nextElementSibling.focus()">
+        <input type="text" v-model="registerData.username" placeholder="Benutzername" class="input" required @keydown.enter="focusNextInput">
         <input type="password" v-model="registerData.password" placeholder="Passwort" class="input" required @keydown.enter="handleRegister">
       </form>
       <div class="animated-border">
@@ -23,8 +23,8 @@
           Anmelden
         </h2>
         <form @submit.prevent="handleLogin" class="form-holder">
-          <input type="text" v-model="loginData.username" placeholder="Benutzername" class="input" required @keydown.enter="$event.target.nextElementSibling.focus()">
-          <input type="password" v-model="loginData.password" placeholder="Passwort" class="input" required @keydown.enter="handleLogin">
+          <input type="text" v-model="registerData.username" placeholder="Benutzername" class="input" required @keydown.enter="focusNextInput">
+          <input type="password" v-model="registerData.password" placeholder="Passwort" class="input" required @keydown.enter="handleRegister">
         </form>
         <div class="animated-border">
           <button @click="handleLogin" class="submit-btn animated-text">Anmelden</button>
@@ -51,6 +51,14 @@ const isTimeout = ref(false);
 const router = useRouter();
 const store = useUserStore();
 
+const focusNextInput = (event: KeyboardEvent) => {
+  const target = event.target as HTMLInputElement;
+  const nextSibling = target.nextElementSibling as HTMLInputElement | null;
+  if (nextSibling) {
+    nextSibling.focus();
+  }
+};
+
 const handleRegister = async () => {
   isLoading.value = true;
   isTimeout.value = false;
@@ -70,7 +78,11 @@ const handleRegister = async () => {
       throw new Error(response.data);
     }
   } catch (error) {
-    message.value = 'Registrierung fehlgeschlagen: ' + (error.response?.data || 'Unbekannter Fehler');
+    if (axios.isAxiosError(error)) {
+      message.value = 'Registrierung fehlgeschlagen: ' + (error.response?.data || 'Unbekannter Fehler');
+    } else {
+      message.value = 'Registrierung fehlgeschlagen: Unbekannter Fehler';
+    }
     isError.value = true;
   } finally {
     clearTimeout(timeout);
@@ -86,7 +98,7 @@ const handleLogin = async () => {
   }, 5000);
 
   try {
-    const response = await axios.post("https://virtual-pet-backend.onrender.com/api/login", loginData.value);
+    const response = await axios.post(`${import.meta.env.VITE_BACKEND_BASE_URL || 'http://localhost:8080'}/api/login`, loginData.value);
     if (response.status === 200) {
       message.value = response.data.message;
       isError.value = false;
@@ -105,7 +117,11 @@ const handleLogin = async () => {
       throw new Error(response.data);
     }
   } catch (error) {
-    message.value = 'Login fehlgeschlagen: ' + (error.response?.data.message || 'Unbekannter Fehler');
+    if (axios.isAxiosError(error)) {
+      message.value = 'Login fehlgeschlagen: ' + (error.response?.data.message || 'Unbekannter Fehler');
+    } else {
+      message.value = 'Login fehlgeschlagen: Unbekannter Fehler';
+    }
     isError.value = true;
     isLoading.value = false;
   } finally {

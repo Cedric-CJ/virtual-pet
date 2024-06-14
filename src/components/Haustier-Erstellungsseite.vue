@@ -54,7 +54,7 @@ const petData = ref({
   userId: ''
 });
 const router = useRouter();
-const explosion = ref(null);
+const explosion = ref<HTMLDivElement | null>(null);
 const loading = ref(false);
 const message = ref('');
 const messageType = ref('');
@@ -89,9 +89,11 @@ const createPet = async (event: Event) => {
       const response = await axios.post(`${import.meta.env.VITE_BACKEND_BASE_URL || 'http://localhost:8080'}/api/create`, petData.value);
       if (response.status === 200) {
         const explosionElement = explosion.value;
-        explosionElement.style.left = `${(event as MouseEvent).clientX - (explosionElement.clientWidth / 2)}px`;
-        explosionElement.style.top = `${(event as MouseEvent).clientY - (explosionElement.clientHeight / 2)}px`;
-        explosionElement.classList.add('explosion-active');
+        if (explosionElement) {
+          explosionElement.style.left = `${(event as MouseEvent).clientX - (explosionElement.clientWidth / 2)}px`;
+          explosionElement.style.top = `${(event as MouseEvent).clientY - (explosionElement.clientHeight / 2)}px`;
+          explosionElement.classList.add('explosion-active');
+        }
 
         setTimeout(() => {
           router.push({ name: 'pet', params: { petData: JSON.stringify(response.data) } });

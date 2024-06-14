@@ -150,6 +150,7 @@ body.dark-mode {
   --dropdown-bg: #333;
   --link-color: #fff;
   --link-hover-bg: #555;
+  --text-color-dark: #ffffff;
 }
 
 .fade-enter-active, .fade-leave-active {
