@@ -100,6 +100,45 @@ public class PetController {
         }
     }
 
+    @PostMapping("/delete")
+    @Transactional
+    public ResponseEntity<?> deletePet(@RequestBody PetRequest petRequest) {
+        Long userId = petRequest.getUserId();
+        String username = petRequest.getUsername();
+        logger.info("Haustier mit Benutzer-ID: {} und Benutzername: {} wird gelöscht und in die application_dead Tabelle verschoben.", userId, username);
+
+        if (userId == null || username == null) {
+            logger.error("Keine Benutzer-ID oder Benutzername übergeben");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Keine Benutzer-ID oder Benutzername übergeben");
+        }
+
+        try {
+            Pet pet = getPetDetailsInternal(userId, username);
+            moveToDeadTable(pet);
+            deleteFromPetTable(userId, username);
+            return ResponseEntity.ok("Tier erfolgreich gelöscht und in die application_dead Tabelle verschoben");
+        } catch (PetNotFoundException e) {
+            logger.error("Fehler beim Löschen des Haustiers: Tier nicht gefunden", e);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Tier nicht gefunden");
+        } catch (Exception e) {
+            logger.error("Fehler beim Löschen des Haustiers", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Interner Serverfehler");
+        }
+    }
+
+    private void moveToDeadTable(Pet pet) {
+        String sql = "INSERT INTO application_dead (user_id, username, name, type, hunger, durst, energie, komfort, created_date, last_fed, last_watered, last_slept, last_petted, last_showered) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        jdbcTemplate.update(sql, pet.getUserId(), pet.getUsername(), pet.getName(), pet.getType(), pet.getHunger(), pet.getDurst(), pet.getEnergie(), pet.getKomfort(), pet.getCreatedDate(), pet.getLastFed(), pet.getLastWatered(), pet.getLastSlept(), pet.getLastPetted(), pet.getLastShowered());
+    }
+
+    private void deleteFromPetTable(Long userId, String username) {
+        String sql = "DELETE FROM application_pet WHERE user_id = ? AND username = ?";
+        int rowsAffected = jdbcTemplate.update(sql, userId, username);
+
+        if (rowsAffected == 0) {
+            throw new RuntimeException("Haustier nicht gefunden oder konnte nicht gelöscht werden: " + userId + " " + username);
+        }
+    }
 
     private List<Pet> getAllPetsInternal() {
         String sql = "SELECT * FROM application_pet";
