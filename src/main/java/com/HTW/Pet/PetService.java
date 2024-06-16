@@ -2,6 +2,7 @@ package com.HTW.Pet;
 
 import com.HTW.User.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,10 +20,31 @@ public class PetService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     private static final int STATS_DECREASE_RATE = 5; // Stats decrease by 5 every hour
 
     public List<Pet> getAllPets() {
-        return petRepository.findAll();
+        String sql = "SELECT * FROM application_pet";
+        return jdbcTemplate.query(sql, (rs, rowNum) -> {
+            Pet pet = new Pet();
+            pet.setUserId(rs.getLong("user_id"));
+            pet.setUsername(rs.getString("username"));
+            pet.setName(rs.getString("name"));
+            pet.setType(rs.getString("type"));
+            pet.setHunger(rs.getInt("hunger"));
+            pet.setDurst(rs.getInt("durst"));
+            pet.setEnergie(rs.getInt("energie"));
+            pet.setKomfort(rs.getInt("komfort"));
+            pet.setCreatedDate(rs.getDate("created_date").toLocalDate());
+            pet.setLastFed(rs.getTimestamp("last_fed").toLocalDateTime());
+            pet.setLastWatered(rs.getTimestamp("last_watered").toLocalDateTime());
+            pet.setLastSlept(rs.getTimestamp("last_slept").toLocalDateTime());
+            pet.setLastPetted(rs.getTimestamp("last_petted").toLocalDateTime());
+            pet.setLastShowered(rs.getTimestamp("last_showered").toLocalDateTime());
+            return pet;
+        });
     }
 
     @Transactional
@@ -55,9 +77,25 @@ public class PetService {
     }
 
     public Pet getPetDetails(Long userId, String name) {
-        PetId petId = new PetId(userId, name);
-        Pet pet = petRepository.findById(petId)
-                .orElseThrow(() -> new RuntimeException("Haustier nicht gefunden: " + userId + " " + name));
+        String sql = "SELECT * FROM application_pet WHERE user_id = ? AND name = ?";
+        Pet pet = jdbcTemplate.queryForObject(sql, new Object[]{userId, name}, (rs, rowNum) -> {
+            Pet p = new Pet();
+            p.setUserId(rs.getLong("user_id"));
+            p.setUsername(rs.getString("username"));
+            p.setName(rs.getString("name"));
+            p.setType(rs.getString("type"));
+            p.setHunger(rs.getInt("hunger"));
+            p.setDurst(rs.getInt("durst"));
+            p.setEnergie(rs.getInt("energie"));
+            p.setKomfort(rs.getInt("komfort"));
+            p.setCreatedDate(rs.getDate("created_date").toLocalDate());
+            p.setLastFed(rs.getTimestamp("last_fed").toLocalDateTime());
+            p.setLastWatered(rs.getTimestamp("last_watered").toLocalDateTime());
+            p.setLastSlept(rs.getTimestamp("last_slept").toLocalDateTime());
+            p.setLastPetted(rs.getTimestamp("last_petted").toLocalDateTime());
+            p.setLastShowered(rs.getTimestamp("last_showered").toLocalDateTime());
+            return p;
+        });
 
         updateStats(pet);
         return pet;
@@ -79,14 +117,13 @@ public class PetService {
 
     @Transactional
     public Pet savePet(Pet pet) {
-        // Find existing pet to ensure the created_date is not overwritten
-        PetId petId = new PetId(pet.getUserId(), pet.getName());
-        Pet existingPet = petRepository.findById(petId)
-                .orElseThrow(() -> new RuntimeException("Haustier nicht gefunden: " + petId));
+        String sql = "UPDATE application_pet SET hunger = ?, durst = ?, energie = ?, komfort = ?, created_date = ?, last_fed = ?, last_watered = ?, last_slept = ?, last_petted = ?, last_showered = ? WHERE user_id = ? AND name = ?";
+        int rowsAffected = jdbcTemplate.update(sql, pet.getHunger(), pet.getDurst(), pet.getEnergie(), pet.getKomfort(), pet.getCreatedDate(), pet.getLastFed(), pet.getLastWatered(), pet.getLastSlept(), pet.getLastPetted(), pet.getLastShowered(), pet.getUserId(), pet.getName());
 
-        // Preserve the original createdDate
-        pet.setCreatedDate(existingPet.getCreatedDate());
+        if (rowsAffected == 0) {
+            throw new RuntimeException("Haustier nicht gefunden: " + pet.getUserId() + " " + pet.getName());
+        }
 
-        return petRepository.save(pet);
+        return pet;
     }
 }
