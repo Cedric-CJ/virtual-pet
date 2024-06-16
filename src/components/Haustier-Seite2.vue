@@ -7,23 +7,23 @@
         </transition>
       </div>
       <h1>{{ petData.name }}</h1>
-      <div class="actions">
-        <button :class="{ 'alert-button': petData.stats.hunger < 20 }" @click="performAction('feed')">Füttern</button>
-        <button :class="{ 'alert-button': petData.stats.durst < 20 }" @click="performAction('water')">Wasser geben</button>
-        <button :class="{ 'alert-button': petData.stats.energie < 20 }" @click="performAction('sleep')">Schlafen</button>
-        <button :class="{ 'alert-button': petData.stats.komfort < 20 }" @click="performAction('pet')">Streicheln</button>
-        <button @click="performAction('clean')">Duschen</button>
-        <button @click="performAction('play')">Spielen</button>
+      <div class="actions" v-if="!isPetDead">
+        <button v-if="petData.stats" :class="{ 'alert-button': petData.stats.Hunger < 20 }" @click="performAction('feed')">Füttern</button>
+        <button v-if="petData.stats" :class="{ 'alert-button': petData.stats.Durst < 20 }" @click="performAction('water')">Wasser geben</button>
+        <button v-if="petData.stats" :class="{ 'alert-button': petData.stats.Energie < 20 }" @click="performAction('sleep')">Schlafen</button>
+        <button v-if="petData.stats" :class="{ 'alert-button': petData.stats.Komfort < 20 }" @click="performAction('pet')">Streicheln</button>
+        <button v-if="petData.stats" @click="performAction('clean')">Duschen</button>
+        <button v-if="petData.stats" @click="performAction('play')">Spielen</button>
       </div>
       <transition name="fade">
         <p v-if="actionText" class="action-text">{{ actionText }}</p>
       </transition>
     </div>
-    <div class="stats">
-      <div class="stat-bar" v-for="(value, key) in petData.stats" :key="key">
+    <div class="stats" v-if="!isPetDead">
+      <div class="stat-bar" v-if="petData.stats" v-for="(value, key) in petData.stats" :key="key">
         <label>{{ key }}:</label>
         <div class="progress">
-          <div class="progress-bar" :style="{width: value + '%' }"></div>
+          <div class="progress-bar" :style="{ width: value + '%' }"></div>
         </div>
         <span>{{ value }}%</span>
       </div>
@@ -47,14 +47,28 @@
         </tbody>
       </table>
     </div>
+    <div v-if="isPetDead" class="modal">
+      <div class="modal-content">
+        <h2>Ihr {{ petData.name }} ist gestorben. Wollen Sie ein neues Tier erstellen?</h2>
+        <button @click="handleNewPet">Ja</button>
+        <button @click="handleLogout">Nein</button>
+      </div>
+    </div>
+    <div v-if="showConfirmDelete" class="modal">
+      <div class="modal-content">
+        <h2>Wollen Sie Ihr Tier löschen?</h2>
+        <button @click="deleteAndLogout">Ja</button>
+        <button @click="logout">Nein</button>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import {ref, onMounted} from 'vue';
 import axios from 'axios';
-import { useRoute, useRouter } from 'vue-router';
-import { useUserStore } from '@/store';
+import {useRoute, useRouter} from 'vue-router';
+import {useUserStore} from '@/store';
 
 const API_URL = 'https://virtual-pet-backend.onrender.com/api';
 const pets = ref([]);
@@ -66,13 +80,22 @@ const petData = ref({
     Hunger: 0,
     Durst: 0,
     Komfort: 0
-  }
+  },
+  createdDate: '',
+  lastFed: '',
+  lastWatered: '',
+  lastSlept: '',
+  lastPetted: '',
+  lastShowered: '',
+  username: ''
 });
 const actionText = ref('');
 const currentImage = ref('');
 const route = useRoute();
 const router = useRouter();
 const store = useUserStore();
+const isPetDead = ref(false);
+const showConfirmDelete = ref(false);
 
 const token = localStorage.getItem('token');
 
@@ -118,10 +141,63 @@ const getPetData = async () => {
       userId: store.userId,
       username: store.username
     });
-    petData.value = response.data;
+
+    if (response.data) {
+      const petResponse = response.data;
+      petData.value.name = petResponse.name;
+      petData.value.type = petResponse.type;
+      petData.value.stats.Energie = petResponse.energie;
+      petData.value.stats.Hunger = petResponse.hunger;
+      petData.value.stats.Durst = petResponse.durst;
+      petData.value.stats.Komfort = petResponse.komfort;
+      petData.value.createdDate = petResponse.createdDate;
+      petData.value.lastFed = petResponse.lastFed;
+      petData.value.lastWatered = petResponse.lastWatered;
+      petData.value.lastSlept = petResponse.lastSlept;
+      petData.value.lastPetted = petResponse.lastPetted;
+      petData.value.lastShowered = petResponse.lastShowered;
+      petData.value.username = petResponse.username;
+
+      checkIfPetIsDead();
+    } else {
+      console.error('Unerwartete Datenstruktur erhalten:', response.data);
+    }
   } catch (error) {
     console.error('Fehler beim Abrufen der Tierdaten:', error.response ? error.response.data : error);
   }
+};
+
+const checkIfPetIsDead = () => {
+  const {Energie, Hunger, Durst, Komfort} = petData.value.stats;
+  if (Energie === 0 && Hunger === 0 && Durst === 0 && Komfort === 0) {
+    isPetDead.value = true;
+  }
+};
+
+const handleNewPet = async () => {
+  try {
+    await axiosInstance.delete('/delete', {data: {userId: store.userId}});
+    router.push('/create');
+  } catch (error) {
+    console.error('Fehler beim Löschen des Tieres:', error.response ? error.response.data : error);
+  }
+};
+
+const handleLogout = () => {
+  showConfirmDelete.value = true;
+};
+
+const deleteAndLogout = async () => {
+  try {
+    await axiosInstance.delete('/delete', {data: {userId: store.userId}});
+    router.push('/logout');
+  } catch (error) {
+    console.error('Fehler beim Löschen des Tieres:', error.response ? error.response.data : error);
+  }
+};
+
+const logout = () => {
+  router.push('/logout');
 };
 
 const reduceStatsOverTime = () => {
@@ -130,6 +206,7 @@ const reduceStatsOverTime = () => {
     petData.value.stats.Hunger = Math.max(petData.value.stats.Hunger - 5, 0);
     petData.value.stats.Durst = Math.max(petData.value.stats.Durst - 5, 0);
     petData.value.stats.Komfort = Math.max(petData.value.stats.Komfort - 5, 0);
+    checkIfPetIsDead();
   }, 3600000); // Alle 1 Stunde
 };
 
@@ -183,6 +260,7 @@ const performAction = async (action) => {
 
   try {
     await axiosInstance.post('/save', petData.value);
+    checkIfPetIsDead();
   } catch (error) {
     console.error('Fehler beim Speichern der Tierdaten:', error.response ? error.response.data : error);
   }
@@ -383,5 +461,29 @@ th {
     left: 10px;
     transform: translateX(0);
   }
+}
+
+/* Modal Styles */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 5px;
+  text-align: center;
+}
+
+.modal-content button {
+  margin: 10px;
 }
 </style>
