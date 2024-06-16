@@ -84,7 +84,7 @@ const axiosInstance = axios.create({
 });
 
 const checkUserData = () => {
-  store.loadUserData(); // Laden Sie die Benutzerdaten aus dem LocalStorage
+  store.loadUserData();
 
   if (!store.userId || !store.username) {
     console.error('UserID oder username fehlt');
@@ -110,10 +110,14 @@ const getTopPets = async () => {
 
 const getPetData = async () => {
   try {
-    const response = await axiosInstance.get(`/${store.userId}/${route.params.name}`);
+    if (!store.userId || !route.params.name) {
+      console.error('Keine Benutzer-ID oder Haustiername übergeben');
+      return;
+    }
+    const response = await axiosInstance.get(`/userpet`);
     petData.value = response.data;
   } catch (error) {
-    console.error('Error fetching pet data:', error.response ? error.response.data : error);
+    console.error('Fehler beim Abrufen der Tierdaten:', error.response ? error.response.data : error);
   }
 };
 
@@ -126,14 +130,14 @@ const reduceStatsOverTime = () => {
   }, 3600000); // Alle 1 Stunde
 };
 
-onMounted(() => {
-  checkUserData();
+onMounted(async () => {
+  await checkUserData();
   if (store.userId && route.params.name) {
-    getPetData();
+    await getPetData();
   } else {
-    console.error('No user ID or pet name provided');
+    console.error('Keine Benutzer-ID oder Haustiername übergeben');
   }
-  getTopPets();
+  await getTopPets();
   reduceStatsOverTime();
 });
 
@@ -177,7 +181,7 @@ const performAction = async (action) => {
   try {
     await axiosInstance.post('/save', petData.value);
   } catch (error) {
-    console.error('Error saving pet data:', error.response ? error.response.data : error);
+    console.error('Fehler beim Speichern der Tierdaten:', error.response ? error.response.data : error);
   }
 };
 
