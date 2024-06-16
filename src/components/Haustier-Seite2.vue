@@ -176,7 +176,7 @@ const checkIfPetIsDead = () => {
 
 const handleNewPet = async () => {
   try {
-    await axiosInstance.delete('/delete', {data: {userId: store.userId}});
+    await axiosInstance.delete('/delete', {data: {userId: store.userId, userName: store.username}});
     router.push('/create');
   } catch (error) {
     console.error('Fehler beim Löschen des Tieres:', error.response ? error.response.data : error);
@@ -189,7 +189,7 @@ const handleLogout = () => {
 
 const deleteAndLogout = async () => {
   try {
-    await axiosInstance.delete('/delete', {data: {userId: store.userId}});
+    await axiosInstance.delete('/delete', {data: {userId: store.userId, userName: store.username}});
     router.push('/logout');
   } catch (error) {
     console.error('Fehler beim Löschen des Tieres:', error.response ? error.response.data : error);
