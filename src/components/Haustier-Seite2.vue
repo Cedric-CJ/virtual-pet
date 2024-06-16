@@ -87,7 +87,7 @@ const checkUserData = () => {
   store.loadUserData();
 
   if (!store.userId || !store.username) {
-    console.error('UserID oder username fehlt');
+    console.error('UserID oder Benutzername fehlt');
     router.push('/login');
   } else {
     console.log('User ID:', store.userId);
@@ -110,13 +110,13 @@ const getTopPets = async () => {
 
 const getPetData = async () => {
   try {
-    if (!store.userId || !route.params.name) {
-      console.error('Keine Benutzer-ID oder Haustiername übergeben');
+    if (!store.userId || !store.username) {
+      console.error('Keine Benutzer-ID oder Benutzername übergeben');
       return;
     }
-    const response = await axiosInstance.post(`/userpet`, {
+    const response = await axiosInstance.post('/userpet', {
       userId: store.userId,
-      name: store.username
+      username: store.username
     });
     petData.value = response.data;
   } catch (error) {
@@ -135,10 +135,10 @@ const reduceStatsOverTime = () => {
 
 onMounted(async () => {
   await checkUserData();
-  if (store.userId && route.params.name) {
+  if (store.userId && store.username) {
     await getPetData();
   } else {
-    console.error('Keine Benutzer-ID oder Haustiername übergeben');
+    console.error('Keine Benutzer-ID oder Benutzername übergeben');
   }
   await getTopPets();
   reduceStatsOverTime();
