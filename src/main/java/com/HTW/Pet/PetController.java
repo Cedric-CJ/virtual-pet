@@ -76,8 +76,10 @@ public class PetController {
         }
     }
 
-    @GetMapping("/userpet/{userId}/{name}")
-    public ResponseEntity<?> getPetById(@PathVariable Long userId, @PathVariable String name) {
+    @PostMapping("/userpet")
+    public ResponseEntity<?> getPetById(@RequestBody PetRequest petRequest) {
+        Long userId = petRequest.getUserId();
+        String name = petRequest.getName();
         logger.info("Haustier mit Benutzer-ID: {} und Name: {} wird abgerufen.", userId, name);
 
         try {
@@ -88,6 +90,7 @@ public class PetController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Tier nicht gefunden");
         }
     }
+
 
     private List<Pet> getAllPetsInternal() {
         String sql = "SELECT * FROM application_pet";
