@@ -17,6 +17,12 @@ export const useUserStore = defineStore('user', {
         loadUserData() {
             this.userId = localStorage.getItem('userId') || '';
             this.username = localStorage.getItem('username') || '';
+        },
+        clearUserData() {
+            this.userId = '';
+            this.username = '';
+            localStorage.removeItem('userId');
+            localStorage.removeItem('username');
         }
     }
 });
