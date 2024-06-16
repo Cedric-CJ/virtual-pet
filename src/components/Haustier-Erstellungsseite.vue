@@ -88,13 +88,6 @@ const createPet = async (event: Event) => {
       console.log('Sending data to backend:', petData.value);
       const response = await axios.post("https://virtual-pet-backend.onrender.com/api/create", petData.value);
       if (response.status === 200) {
-        const explosionElement = explosion.value;
-        if (explosionElement) {
-          explosionElement.style.left = `${(event as MouseEvent).clientX - (explosionElement.clientWidth / 2)}px`;
-          explosionElement.style.top = `${(event as MouseEvent).clientY - (explosionElement.clientHeight / 2)}px`;
-          explosionElement.classList.add('explosion-active');
-        }
-
         setTimeout(() => {
           router.push({ name: 'pet', params: { petData: JSON.stringify(response.data) } });
           loading.value = false;
