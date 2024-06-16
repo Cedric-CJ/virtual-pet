@@ -8,10 +8,9 @@
         <h1>Herzlich Willkommen</h1>
         <nav>
           <RouterLink to="/login">Login</RouterLink>
-          <RouterLink to="/pet">#Pet</RouterLink>
           <RouterLink to="/logout">Abmelden</RouterLink>
           <button class="dropdown-button" @click="saveAndLogout">Speichern und Abmelden</button>
-          <a href="#" @click="toggleDarkMode" class="dark-mode-link">Dark Mode</a>
+          <button @click="toggleDarkMode" class="dark-mode-link">Dark Mode</button>
         </nav>
       </div>
     </transition>
@@ -58,7 +57,7 @@ onUnmounted(() => {
 
 const saveAndLogout = async () => {
   try {
-    const response = await axios.post(`${API_URL}/pet/save`, petData.value);
+    const response = await axios.post(`${API_URL}/save`, petData.value);
     console.log('Pet data saved:', response.data);
     router.push('/login');
   } catch (error) {

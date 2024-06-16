@@ -114,7 +114,10 @@ const getPetData = async () => {
       console.error('Keine Benutzer-ID oder Haustiername übergeben');
       return;
     }
-    const response = await axiosInstance.get(`/userpet/${store.userId}/${route.params.name}`);
+    const response = await axiosInstance.post(`/userpet`, {
+      userId: store.userId,
+      name: route.params.name
+    });
     petData.value = response.data;
   } catch (error) {
     console.error('Fehler beim Abrufen der Tierdaten:', error.response ? error.response.data : error);
