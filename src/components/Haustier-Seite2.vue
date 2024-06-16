@@ -6,21 +6,21 @@
           <img v-if="currentImage" :src="currentImage" alt="Pet" class="pet-image" key="currentImage">
         </transition>
       </div>
-      <h1>{{ petData.name }}</h1>
+      <h1>{{ store.petData.name }}</h1>
       <div class="actions" v-if="!isPetDead">
-        <button v-if="petData.stats" :class="{ 'alert-button': petData.stats.Hunger < 20 }" @click="performAction('feed')">Füttern</button>
-        <button v-if="petData.stats" :class="{ 'alert-button': petData.stats.Durst < 20 }" @click="performAction('water')">Wasser geben</button>
-        <button v-if="petData.stats" :class="{ 'alert-button': petData.stats.Energie < 20 }" @click="performAction('sleep')">Schlafen</button>
-        <button v-if="petData.stats" :class="{ 'alert-button': petData.stats.Komfort < 20 }" @click="performAction('pet')">Streicheln</button>
-        <button v-if="petData.stats" @click="performAction('clean')">Duschen</button>
-        <button v-if="petData.stats" @click="performAction('play')">Spielen</button>
+        <button v-if="store.petData.stats" :class="{ 'alert-button': store.petData.stats.Hunger < 20 }" @click="performAction('feed')">Füttern</button>
+        <button v-if="store.petData.stats" :class="{ 'alert-button': store.petData.stats.Durst < 20 }" @click="performAction('water')">Wasser geben</button>
+        <button v-if="store.petData.stats" :class="{ 'alert-button': store.petData.stats.Energie < 20 }" @click="performAction('sleep')">Schlafen</button>
+        <button v-if="store.petData.stats" :class="{ 'alert-button': store.petData.stats.Komfort < 20 }" @click="performAction('pet')">Streicheln</button>
+        <button v-if="store.petData.stats" @click="performAction('clean')">Duschen</button>
+        <button v-if="store.petData.stats" @click="performAction('play')">Spielen</button>
       </div>
       <transition name="fade">
         <p v-if="actionText" class="action-text">{{ actionText }}</p>
       </transition>
     </div>
     <div class="stats" v-if="!isPetDead">
-      <div class="stat-bar" v-if="petData.stats" v-for="(value, key) in petData.stats" :key="key">
+      <div class="stat-bar" v-if="store.petData.stats" v-for="(value, key) in store.petData.stats" :key="key">
         <label>{{ key }}:</label>
         <div class="progress">
           <div class="progress-bar" :style="{ width: value + '%' }"></div>
@@ -49,7 +49,7 @@
     </div>
     <div v-if="isPetDead" class="modal">
       <div class="modal-content">
-        <h2>Ihr {{ petData.name }} ist gestorben. Wollen Sie ein neues Tier erstellen?</h2>
+        <h2>Ihr {{ store.petData.name }} ist gestorben. Wollen Sie ein neues Tier erstellen?</h2>
         <button @click="handleNewPet">Ja</button>
         <button @click="handleLogout">Nein</button>
       </div>
@@ -64,38 +64,22 @@
   </div>
 </template>
 
-<script setup>
-import {ref, onMounted} from 'vue';
+<script setup lang="ts">
+import { ref, onMounted } from 'vue';
 import axios from 'axios';
-import {useRoute, useRouter} from 'vue-router';
-import {useUserStore} from '@/store';
+import { useRoute, useRouter } from 'vue-router';
+import { useUserStore } from '@/store';
+import { PetData } from '@/types';  // Pfad zur types.ts-Datei
 
 const API_URL = 'https://virtual-pet-backend.onrender.com/api';
-const pets = ref([]);
-const petData = ref({
-  name: '',
-  type: '',
-  stats: {
-    Energie: 0,
-    Hunger: 0,
-    Durst: 0,
-    Komfort: 0
-  },
-  createdDate: '',
-  lastFed: '',
-  lastWatered: '',
-  lastSlept: '',
-  lastPetted: '',
-  lastShowered: '',
-  username: ''
-});
-const actionText = ref('');
-const currentImage = ref('');
+const pets = ref<any[]>([]);
+const store = useUserStore();
+const actionText = ref<string>('');
+const currentImage = ref<string>('');
 const route = useRoute();
 const router = useRouter();
-const store = useUserStore();
-const isPetDead = ref(false);
-const showConfirmDelete = ref(false);
+const isPetDead = ref<boolean>(false);
+const showConfirmDelete = ref<boolean>(false);
 
 const token = localStorage.getItem('token');
 
@@ -121,13 +105,13 @@ const checkUserData = () => {
 const getTopPets = async () => {
   try {
     const response = await axiosInstance.get('/top');
-    pets.value = response.data.map((pet, index) => ({
+    pets.value = response.data.map((pet: any, index: number) => ({
       name: pet.name,
       daysAlive: pet.daysAlive,
       index: index + 1
     }));
   } catch (error) {
-    console.error('Error fetching top pets:', error.response ? error.response.data : error);
+    handleError(error);
   }
 };
 
@@ -144,31 +128,37 @@ const getPetData = async () => {
 
     if (response.data) {
       const petResponse = response.data;
-      petData.value.name = petResponse.name;
-      petData.value.type = petResponse.type;
-      petData.value.stats.Energie = petResponse.energie;
-      petData.value.stats.Hunger = petResponse.hunger;
-      petData.value.stats.Durst = petResponse.durst;
-      petData.value.stats.Komfort = petResponse.komfort;
-      petData.value.createdDate = petResponse.createdDate;
-      petData.value.lastFed = petResponse.lastFed;
-      petData.value.lastWatered = petResponse.lastWatered;
-      petData.value.lastSlept = petResponse.lastSlept;
-      petData.value.lastPetted = petResponse.lastPetted;
-      petData.value.lastShowered = petResponse.lastShowered;
-      petData.value.username = petResponse.username;
+      const petData: PetData = {
+        name: petResponse.name,
+        type: petResponse.type,
+        stats: {
+          Energie: petResponse.energie,
+          Hunger: petResponse.hunger,
+          Durst: petResponse.durst,
+          Komfort: petResponse.komfort
+        },
+        createdDate: petResponse.createdDate,
+        lastFed: petResponse.lastFed,
+        lastWatered: petResponse.lastWatered,
+        lastSlept: petResponse.lastSlept,
+        lastPetted: petResponse.lastPetted,
+        lastShowered: petResponse.lastShowered,
+        username: petResponse.username,
+        userId: store.userId
+      };
+      store.updatePetData(petData);
 
       checkIfPetIsDead();
     } else {
       console.error('Unerwartete Datenstruktur erhalten:', response.data);
     }
   } catch (error) {
-    console.error('Fehler beim Abrufen der Tierdaten:', error.response ? error.response.data : error);
+    handleError(error);
   }
 };
 
 const checkIfPetIsDead = () => {
-  const {Energie, Hunger, Durst, Komfort} = petData.value.stats;
+  const { Energie, Hunger, Durst, Komfort } = store.petData.stats;
   if (Energie === 0 && Hunger === 0 && Durst === 0 && Komfort === 0) {
     isPetDead.value = true;
   }
@@ -176,10 +166,10 @@ const checkIfPetIsDead = () => {
 
 const handleNewPet = async () => {
   try {
-    await axiosInstance.delete('/delete', {data: {userId: store.userId, userName: store.username}});
+    await axiosInstance.delete('/delete', { data: { userId: store.userId, username: store.username } });
     router.push('/create');
   } catch (error) {
-    console.error('Fehler beim Löschen des Tieres:', error.response ? error.response.data : error);
+    handleError(error);
   }
 };
 
@@ -189,10 +179,10 @@ const handleLogout = () => {
 
 const deleteAndLogout = async () => {
   try {
-    await axiosInstance.delete('/delete', {data: {userId: store.userId, userName: store.username}});
+    await axiosInstance.delete('/delete', { data: { userId: store.userId, username: store.username } });
     router.push('/logout');
   } catch (error) {
-    console.error('Fehler beim Löschen des Tieres:', error.response ? error.response.data : error);
+    handleError(error);
   }
 };
 
@@ -202,10 +192,10 @@ const logout = () => {
 
 const reduceStatsOverTime = () => {
   setInterval(() => {
-    petData.value.stats.Energie = Math.max(petData.value.stats.Energie - 5, 0);
-    petData.value.stats.Hunger = Math.max(petData.value.stats.Hunger - 5, 0);
-    petData.value.stats.Durst = Math.max(petData.value.stats.Durst - 5, 0);
-    petData.value.stats.Komfort = Math.max(petData.value.stats.Komfort - 5, 0);
+    store.petData.stats.Energie = Math.max(store.petData.stats.Energie - 5, 0);
+    store.petData.stats.Hunger = Math.max(store.petData.stats.Hunger - 5, 0);
+    store.petData.stats.Durst = Math.max(store.petData.stats.Durst - 5, 0);
+    store.petData.stats.Komfort = Math.max(store.petData.stats.Komfort - 5, 0);
     checkIfPetIsDead();
   }, 3600000); // Alle 1 Stunde
 };
@@ -221,61 +211,61 @@ onMounted(async () => {
   reduceStatsOverTime();
 });
 
-const performAction = async (action) => {
+const performAction = async (action: string) => {
   const now = new Date().toISOString();
-  const actions = {
+  const actions: { [key: string]: () => void } = {
     feed: () => {
-      petData.value.stats.Hunger = Math.min(petData.value.stats.Hunger + 50, 100);
-      petData.value.lastFed = now;
-      changeImage(petData.value.type === 'dog' ? 'src/assets/dogessen.png' : 'src/assets/catessen.png');
+      store.petData.stats.Hunger = Math.min(store.petData.stats.Hunger + 50, 100);
+      store.petData.lastFed = now;
+      changeImage(store.petData.type === 'dog' ? 'src/assets/dogessen.png' : 'src/assets/catessen.png');
     },
     water: () => {
-      petData.value.stats.Durst = Math.min(petData.value.stats.Durst + 100, 100);
-      petData.value.lastWatered = now;
-      changeImage(petData.value.type === 'dog' ? 'src/assets/dogtrinken.png' : 'src/assets/cattrinken.png');
+      store.petData.stats.Durst = Math.min(store.petData.stats.Durst + 100, 100);
+      store.petData.lastWatered = now;
+      changeImage(store.petData.type === 'dog' ? 'src/assets/dogtrinken.png' : 'src/assets/cattrinken.png');
     },
     sleep: () => {
-      petData.value.stats.Energie = 100;
-      petData.value.lastSlept = now;
-      changeImage(petData.value.type === 'dog' ? 'src/assets/dogschlafen.png' : 'src/assets/catschlafen.png');
+      store.petData.stats.Energie = 100;
+      store.petData.lastSlept = now;
+      changeImage(store.petData.type === 'dog' ? 'src/assets/dogschlafen.png' : 'src/assets/catschlafen.png');
     },
     pet: () => {
-      petData.value.stats.Komfort = Math.min(petData.value.stats.Komfort + 10, 100);
-      petData.value.lastPetted = now;
-      changeImage(petData.value.type === 'dog' ? 'src/assets/dogstreicheln.png' : 'src/assets/catstreicheln.png');
+      store.petData.stats.Komfort = Math.min(store.petData.stats.Komfort + 10, 100);
+      store.petData.lastPetted = now;
+      changeImage(store.petData.type === 'dog' ? 'src/assets/dogstreicheln.png' : 'src/assets/catstreicheln.png');
     },
     clean: () => {
-      petData.value.stats.Komfort = Math.min(petData.value.stats.Komfort + 100, 100);
-      petData.value.lastShowered = now;
-      changeImage(petData.value.type === 'dog' ? 'src/assets/dogduschen.png' : 'src/assets/catduschen.png');
+      store.petData.stats.Komfort = Math.min(store.petData.stats.Komfort + 100, 100);
+      store.petData.lastShowered = now;
+      changeImage(store.petData.type === 'dog' ? 'src/assets/dogduschen.png' : 'src/assets/catduschen.png');
     },
     play: () => {
-      petData.value.stats.Energie = Math.max(petData.value.stats.Energie - 10, 0);
-      petData.value.stats.Komfort = Math.min(petData.value.stats.Komfort + 10, 100);
-      changeImage(petData.value.type === 'dog' ? 'src/assets/dogspielen.png' : 'src/assets/catspielen.png');
+      store.petData.stats.Energie = Math.max(store.petData.stats.Energie - 10, 0);
+      store.petData.stats.Komfort = Math.min(store.petData.stats.Komfort + 10, 100);
+      changeImage(store.petData.type === 'dog' ? 'src/assets/dogspielen.png' : 'src/assets/catspielen.png');
     }
   };
   actions[action]();
   updateActionText(action);
 
   try {
-    await axiosInstance.post('/save', petData.value);
+    await axiosInstance.post('/save', store.petData);
     checkIfPetIsDead();
   } catch (error) {
-    console.error('Fehler beim Speichern der Tierdaten:', error.response ? error.response.data : error);
+    handleError(error);
   }
 };
 
-const changeImage = (newImage) => {
-  const frontImage = petData.value.type === 'dog' ? 'src/assets/dogfront.png' : 'src/assets/catfront.png';
+const changeImage = (newImage: string) => {
+  const frontImage = store.petData.type === 'dog' ? 'src/assets/dogfront.png' : 'src/assets/catfront.png';
   currentImage.value = newImage;
   setTimeout(() => {
     currentImage.value = frontImage;
   }, 5000);
 };
 
-const updateActionText = (action) => {
-  const actionMessages = {
+const updateActionText = (action: string) => {
+  const actionMessages: { [key: string]: string } = {
     feed: 'Hunger +50',
     water: 'Durst +100',
     sleep: 'Energie aufgefüllt',
@@ -287,6 +277,14 @@ const updateActionText = (action) => {
   setTimeout(() => {
     actionText.value = '';
   }, 3000);
+};
+
+const handleError = (error: unknown) => {
+  if (axios.isAxiosError(error)) {
+    console.error('Error response:', error.response ? error.response.data : error.message);
+  } else {
+    console.error('Unexpected error:', error);
+  }
 };
 </script>
 
