@@ -29,7 +29,7 @@ public class PetController {
     private JdbcTemplate jdbcTemplate;
 
     private static final Logger logger = LoggerFactory.getLogger(PetController.class);
-    private static final int STATS_DECREASE_RATE = 5; // Stats decrease by 5 every hour
+    private static final int STATS_DECREASE_RATE = 5; // Stats gehen alle 5 Stunden um 1 runter
 
     @PostMapping("/create")
     public ResponseEntity<?> createPet(@RequestBody Pet newPet) {
@@ -76,7 +76,7 @@ public class PetController {
         }
     }
 
-    @GetMapping("/{userId}/{name}")
+    @GetMapping("/userpet")
     public ResponseEntity<?> getPetById(@PathVariable Long userId, @PathVariable String name) {
         logger.info("Haustier mit Benutzer-ID: {} und Name: {} wird abgerufen.", userId, name);
 
