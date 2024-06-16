@@ -39,7 +39,7 @@
 import { ref } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
-import { useUserStore } from '@/store'; // Verwenden Sie den richtigen Pfad
+import { useUserStore } from '@/store';
 
 const isLogin = ref(true);
 const loginData = ref({ username: '', password: '' });
@@ -68,12 +68,9 @@ const handleRegister = async () => {
 
   try {
     const response = await axios.post("https://virtual-pet-backend.onrender.com/api/registration", registerData.value);
-
     if (response.status === 200) {
       message.value = 'Registrierung erfolgreich!';
       isError.value = false;
-      const userId = response.data.userId;
-      store.updateUserId(userId);
     } else {
       throw new Error(response.data);
     }
@@ -104,7 +101,9 @@ const handleLogin = async () => {
       isError.value = false;
       localStorage.setItem('token', response.data.token);
       const userId = response.data.userId;
-      store.updateUserId(userId); // Benutzer-ID im Pinia Store speichern
+      const username = response.data.username;
+      store.updateUserId(userId);
+      store.updateUsername(username);
       isLoading.value = false;
       setTimeout(() => {
         if (response.data.hasPet) {
@@ -112,7 +111,7 @@ const handleLogin = async () => {
         } else {
           router.push('/create');
         }
-      }, 2000); // Verzögerung vor dem Seitenwechsel
+      }, 2000);
     } else {
       throw new Error(response.data);
     }

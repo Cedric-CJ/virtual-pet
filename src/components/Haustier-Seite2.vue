@@ -53,7 +53,8 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
+import { useUserStore } from '@/store';
 
 const API_URL = 'https://virtual-pet-backend.onrender.com/api';
 const pets = ref([]);
@@ -70,7 +71,10 @@ const petData = ref({
 const actionText = ref('');
 const currentImage = ref('');
 const route = useRoute();
-const token = localStorage.getItem('authToken'); // Annahme: Authentifizierungs-Token wird in localStorage gespeichert
+const router = useRouter();
+const store = useUserStore();
+
+const token = localStorage.getItem('token');
 
 const axiosInstance = axios.create({
   baseURL: API_URL,
@@ -78,6 +82,18 @@ const axiosInstance = axios.create({
     'Authorization': `Bearer ${token}`
   }
 });
+
+const checkUserData = () => {
+  store.loadUserData(); // Laden Sie die Benutzerdaten aus dem LocalStorage
+
+  if (!store.userId || !store.username) {
+    console.error('UserID oder username fehlt');
+    router.push('/login');
+  } else {
+    console.log('User ID:', store.userId);
+    console.log('Username:', store.username);
+  }
+};
 
 const getTopPets = async () => {
   try {
@@ -94,7 +110,7 @@ const getTopPets = async () => {
 
 const getPetData = async () => {
   try {
-    const response = await axiosInstance.get(`/pet/${route.params.petId}`);
+    const response = await axiosInstance.get(`/${store.userId}/${route.params.name}`);
     petData.value = response.data;
   } catch (error) {
     console.error('Error fetching pet data:', error.response ? error.response.data : error);
@@ -111,17 +127,18 @@ const reduceStatsOverTime = () => {
 };
 
 onMounted(() => {
-  if (route.params.petId) {
+  checkUserData();
+  if (store.userId && route.params.name) {
     getPetData();
   } else {
-    console.error('No pet ID provided');
+    console.error('No user ID or pet name provided');
   }
   getTopPets();
   reduceStatsOverTime();
 });
 
 const performAction = async (action) => {
-  const now = new Date().toISOString(); // Current time in ISO format
+  const now = new Date().toISOString();
   const actions = {
     feed: () => {
       petData.value.stats.Hunger = Math.min(petData.value.stats.Hunger + 50, 100);
@@ -157,9 +174,8 @@ const performAction = async (action) => {
   actions[action]();
   updateActionText(action);
 
-  // Save the updated pet data
   try {
-    await axiosInstance.post('/pet/save', petData.value);
+    await axiosInstance.post('/save', petData.value);
   } catch (error) {
     console.error('Error saving pet data:', error.response ? error.response.data : error);
   }

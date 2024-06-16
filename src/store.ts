@@ -2,15 +2,21 @@ import { defineStore } from 'pinia';
 
 export const useUserStore = defineStore('user', {
     state: () => ({
-        userId: localStorage.getItem('userId') || ''
+        userId: '',
+        username: ''
     }),
     actions: {
         updateUserId(userId: string) {
             this.userId = userId;
-            localStorage.setItem('userId', userId); // Speichern im localStorage
+            localStorage.setItem('userId', userId);
+        },
+        updateUsername(username: string) {
+            this.username = username;
+            localStorage.setItem('username', username);
+        },
+        loadUserData() {
+            this.userId = localStorage.getItem('userId') || '';
+            this.username = localStorage.getItem('username') || '';
         }
-    },
-    getters: {
-        getUserId: (state) => state.userId
     }
 });
