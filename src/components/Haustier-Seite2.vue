@@ -116,7 +116,7 @@ const getPetData = async () => {
     }
     const response = await axiosInstance.post(`/userpet`, {
       userId: store.userId,
-      name: route.params.name
+      name: store.username
     });
     petData.value = response.data;
   } catch (error) {
