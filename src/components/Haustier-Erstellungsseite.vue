@@ -61,7 +61,7 @@ const messageType = ref('');
 const store = useUserStore();
 
 onMounted(() => {
-  petData.value.userId = store.getUserId;
+  petData.value.userId = store.userId;
   console.log('UserId set to:', petData.value.userId);
 });
 
