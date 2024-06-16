@@ -2,6 +2,7 @@ package com.HTW.Pet;
 
 import com.HTW.User.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -79,15 +80,23 @@ public class PetController {
     @PostMapping("/userpet")
     public ResponseEntity<?> getPetById(@RequestBody PetRequest petRequest) {
         Long userId = petRequest.getUserId();
-        String name = petRequest.getName();
-        logger.info("Haustier mit Benutzer-ID: {} und Name: {} wird abgerufen.", userId, name);
+        String username = petRequest.getUsername();
+        logger.info("Haustier mit Benutzer-ID: {} und Benutzername: {} wird abgerufen.", userId, username);
+
+        if (userId == null || username == null) {
+            logger.error("Keine Benutzer-ID oder Benutzername übergeben");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Keine Benutzer-ID oder Benutzername übergeben");
+        }
 
         try {
-            Pet pet = getPetDetailsInternal(userId, name);
+            Pet pet = getPetDetailsInternal(userId, username);
             return ResponseEntity.ok(pet);
+        } catch (PetNotFoundException e) {
+            logger.error("Fehler beim Abrufen des Haustiers: Tier nicht gefunden", e);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Tier nicht gefunden");
         } catch (Exception e) {
             logger.error("Fehler beim Abrufen des Haustiers", e);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Tier nicht gefunden");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Interner Serverfehler");
         }
     }
 
@@ -140,38 +149,44 @@ public class PetController {
         return petRepository.save(newPet);
     }
 
-    private Pet getPetDetailsInternal(Long userId, String name) {
-        String sql = "SELECT * FROM application_pet WHERE user_id = ? AND name = ?";
-        Pet pet = jdbcTemplate.queryForObject(sql, new Object[]{userId, name}, (rs, rowNum) -> {
-            Pet p = new Pet();
-            p.setUserId(rs.getLong("user_id"));
-            p.setUsername(rs.getString("username"));
-            p.setName(rs.getString("name"));
-            p.setType(rs.getString("type"));
-            p.setHunger(rs.getInt("hunger"));
-            p.setDurst(rs.getInt("durst"));
-            p.setEnergie(rs.getInt("energie"));
-            p.setKomfort(rs.getInt("komfort"));
-            p.setCreatedDate(rs.getDate("created_date").toLocalDate());
-            p.setLastFed(rs.getTimestamp("last_fed").toLocalDateTime());
-            p.setLastWatered(rs.getTimestamp("last_watered").toLocalDateTime());
-            p.setLastSlept(rs.getTimestamp("last_slept").toLocalDateTime());
-            p.setLastPetted(rs.getTimestamp("last_petted").toLocalDateTime());
-            p.setLastShowered(rs.getTimestamp("last_showered").toLocalDateTime());
-            return p;
-        });
+    private Pet getPetDetailsInternal(Long userId, String username) {
+        String sql = "SELECT * FROM application_pet WHERE user_id = ? AND username = ?";
+        Pet pet;
+        try {
+            pet = jdbcTemplate.queryForObject(sql, new Object[]{userId, username}, (rs, rowNum) -> {
+                Pet p = new Pet();
+                p.setUserId(rs.getLong("user_id"));
+                p.setUsername(rs.getString("username"));
+                p.setName(rs.getString("name"));
+                p.setType(rs.getString("type"));
+                p.setHunger(rs.getInt("hunger"));
+                p.setDurst(rs.getInt("durst"));
+                p.setEnergie(rs.getInt("energie"));
+                p.setKomfort(rs.getInt("komfort"));
+                p.setCreatedDate(rs.getDate("created_date").toLocalDate());
+                p.setLastFed(rs.getTimestamp("last_fed").toLocalDateTime());
+                p.setLastWatered(rs.getTimestamp("last_watered").toLocalDateTime());
+                p.setLastSlept(rs.getTimestamp("last_slept").toLocalDateTime());
+                p.setLastPetted(rs.getTimestamp("last_petted").toLocalDateTime());
+                p.setLastShowered(rs.getTimestamp("last_showered").toLocalDateTime());
+                return p;
+            });
+        } catch (EmptyResultDataAccessException e) {
+            throw new PetNotFoundException("Tier nicht gefunden", e);
+        }
 
         updateStats(pet);
         return pet;
     }
 
-    private void updateStats(Pet pet) {
+    private Pet updateStats(Pet pet) {
         LocalDateTime now = LocalDateTime.now();
 
         pet.setHunger(calculateStat(pet.getLastFed(), now, pet.getHunger()));
         pet.setDurst(calculateStat(pet.getLastWatered(), now, pet.getDurst()));
         pet.setEnergie(calculateStat(pet.getLastSlept(), now, pet.getEnergie()));
         pet.setKomfort(calculateStat(pet.getLastPetted(), now, pet.getKomfort()));
+        return pet;
     }
 
     private int calculateStat(LocalDateTime lastAction, LocalDateTime now, int currentStat) {
@@ -189,5 +204,11 @@ public class PetController {
         }
 
         return pet;
+    }
+
+    public class PetNotFoundException extends RuntimeException {
+        public PetNotFoundException(String message, Throwable cause) {
+            super(message, cause);
+        }
     }
 }

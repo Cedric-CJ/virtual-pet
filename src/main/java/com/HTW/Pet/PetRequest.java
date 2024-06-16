@@ -2,7 +2,7 @@ package com.HTW.Pet;
 
 public class PetRequest {
     private Long userId;
-    private String name;
+    private String username;
 
     public Long getUserId() {
         return userId;
@@ -12,11 +12,11 @@ public class PetRequest {
         this.userId = userId;
     }
 
-    public String getName() {
-        return name;
+    public String getUsername() {
+        return username;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setUsername(String name) {
+        this.username = name;
     }
 }
