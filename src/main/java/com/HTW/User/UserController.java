@@ -71,11 +71,12 @@ public class UserController {
         logger.info("Login attempt for username: {}", username);
 
         try {
-            String findUserQuery = "SELECT id, password FROM application_user WHERE username = ?";
+            String findUserQuery = "SELECT id, username, password FROM application_user WHERE username = ?";
             Map<String, Object> userRecord = jdbcTemplate.queryForMap(findUserQuery, username);
 
-            Long userId = ((Number) userRecord.get("id")).longValue(); // Hier wird Long anstelle von Integer verwendet
+            Long userId = ((Number) userRecord.get("id")).longValue();
             String storedHashedPassword = (String) userRecord.get("password");
+            String storedUsername = (String) userRecord.get("username");
             logger.debug("Stored hashed password for user {}: {}", username, storedHashedPassword);
 
             if (storedHashedPassword == null) {
@@ -96,6 +97,7 @@ public class UserController {
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Anmeldung erfolgreich");
             response.put("userId", userId);
+            response.put("username", storedUsername); // Benutzername hinzufügen
             response.put("hasPet", petCount > 0);
 
             logger.info("Anmeldung erfolgreich und Benutzer hat bereits ein Haustier: {}", petCount > 0);
@@ -109,4 +111,5 @@ public class UserController {
             return ResponseEntity.status(500).body("Fehler bei der Anmeldung: " + e.getMessage());
         }
     }
+
 }
