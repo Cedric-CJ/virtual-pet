@@ -76,7 +76,7 @@ public class PetController {
         }
     }
 
-    @GetMapping("/userpet")
+    @GetMapping("/userpet/{userId}/{name}")
     public ResponseEntity<?> getPetById(@PathVariable Long userId, @PathVariable String name) {
         logger.info("Haustier mit Benutzer-ID: {} und Name: {} wird abgerufen.", userId, name);
 
