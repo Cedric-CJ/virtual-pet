@@ -22,8 +22,10 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
+import { useUserStore } from '@/store';  // Importiere den Store
 
 const dropdownVisible = ref(false);
+const store = useUserStore();  // Initialisiere den Store
 
 const toggleDropdown = () => {
   dropdownVisible.value = !dropdownVisible.value;
@@ -57,8 +59,10 @@ onUnmounted(() => {
 
 const saveAndLogout = async () => {
   try {
-    const response = await axios.post(`${API_URL}/save`, petData.value);
+    const petData = store.petData;  // Hole die Pet-Daten aus dem Store
+    const response = await axios.post(`https://virtual-pet-backend.onrender.com/api/save`, petData);
     console.log('Pet data saved:', response.data);
+    store.clearUserData();  // Lösche die Benutzerdaten aus dem Store
     router.push('/login');
   } catch (error) {
     console.error('Error saving pet data:', error.response ? error.response.data : error);

@@ -149,6 +149,7 @@ const getPetData = async () => {
       store.updatePetData(petData);
 
       checkIfPetIsDead();
+      setInitialImage();
     } else {
       console.error('Unerwartete Datenstruktur erhalten:', response.data);
     }
@@ -162,6 +163,21 @@ const checkIfPetIsDead = () => {
   if (Energie === 0 && Hunger === 0 && Durst === 0 && Komfort === 0) {
     isPetDead.value = true;
   }
+};
+
+const setInitialImage = () => {
+  const { Energie, Hunger, Durst, Komfort } = store.petData.stats;
+  let imageName;
+
+  if (Energie < 30 || Hunger < 30 || Durst < 30 || Komfort < 30) {
+    imageName = store.petData.type === 'dog' ? 'dognegativ.png' : 'catnegativ.png';
+  } else if (Energie > 70 && Hunger > 70 && Durst > 70 && Komfort > 70) {
+    imageName = store.petData.type === 'dog' ? 'dogpositiv.png' : 'catpositiv.png';
+  } else {
+    imageName = store.petData.type === 'dog' ? 'dogfront.png' : 'catfront.png';
+  }
+
+  currentImage.value = `src/assets/${imageName}`;
 };
 
 const handleNewPet = async () => {
@@ -251,6 +267,7 @@ const performAction = async (action: string) => {
   try {
     await axiosInstance.post('/save', store.petData);
     checkIfPetIsDead();
+    setInitialImage();
   } catch (error) {
     handleError(error);
   }
@@ -260,7 +277,7 @@ const changeImage = (newImage: string) => {
   const frontImage = store.petData.type === 'dog' ? 'src/assets/dogfront.png' : 'src/assets/catfront.png';
   currentImage.value = newImage;
   setTimeout(() => {
-    currentImage.value = frontImage;
+    setInitialImage();
   }, 5000);
 };
 
