@@ -117,7 +117,8 @@ const handleLogin = async () => {
     }
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      message.value = 'Login fehlgeschlagen: ' + (error.response?.data.message || 'Unbekannter Fehler');
+      const errorMessage = error.response?.data.message || error.response?.data || 'Unbekannter Fehler';
+      message.value = 'Login fehlgeschlagen: ' + errorMessage;
     } else {
       message.value = 'Login fehlgeschlagen: Unbekannter Fehler';
     }
