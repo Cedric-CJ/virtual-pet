@@ -57,7 +57,7 @@ public class PetController {
         logger.info("Daten für Haustier werden gespeichert: {}", pet);
 
         try {
-            Pet savedPet = savePetInternal(pet);
+            Pet savedPet = savePetInternal(pet.getUserId(), pet.getUsername(), pet.getHunger(), pet.getDurst(), pet.getEnergie(), pet.getKomfort(), pet.getCreatedDate(), pet.getLastFed(), pet.getLastWatered(), pet.getLastSlept(), pet.getLastPetted(), pet.getLastShowered());
             logger.info("Haustierdaten erfolgreich gespeichert");
             return ResponseEntity.ok(savedPet);
         } catch (Exception e) {
@@ -234,13 +234,27 @@ public class PetController {
     }
 
     @Transactional
-    private Pet savePetInternal(Pet pet) {
-        String sql = "UPDATE application_pet SET hunger = ?, durst = ?, energie = ?, komfort = ?, created_date = ?, last_fed = ?, last_watered = ?, last_slept = ?, last_petted = ?, last_showered = ? WHERE user_id = ? AND name = ?";
-        int rowsAffected = jdbcTemplate.update(sql, pet.getHunger(), pet.getDurst(), pet.getEnergie(), pet.getKomfort(), pet.getCreatedDate(), pet.getLastFed(), pet.getLastWatered(), pet.getLastSlept(), pet.getLastPetted(), pet.getLastShowered(), pet.getUserId(), pet.getName());
+    private Pet savePetInternal(Long userId, String username, int hunger, int durst, int energie, int komfort, LocalDate createdDate, LocalDateTime lastFed, LocalDateTime lastWatered, LocalDateTime lastSlept, LocalDateTime lastPetted, LocalDateTime lastShowered) {
+        String sql = "UPDATE application_pet SET hunger = ?, durst = ?, energie = ?, komfort = ?, created_date = ?, last_fed = ?, last_watered = ?, last_slept = ?, last_petted = ?, last_showered = ? WHERE user_id = ? AND username = ?";
+        int rowsAffected = jdbcTemplate.update(sql, hunger, durst, energie, komfort, createdDate, lastFed, lastWatered, lastSlept, lastPetted, lastShowered, userId, username);
 
         if (rowsAffected == 0) {
-            throw new RuntimeException("Haustier nicht gefunden: " + pet.getUserId() + " " + pet.getName());
+            throw new RuntimeException("Haustier nicht gefunden: " + userId + " " + username);
         }
+
+        Pet pet = new Pet();
+        pet.setUserId(userId);
+        pet.setUsername(username);
+        pet.setHunger(hunger);
+        pet.setDurst(durst);
+        pet.setEnergie(energie);
+        pet.setKomfort(komfort);
+        pet.setCreatedDate(createdDate);
+        pet.setLastFed(lastFed);
+        pet.setLastWatered(lastWatered);
+        pet.setLastSlept(lastSlept);
+        pet.setLastPetted(lastPetted);
+        pet.setLastShowered(lastShowered);
 
         return pet;
     }
