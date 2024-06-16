@@ -57,7 +57,20 @@ public class PetController {
         logger.info("Daten für Haustier werden gespeichert: {}", pet);
 
         try {
-            Pet savedPet = savePetInternal(pet.getUserId(), pet.getUsername(), pet.getHunger(), pet.getDurst(), pet.getEnergie(), pet.getKomfort(), pet.getCreatedDate(), pet.getLastFed(), pet.getLastWatered(), pet.getLastSlept(), pet.getLastPetted(), pet.getLastShowered());
+            Pet savedPet = savePetInternal(
+                    pet.getUserId(),
+                    pet.getUsername(),
+                    pet.getHunger(),
+                    pet.getDurst(),
+                    pet.getEnergie(),
+                    pet.getKomfort(),
+                    pet.getCreatedDate(),
+                    pet.getLastFed(),
+                    pet.getLastWatered(),
+                    pet.getLastSlept(),
+                    pet.getLastPetted(),
+                    pet.getLastShowered()
+            );
             logger.info("Haustierdaten erfolgreich gespeichert");
             return ResponseEntity.ok(savedPet);
         } catch (Exception e) {
