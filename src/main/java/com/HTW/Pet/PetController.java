@@ -176,7 +176,7 @@ public class PetController {
     }
 
     @Transactional
-    private Pet createPetInternal(String type, String name, Long userId) {
+    protected Pet createPetInternal(String type, String name, Long userId) {
         Pet newPet = new Pet();
         newPet.setType(type);
         newPet.setName(name);
@@ -247,7 +247,7 @@ public class PetController {
     }
 
     @Transactional
-    private Pet savePetInternal(Long userId, String username, int hunger, int durst, int energie, int komfort, LocalDate createdDate, LocalDateTime lastFed, LocalDateTime lastWatered, LocalDateTime lastSlept, LocalDateTime lastPetted, LocalDateTime lastShowered) {
+    protected Pet savePetInternal(Long userId, String username, int hunger, int durst, int energie, int komfort, LocalDate createdDate, LocalDateTime lastFed, LocalDateTime lastWatered, LocalDateTime lastSlept, LocalDateTime lastPetted, LocalDateTime lastShowered) {
         String sql = "UPDATE application_pet SET hunger = ?, durst = ?, energie = ?, komfort = ?, created_date = ?, last_fed = ?, last_watered = ?, last_slept = ?, last_petted = ?, last_showered = ? WHERE user_id = ? AND username = ?";
         int rowsAffected = jdbcTemplate.update(sql, hunger, durst, energie, komfort, createdDate, lastFed, lastWatered, lastSlept, lastPetted, lastShowered, userId, username);
 
