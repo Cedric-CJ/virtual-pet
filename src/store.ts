@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { PetData } from '@/types';  // Stelle sicher, dass der Pfad zur types.ts-Datei korrekt ist
+import { PetData } from '@/types';
 
 export const useUserStore = defineStore('user', {
     state: (): { userId: string; username: string; petData: PetData } => ({
@@ -62,7 +62,11 @@ export const useUserStore = defineStore('user', {
             localStorage.removeItem('username');
         },
         updatePetData(petData: PetData) {
-            this.petData = petData;
+            this.petData = { ...petData };
+        },
+        updatePetStat(stat: keyof PetData['stats'], value: number) {
+            this.petData.stats[stat] = value;
+            this.petData = { ...this.petData };
         }
     }
 });

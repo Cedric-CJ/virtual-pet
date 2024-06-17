@@ -65,29 +65,44 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, nextTick, onMounted } from 'vue';
 import axios from 'axios';
-import { useRoute, useRouter } from 'vue-router';
+import { useRouter } from 'vue-router';
 import { useUserStore } from '@/store';
-import { PetData } from '@/types';  // Pfad zur types.ts-Datei
+import { PetData } from '@/types';
 
 const API_URL = 'https://virtual-pet-backend.onrender.com/api';
 const pets = ref<any[]>([]);
 const store = useUserStore();
 const actionText = ref<string>('');
 const currentImage = ref<string>('');
-const route = useRoute();
 const router = useRouter();
 const isPetDead = ref<boolean>(false);
 const showConfirmDelete = ref<boolean>(false);
 
 const token = localStorage.getItem('token');
+if (!token) {
+  console.error('Token is missing');
+}
 
 const axiosInstance = axios.create({
   baseURL: API_URL,
   headers: {
     'Authorization': `Bearer ${token}`
   }
+});
+
+axiosInstance.interceptors.request.use(request => {
+  console.log('Starting Request', request)
+  return request
+})
+
+axiosInstance.interceptors.response.use(response => {
+  console.log('Response:', response)
+  return response
+}, error => {
+  console.log('Response Error:', error.response)
+  return Promise.reject(error)
 });
 
 const checkUserData = () => {
@@ -182,8 +197,23 @@ const setInitialImage = () => {
 
 const handleNewPet = async () => {
   try {
-    await axiosInstance.delete('/delete', { data: { userId: store.userId, username: store.username } });
+    const payload = { userId: store.userId, username: store.username };
+    console.log('Sending delete request with:', payload);
+    console.log('Authorization header:', axiosInstance.defaults.headers.Authorization);
+    await axiosInstance.delete('/delete', { data: payload });
     router.push('/create');
+  } catch (error) {
+    handleError(error);
+  }
+};
+
+const deleteAndLogout = async () => {
+  try {
+    const payload = { userId: store.userId, username: store.username };
+    console.log('Sending delete request with:', payload);
+    console.log('Authorization header:', axiosInstance.defaults.headers.Authorization);
+    await axiosInstance.delete('/delete', { data: payload });
+    router.push('/logout');
   } catch (error) {
     handleError(error);
   }
@@ -191,15 +221,6 @@ const handleNewPet = async () => {
 
 const handleLogout = () => {
   showConfirmDelete.value = true;
-};
-
-const deleteAndLogout = async () => {
-  try {
-    await axiosInstance.delete('/delete', { data: { userId: store.userId, username: store.username } });
-    router.push('/logout');
-  } catch (error) {
-    handleError(error);
-  }
 };
 
 const logout = () => {
@@ -231,41 +252,56 @@ const performAction = async (action: string) => {
   const now = new Date().toISOString();
   const actions: { [key: string]: () => void } = {
     feed: () => {
-      store.petData.stats.Hunger = Math.min(store.petData.stats.Hunger + 50, 100);
+      const newHunger = Math.min(store.petData.stats.Hunger + 50, 100);
+      store.updatePetStat('Hunger', newHunger);
       store.petData.lastFed = now;
       changeImage(store.petData.type === 'dog' ? 'src/assets/dogessen.png' : 'src/assets/catessen.png');
     },
     water: () => {
-      store.petData.stats.Durst = Math.min(store.petData.stats.Durst + 100, 100);
+      const newDurst = Math.min(store.petData.stats.Durst + 100, 100);
+      store.updatePetStat('Durst', newDurst);
       store.petData.lastWatered = now;
       changeImage(store.petData.type === 'dog' ? 'src/assets/dogtrinken.png' : 'src/assets/cattrinken.png');
     },
     sleep: () => {
-      store.petData.stats.Energie = 100;
+      store.updatePetStat('Energie', 100);
       store.petData.lastSlept = now;
       changeImage(store.petData.type === 'dog' ? 'src/assets/dogschlafen.png' : 'src/assets/catschlafen.png');
     },
     pet: () => {
-      store.petData.stats.Komfort = Math.min(store.petData.stats.Komfort + 10, 100);
+      const newKomfort = Math.min(store.petData.stats.Komfort + 10, 100);
+      store.updatePetStat('Komfort', newKomfort);
       store.petData.lastPetted = now;
       changeImage(store.petData.type === 'dog' ? 'src/assets/dogstreicheln.png' : 'src/assets/catstreicheln.png');
     },
     clean: () => {
-      store.petData.stats.Komfort = Math.min(store.petData.stats.Komfort + 100, 100);
+      const newKomfort = Math.min(store.petData.stats.Komfort + 100, 100);
+      store.updatePetStat('Komfort', newKomfort);
       store.petData.lastShowered = now;
       changeImage(store.petData.type === 'dog' ? 'src/assets/dogduschen.png' : 'src/assets/catduschen.png');
     },
     play: () => {
-      store.petData.stats.Energie = Math.max(store.petData.stats.Energie - 10, 0);
-      store.petData.stats.Komfort = Math.min(store.petData.stats.Komfort + 10, 100);
+      const newEnergie = Math.max(store.petData.stats.Energie - 10, 0);
+      const newKomfort = Math.min(store.petData.stats.Komfort + 10, 100);
+      store.updatePetStat('Energie', newEnergie);
+      store.updatePetStat('Komfort', newKomfort);
       changeImage(store.petData.type === 'dog' ? 'src/assets/dogspielen.png' : 'src/assets/catspielen.png');
     }
   };
+
   actions[action]();
+
+  console.log('Aktualisierte Haustierdaten vor dem Senden an das Backend:', store.petData);
+
   updateActionText(action);
 
+  // Sicherstellen, dass der Zustand vor dem API-Aufruf aktualisiert wird
+  await nextTick();
+
   try {
-    await axiosInstance.post('/save', store.petData);
+    // Aktualisierte Haustierdaten an das Backend senden
+    const response = await axiosInstance.post('/save', store.petData);
+    console.log('Antwort vom Backend:', response.data);  // Antwort des Backends überprüfen
     checkIfPetIsDead();
     setInitialImage();
   } catch (error) {

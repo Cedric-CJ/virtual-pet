@@ -88,16 +88,19 @@ const createPet = async (event: Event) => {
       console.log('Sending data to backend:', petData.value);
       const response = await axios.post("https://virtual-pet-backend.onrender.com/api/create", petData.value);
       if (response.status === 200) {
+        message.value = 'Haustier erfolgreich erstellt!';
+        messageType.value = 'success';
+        console.log('Pet created successfully, navigating to pet page with data:', response.data);
+
         setTimeout(() => {
           router.push({ name: 'pet', params: { petData: JSON.stringify(response.data) } });
           loading.value = false;
-          message.value = 'Haustier erfolgreich erstellt!';
-          messageType.value = 'success';
-          if (messageType.value === 'success') {
-            router.push('/pet')};
         }, 500);
       } else {
         console.error('Unexpected response status:', response.status);
+        message.value = 'Fehler beim Erstellen des Haustiers';
+        messageType.value = 'error';
+        loading.value = false;
       }
     } catch (error) {
       console.error('Fehler beim Erstellen des Haustiers:', error);
@@ -107,8 +110,11 @@ const createPet = async (event: Event) => {
     }
   } else {
     console.warn('Pet data is incomplete:', petData.value);
+    message.value = 'Bitte alle Felder ausfüllen';
+    messageType.value = 'error';
   }
 };
+
 </script>
 
 <style scoped>
