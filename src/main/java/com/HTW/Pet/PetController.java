@@ -71,7 +71,7 @@ public class PetController {
                     pet.getLastPetted(),
                     pet.getLastShowered()
             );
-            logger.info("Haustierdaten erfolgreich gespeichert");
+            logger.info("Haustierdaten erfolgreich gespeichert: {}", savedPet);
             return ResponseEntity.ok(savedPet);
         } catch (Exception e) {
             logger.error("Fehler beim Speichern der Haustierdaten: ", e);
