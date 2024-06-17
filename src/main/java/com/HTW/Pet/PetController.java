@@ -113,7 +113,7 @@ public class PetController {
         }
     }
 
-    @PostMapping("/delete")
+    @DeleteMapping("/delete")
     @Transactional
     public ResponseEntity<?> deletePet(@RequestBody PetRequest petRequest) {
         Long userId = petRequest.getUserId();
