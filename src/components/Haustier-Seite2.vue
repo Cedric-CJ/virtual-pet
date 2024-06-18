@@ -80,29 +80,11 @@ const router = useRouter();
 const isPetDead = ref<boolean>(false);
 const showConfirmDelete = ref<boolean>(false);
 
-const token = localStorage.getItem('token');
-if (!token) {
-  console.error('Token is missing');
-}
-
 const axiosInstance = axios.create({
   baseURL: API_URL,
   headers: {
-    'Authorization': `Bearer ${token}`
+    'Content-Type': 'application/json'
   }
-});
-
-axiosInstance.interceptors.request.use(request => {
-  console.log('Starting Request', request)
-  return request
-})
-
-axiosInstance.interceptors.response.use(response => {
-  console.log('Response:', response)
-  return response
-}, error => {
-  console.log('Response Error:', error.response)
-  return Promise.reject(error)
 });
 
 const checkUserData = () => {
@@ -197,11 +179,26 @@ const setInitialImage = () => {
 
 const handleNewPet = async () => {
   try {
+    // Benutzer-ID und Benutzername sicherstellen
+    if (!store.userId || !store.username) {
+      console.error('Keine Benutzer-ID oder Benutzername übergeben');
+      return;
+    }
+    // Payload erstellen
     const payload = { userId: store.userId, username: store.username };
     console.log('Sending delete request with:', payload);
-    console.log('Authorization header:', axiosInstance.defaults.headers.Authorization);
-    await axiosInstance.delete('/delete', { data: payload });
-    router.push('/create');
+
+    // DELETE Anfrage senden
+    const deleteResponse = await axiosInstance.delete('/delete', { data: payload });
+
+    // Prüfen ob die Antwort erfolgreich war
+    if (deleteResponse.status === 200) {
+      console.log('Antwort vom Backend:', deleteResponse.data);
+      // Nach erfolgreicher Löschung zur Erstellungsseite weiterleiten
+      router.push('/create');
+    } else {
+      console.error('Fehler beim Löschen des Haustiers:', deleteResponse.data);
+    }
   } catch (error) {
     handleError(error);
   }
