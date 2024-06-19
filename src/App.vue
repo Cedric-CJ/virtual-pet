@@ -8,6 +8,7 @@
         <h1>Herzlich Willkommen</h1>
         <nav>
           <RouterLink to="/login">Login</RouterLink>
+          <RouterLink to="/dead">Bestenliste</RouterLink>
           <button class="dropdown-button" @click="Logout">Abmelden</button>
           <button @click="toggleDarkMode" class="dark-mode-link">Dark Mode</button>
         </nav>
