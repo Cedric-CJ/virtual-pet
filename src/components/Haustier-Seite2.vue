@@ -8,18 +8,19 @@
       </div>
       <h1>{{ store.petData.name }}</h1>
       <div class="actions" v-if="!isPetDead">
-        <button v-if="store.petData.stats" :class="{ 'alert-button': store.petData.stats.Hunger < 20 }" @click="performAction('feed')">Füttern</button>
-        <button v-if="store.petData.stats" :class="{ 'alert-button': store.petData.stats.Durst < 20 }" @click="performAction('water')">Wasser geben</button>
-        <button v-if="store.petData.stats" :class="{ 'alert-button': store.petData.stats.Energie < 20 }" @click="performAction('sleep')">Schlafen</button>
-        <button v-if="store.petData.stats" :class="{ 'alert-button': store.petData.stats.Komfort < 20 }" @click="performAction('pet')">Streicheln</button>
-        <button v-if="store.petData.stats" :class="{ 'alert-button': store.petData.stats.Komfort < 20 }" @click="performAction('clean')">Duschen</button>
-        <button v-if="store.petData.stats" :class="{ 'alert-button': store.petData.stats.Komfort < 20 }" @click="performAction('play')">Spielen</button>
+        <button v-if="store.petData.stats" :class="{ 'alert-button': store.petData.stats.Hunger < 20 }" @click="performAction('feed')" :disabled="isActionInProgress">Füttern</button>
+        <button v-if="store.petData.stats" :class="{ 'alert-button': store.petData.stats.Durst < 20 }" @click="performAction('water')" :disabled="isActionInProgress">Wasser geben</button>
+        <button v-if="store.petData.stats" :class="{ 'alert-button': store.petData.stats.Energie < 20 }" @click="performAction('sleep')" :disabled="isActionInProgress">Schlafen</button>
+        <button v-if="store.petData.stats" :class="{ 'alert-button': store.petData.stats.Komfort < 20 }" @click="performAction('pet')" :disabled="isActionInProgress">Streicheln</button>
+        <button v-if="store.petData.stats" :class="{ 'alert-button': store.petData.stats.Komfort < 20 }" @click="performAction('clean')" :disabled="isActionInProgress">Duschen</button>
+        <button v-if="store.petData.stats" :class="{ 'alert-button': store.petData.stats.Komfort < 20 }" @click="performAction('play')" :disabled="isActionInProgress">Spielen</button>
       </div>
       <transition name="fade">
         <p v-if="actionText" class="action-text">{{ actionText }}</p>
       </transition>
     </div>
     <div class="stats" v-if="!isPetDead">
+      <h1>{{ daysAlive }} Stunden am Leben</h1>
       <div class="stat-bar" v-if="store.petData.stats" v-for="(value, key) in store.petData.stats" :key="key">
         <label>{{ key }}:</label>
         <div class="progress">
@@ -42,7 +43,6 @@
         <tr v-for="(pet, index) in pets" :key="index">
           <td>{{ index + 1 }}</td>
           <td>{{ pet.name }}</td>
-          <td>{{ pet.daysAlive }}</td>
         </tr>
         </tbody>
       </table>
@@ -65,20 +65,21 @@
 </template>
 
 <script setup lang="ts">
-import { ref, nextTick, onMounted } from 'vue';
+import { ref, nextTick, onMounted, computed } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/store';
 import { PetData } from '@/types';
+import router from "@/router";
 
 const API_URL = 'https://virtual-pet-backend.onrender.com/api';
 const pets = ref<any[]>([]);
 const store = useUserStore();
 const actionText = ref<string>('');
 const currentImage = ref<string>('');
-const router = useRouter();
 const isPetDead = ref<boolean>(false);
 const showConfirmDelete = ref<boolean>(false);
+const isActionInProgress = ref<boolean>(false);
 
 defineProps({
   petData: {
@@ -186,6 +187,13 @@ const setInitialImage = () => {
   currentImage.value = `src/assets/${imageName}`;
 };
 
+const daysAlive = computed(() => {
+  const createdDate = new Date(store.petData.createdDate);
+  const now = new Date();
+  const difference = now.getTime() - createdDate.getTime();
+  return Math.floor(difference / (1000 * 3600));
+});
+
 const handleNewPet = async () => {
   try {
     // Benutzer-ID und Benutzername sicherstellen
@@ -240,7 +248,7 @@ const reduceStatsOverTime = () => {
     store.petData.stats.Durst = Math.max(store.petData.stats.Durst - 1, 0);
     store.petData.stats.Komfort = Math.max(store.petData.stats.Komfort - 1, 0);
     checkIfPetIsDead();
-  }, 3600000); // Alle 1 Stunde
+  }, 36000); // Alle 5 Sekunden
 };
 
 onMounted(async () => {
@@ -255,6 +263,9 @@ onMounted(async () => {
 });
 
 const performAction = async (action: string) => {
+  if (isActionInProgress.value) return;
+
+  isActionInProgress.value = true;
   const now = new Date().toISOString();
   const actions: { [key: string]: () => void } = {
     feed: () => {
@@ -333,14 +344,17 @@ const performAction = async (action: string) => {
   }
 
   console.log('Letzte Fütterung:', store.petData.lastFed, 'Aktuelle Stats:', store.petData.stats);
+
+  setTimeout(() => {
+    isActionInProgress.value = false;
+  }, 4000);
 };
 
 const changeImage = (newImage: string) => {
-  const frontImage = store.petData.type === 'dog' ? 'src/assets/dogfront.png' : 'src/assets/catfront.png';
   currentImage.value = newImage;
   setTimeout(() => {
     setInitialImage();
-  }, 5000);
+  }, 40000);
 };
 
 const updateActionText = (action: string) => {
@@ -355,7 +369,7 @@ const updateActionText = (action: string) => {
   actionText.value = actionMessages[action];
   setTimeout(() => {
     actionText.value = '';
-  }, 3000);
+  }, 4000);
 };
 
 const handleError = (error: unknown) => {
