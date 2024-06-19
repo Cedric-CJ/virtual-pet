@@ -29,7 +29,7 @@
       </div>
     </div>
     <div class="top-pets">
-      <h3>Top 10 Tiere</h3>
+      <h3><router-link to="/dead">Top 10 Tiere</router-link></h3>
       <table>
         <thead>
         <tr>
@@ -149,7 +149,8 @@ const getPetData = async () => {
         lastPetted: petResponse.lastPetted,
         lastShowered: petResponse.lastShowered,
         username: petResponse.username,
-        userId: store.userId
+        userId: store.userId,
+        dead: petResponse.dead
       };
       store.updatePetData(petData);
 
@@ -176,7 +177,7 @@ const setInitialImage = () => {
 
   if (Energie < 30 || Hunger < 30 || Durst < 30 || Komfort < 30) {
     imageName = store.petData.type === 'dog' ? 'dognegativ.png' : 'catnegativ.png';
-  } else if (Energie > 70 && Hunger > 70 && Durst > 70 && Komfort > 70) {
+  } else if (Energie > 70 && Hunger > 70 && Durst > 70) {
     imageName = store.petData.type === 'dog' ? 'dogpositiv.png' : 'catpositiv.png';
   } else {
     imageName = store.petData.type === 'dog' ? 'dogfront.png' : 'catfront.png';

@@ -21,7 +21,8 @@ export const useUserStore = defineStore('user', {
             lastPetted: '',
             lastShowered: '',
             username: '',
-            userId: null
+            userId: null,
+            dead: false // Neu hinzugefügt
         }
     }),
     actions: {
@@ -56,7 +57,8 @@ export const useUserStore = defineStore('user', {
                 lastPetted: '',
                 lastShowered: '',
                 username: '',
-                userId: null
+                userId: null,
+                dead: false // Neu hinzugefügt
             };
             localStorage.removeItem('userId');
             localStorage.removeItem('username');

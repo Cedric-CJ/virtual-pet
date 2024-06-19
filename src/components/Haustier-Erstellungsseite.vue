@@ -78,14 +78,15 @@ const handleInput = (event: Event) => {
   }
 };
 
-const createPet = async (event) => {
+const createPet = async (event: Event) => {
   console.log('CreatePet-Methode aufgerufen');
   event.preventDefault();
   if (petData.value.name && petData.value.type && petData.value.userId) {
     loading.value = true;
     message.value = '';
     try {
-      const response = await axios.post("https://virtual-pet-backend.onrender.com/api/checkAndCreate", {
+      // Überprüfen und Erstellen in einem Schritt
+      const response = await axios.post("http://localhost:8080/api/checkAndCreate", {
         userId: petData.value.userId,
         name: petData.value.name,
         type: petData.value.type
@@ -104,8 +105,7 @@ const createPet = async (event) => {
         console.log('Haustier erfolgreich erstellt, Navigation zur Haustierseite mit Daten:', response.data);
 
         setTimeout(() => {
-          const petData = response.data ? JSON.stringify(response.data) : "{}";
-          router.push({ name: 'pet', query: { petData: encodeURIComponent(petData) } });
+          router.push({ name: 'pet', query: { petData: encodeURIComponent(JSON.stringify(response.data)) } });
           loading.value = false;
         }, 500);
       } else {

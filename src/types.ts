@@ -1,4 +1,3 @@
-
 export interface PetStats {
     Energie: number;
     Hunger: number;
@@ -18,4 +17,5 @@ export interface PetData {
     lastShowered: string;
     username: string;
     userId: string | null;
+    dead: boolean;
 }
