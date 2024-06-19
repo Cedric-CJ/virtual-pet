@@ -65,8 +65,7 @@ export const useUserStore = defineStore('user', {
             this.petData = { ...petData };
         },
         updatePetStat(stat: keyof PetData['stats'], value: number) {
-            this.petData.stats[stat] = value;
-            this.petData = { ...this.petData };
+            this.petData.stats = { ...this.petData.stats, [stat]: value };
         }
     }
 });

@@ -8,8 +8,7 @@
         <h1>Herzlich Willkommen</h1>
         <nav>
           <RouterLink to="/login">Login</RouterLink>
-          <RouterLink to="/logout">Abmelden</RouterLink>
-          <button class="dropdown-button" @click="saveAndLogout">Speichern und Abmelden</button>
+          <button class="dropdown-button" @click="Logout">Abmelden</button>
           <button @click="toggleDarkMode" class="dark-mode-link">Dark Mode</button>
         </nav>
       </div>
@@ -57,16 +56,9 @@ onUnmounted(() => {
   router.beforeEach(null);
 });
 
-const saveAndLogout = async () => {
-  try {
-    const petData = store.petData;  // Hole die Pet-Daten aus dem Store
-    const response = await axios.post(`https://virtual-pet-backend.onrender.com/api/save`, petData);
-    console.log('Pet data saved:', response.data);
+const Logout = async () => {
     store.clearUserData();  // Lösche die Benutzerdaten aus dem Store
     router.push('/login');
-  } catch (error) {
-    console.error('Error saving pet data:', error.response ? error.response.data : error);
-  }
 };
 </script>
 

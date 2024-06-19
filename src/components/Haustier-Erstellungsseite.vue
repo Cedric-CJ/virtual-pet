@@ -62,12 +62,12 @@ const store = useUserStore();
 
 onMounted(() => {
   petData.value.userId = store.userId;
-  console.log('UserId set to:', petData.value.userId);
+  console.log('Benutzer-ID festgelegt auf:', petData.value.userId);
 });
 
 const selectPet = (type: string) => {
   petData.value.type = type;
-  console.log('Pet type selected:', type);
+  console.log('Ausgewählter Haustiertyp:', type);
 };
 
 const handleInput = (event: Event) => {
@@ -78,26 +78,38 @@ const handleInput = (event: Event) => {
   }
 };
 
-const createPet = async (event: Event) => {
-  console.log('CreatePet method called');
+const createPet = async (event) => {
+  console.log('CreatePet-Methode aufgerufen');
   event.preventDefault();
   if (petData.value.name && petData.value.type && petData.value.userId) {
     loading.value = true;
     message.value = '';
     try {
-      console.log('Sending data to backend:', petData.value);
-      const response = await axios.post("https://virtual-pet-backend.onrender.com/api/create", petData.value);
+      const response = await axios.post("http://localhost:8080/api/checkAndCreate", {
+        userId: petData.value.userId,
+        name: petData.value.name,
+        type: petData.value.type
+      });
+
+      if (response.data && typeof response.data === 'string') {
+        message.value = response.data;
+        messageType.value = 'error';
+        loading.value = false;
+        return;
+      }
+
       if (response.status === 200) {
         message.value = 'Haustier erfolgreich erstellt!';
         messageType.value = 'success';
-        console.log('Pet created successfully, navigating to pet page with data:', response.data);
+        console.log('Haustier erfolgreich erstellt, Navigation zur Haustierseite mit Daten:', response.data);
 
         setTimeout(() => {
-          router.push({ name: 'pet', params: { petData: JSON.stringify(response.data) } });
+          const petData = response.data ? JSON.stringify(response.data) : "{}";
+          router.push({ name: 'pet', query: { petData: encodeURIComponent(petData) } });
           loading.value = false;
         }, 500);
       } else {
-        console.error('Unexpected response status:', response.status);
+        console.error('Unerwarteter Antwortstatus:', response.status);
         message.value = 'Fehler beim Erstellen des Haustiers';
         messageType.value = 'error';
         loading.value = false;

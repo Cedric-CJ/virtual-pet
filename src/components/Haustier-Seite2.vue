@@ -12,8 +12,8 @@
         <button v-if="store.petData.stats" :class="{ 'alert-button': store.petData.stats.Durst < 20 }" @click="performAction('water')">Wasser geben</button>
         <button v-if="store.petData.stats" :class="{ 'alert-button': store.petData.stats.Energie < 20 }" @click="performAction('sleep')">Schlafen</button>
         <button v-if="store.petData.stats" :class="{ 'alert-button': store.petData.stats.Komfort < 20 }" @click="performAction('pet')">Streicheln</button>
-        <button v-if="store.petData.stats" @click="performAction('clean')">Duschen</button>
-        <button v-if="store.petData.stats" @click="performAction('play')">Spielen</button>
+        <button v-if="store.petData.stats" :class="{ 'alert-button': store.petData.stats.Komfort < 20 }" @click="performAction('clean')">Duschen</button>
+        <button v-if="store.petData.stats" :class="{ 'alert-button': store.petData.stats.Komfort < 20 }" @click="performAction('play')">Spielen</button>
       </div>
       <transition name="fade">
         <p v-if="actionText" class="action-text">{{ actionText }}</p>
@@ -71,7 +71,7 @@ import { useRouter } from 'vue-router';
 import { useUserStore } from '@/store';
 import { PetData } from '@/types';
 
-const API_URL = 'https://virtual-pet-backend.onrender.com/api';
+const API_URL = 'http://localhost:8080/api';
 const pets = ref<any[]>([]);
 const store = useUserStore();
 const actionText = ref<string>('');
@@ -79,6 +79,14 @@ const currentImage = ref<string>('');
 const router = useRouter();
 const isPetDead = ref<boolean>(false);
 const showConfirmDelete = ref<boolean>(false);
+
+defineProps({
+  petData: {
+    type: Object,
+    required: true,
+    default: () => ({})
+  }
+});
 
 const axiosInstance = axios.create({
   baseURL: API_URL,
@@ -186,7 +194,7 @@ const handleNewPet = async () => {
     }
     // Payload erstellen
     const payload = { userId: store.userId, username: store.username };
-    console.log('Sending delete request with:', payload);
+    console.log('Löschanfrage senden mit:', payload);
 
     // DELETE Anfrage senden
     const deleteResponse = await axiosInstance.delete('/delete', { data: payload });
@@ -207,8 +215,8 @@ const handleNewPet = async () => {
 const deleteAndLogout = async () => {
   try {
     const payload = { userId: store.userId, username: store.username };
-    console.log('Sending delete request with:', payload);
-    console.log('Authorization header:', axiosInstance.defaults.headers.Authorization);
+    console.log('Löschanfrage senden mit:', payload);
+    console.log('Autorisierungsheader:', axiosInstance.defaults.headers.Authorization);
     await axiosInstance.delete('/delete', { data: payload });
     router.push('/logout');
   } catch (error) {
@@ -226,10 +234,10 @@ const logout = () => {
 
 const reduceStatsOverTime = () => {
   setInterval(() => {
-    store.petData.stats.Energie = Math.max(store.petData.stats.Energie - 5, 0);
-    store.petData.stats.Hunger = Math.max(store.petData.stats.Hunger - 5, 0);
-    store.petData.stats.Durst = Math.max(store.petData.stats.Durst - 5, 0);
-    store.petData.stats.Komfort = Math.max(store.petData.stats.Komfort - 5, 0);
+    store.petData.stats.Energie = Math.max(store.petData.stats.Energie - 1, 0);
+    store.petData.stats.Hunger = Math.max(store.petData.stats.Hunger - 1, 0);
+    store.petData.stats.Durst = Math.max(store.petData.stats.Durst - 1, 0);
+    store.petData.stats.Komfort = Math.max(store.petData.stats.Komfort - 1, 0);
     checkIfPetIsDead();
   }, 3600000); // Alle 1 Stunde
 };
@@ -288,7 +296,8 @@ const performAction = async (action: string) => {
 
   actions[action]();
 
-  console.log('Aktualisierte Haustierdaten vor dem Senden an das Backend:', store.petData);
+  console.log('Letzte Fütterung:', store.petData.lastFed, 'Aktuelle Stats:', store.petData.stats);
+  console.log('Aktualisierte Haustierdaten vor dem Senden an das Backend:', JSON.stringify(store.petData));
 
   updateActionText(action);
 
@@ -296,14 +305,33 @@ const performAction = async (action: string) => {
   await nextTick();
 
   try {
-    // Aktualisierte Haustierdaten an das Backend senden
-    const response = await axiosInstance.post('/save', store.petData);
+    // Extrahiere die PetStats-Daten
+    const petStats = {
+      hunger: store.petData.stats.Hunger,
+      durst: store.petData.stats.Durst,
+      energie: store.petData.stats.Energie,
+      komfort: store.petData.stats.Komfort
+    };
+
+    // Konvertiere die petStats zu einem normalen JavaScript-Objekt
+    const plainPetStats = JSON.parse(JSON.stringify(petStats));
+    console.log('Plain Pet Stats:', plainPetStats);
+
+    // Aktualisierte Haustier-Statistiken an das Backend senden
+    const response = await axiosInstance.post('/updateStats', plainPetStats, {
+      params: {
+        userId: store.petData.userId,
+        petName: store.petData.name
+      }
+    });
     console.log('Antwort vom Backend:', response.data);  // Antwort des Backends überprüfen
     checkIfPetIsDead();
     setInitialImage();
   } catch (error) {
     handleError(error);
   }
+
+  console.log('Letzte Fütterung:', store.petData.lastFed, 'Aktuelle Stats:', store.petData.stats);
 };
 
 const changeImage = (newImage: string) => {
