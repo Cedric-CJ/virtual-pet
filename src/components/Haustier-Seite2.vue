@@ -71,7 +71,7 @@ import { useRouter } from 'vue-router';
 import { useUserStore } from '@/store';
 import { PetData } from '@/types';
 
-const API_URL = 'http://localhost:8080/api';
+const API_URL = 'https://virtual-pet-backend.onrender.com/api';
 const pets = ref<any[]>([]);
 const store = useUserStore();
 const actionText = ref<string>('');

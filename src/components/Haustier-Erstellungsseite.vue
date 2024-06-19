@@ -85,7 +85,7 @@ const createPet = async (event) => {
     loading.value = true;
     message.value = '';
     try {
-      const response = await axios.post("http://localhost:8080/api/checkAndCreate", {
+      const response = await axios.post("https://virtual-pet-backend.onrender.com/api/checkAndCreate", {
         userId: petData.value.userId,
         name: petData.value.name,
         type: petData.value.type

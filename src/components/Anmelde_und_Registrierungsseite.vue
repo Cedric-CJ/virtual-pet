@@ -67,7 +67,7 @@ const handleRegister = async () => {
   }, 5000);
 
   try {
-    const response = await axios.post("http://localhost:8080/api/registration", registerData.value);
+    const response = await axios.post("https://virtual-pet-backend.onrender.com/api/registration", registerData.value);
     if (response.status === 200) {
       message.value = 'Registrierung erfolgreich!';
       isError.value = false;
@@ -95,7 +95,7 @@ const handleLogin = async () => {
   }, 5000);
 
   try {
-    const response = await axios.post("http://localhost:8080/api/login", loginData.value);
+    const response = await axios.post("https://virtual-pet-backend.onrender.com/api/login", loginData.value);
     if (response.status === 200) {
       message.value = response.data.message;
       isError.value = false;
