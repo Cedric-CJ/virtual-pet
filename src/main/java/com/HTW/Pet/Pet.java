@@ -53,6 +53,9 @@ public class Pet {
     @Column(name = "username", nullable = false)
     private String username;
 
+    @Transient
+    private boolean dead;
+
     // Default constructor
     public Pet() {}
 
@@ -167,5 +170,13 @@ public class Pet {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public boolean isDead() {
+        return dead;
+    }
+
+    public void setDead(boolean dead) {
+        this.dead = dead;
     }
 }

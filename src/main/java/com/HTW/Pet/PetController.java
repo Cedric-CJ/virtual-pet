@@ -56,6 +56,16 @@ public class PetController {
         }
     }
 
+    @GetMapping("/allPets")
+    public ResponseEntity<List<Pet>> getAllPets() {
+        try {
+            List<Pet> pets = petService.getAllPets();
+            return ResponseEntity.ok(pets);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(null);
+        }
+    }
+
     @GetMapping("/top")
     public ResponseEntity<List<Pet>> getTopPets() {
         try {

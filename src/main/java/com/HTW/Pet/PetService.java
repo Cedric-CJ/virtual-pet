@@ -147,6 +147,54 @@ public class PetService {
         return (countPet != null && countPet > 0) || (countDead != null && countDead > 0);
     }
 
+    public List<Pet> getAllPets() {
+        String sqlAlive = "SELECT user_id, username, name, type, hunger, durst, energie, komfort, created_date, last_fed, last_watered, last_slept, last_petted, last_showered, false AS dead FROM application_pet";
+        String sqlDead = "SELECT user_id, username, name, type, hunger, durst, energie, komfort, created_date, last_fed, last_watered, last_slept, last_petted, last_showered, true AS dead FROM application_dead";
+
+        List<Pet> alivePets = jdbcTemplate.query(sqlAlive, (rs, rowNum) -> {
+            Pet pet = new Pet();
+            pet.setUserId(rs.getLong("user_id"));
+            pet.setUsername(rs.getString("username"));
+            pet.setName(rs.getString("name"));
+            pet.setType(rs.getString("type"));
+            pet.setHunger(rs.getInt("hunger"));
+            pet.setDurst(rs.getInt("durst"));
+            pet.setEnergie(rs.getInt("energie"));
+            pet.setKomfort(rs.getInt("komfort"));
+            pet.setCreatedDate(rs.getDate("created_date").toLocalDate());
+            pet.setLastFed(rs.getTimestamp("last_fed") != null ? rs.getTimestamp("last_fed").toLocalDateTime() : null);
+            pet.setLastWatered(rs.getTimestamp("last_watered") != null ? rs.getTimestamp("last_watered").toLocalDateTime() : null);
+            pet.setLastSlept(rs.getTimestamp("last_slept") != null ? rs.getTimestamp("last_slept").toLocalDateTime() : null);
+            pet.setLastPetted(rs.getTimestamp("last_petted") != null ? rs.getTimestamp("last_petted").toLocalDateTime() : null);
+            pet.setLastShowered(rs.getTimestamp("last_showered") != null ? rs.getTimestamp("last_showered").toLocalDateTime() : null);
+            pet.setDead(rs.getBoolean("dead"));
+            return pet;
+        });
+
+        List<Pet> deadPets = jdbcTemplate.query(sqlDead, (rs, rowNum) -> {
+            Pet pet = new Pet();
+            pet.setUserId(rs.getLong("user_id"));
+            pet.setUsername(rs.getString("username"));
+            pet.setName(rs.getString("name"));
+            pet.setType(rs.getString("type"));
+            pet.setHunger(rs.getInt("hunger"));
+            pet.setDurst(rs.getInt("durst"));
+            pet.setEnergie(rs.getInt("energie"));
+            pet.setKomfort(rs.getInt("komfort"));
+            pet.setCreatedDate(rs.getDate("created_date").toLocalDate());
+            pet.setLastFed(rs.getTimestamp("last_fed") != null ? rs.getTimestamp("last_fed").toLocalDateTime() : null);
+            pet.setLastWatered(rs.getTimestamp("last_watered") != null ? rs.getTimestamp("last_watered").toLocalDateTime() : null);
+            pet.setLastSlept(rs.getTimestamp("last_slept") != null ? rs.getTimestamp("last_slept").toLocalDateTime() : null);
+            pet.setLastPetted(rs.getTimestamp("last_petted") != null ? rs.getTimestamp("last_petted").toLocalDateTime() : null);
+            pet.setLastShowered(rs.getTimestamp("last_showered") != null ? rs.getTimestamp("last_showered").toLocalDateTime() : null);
+            pet.setDead(rs.getBoolean("dead"));
+            return pet;
+        });
+
+        alivePets.addAll(deadPets);
+        return alivePets;
+    }
+
     public List<Pet> getAllPetsInternal() {
         String sql = "SELECT * FROM application_pet";
         return jdbcTemplate.query(sql, (rs, rowNum) -> {
