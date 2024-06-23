@@ -8,19 +8,18 @@
       </div>
       <h1>{{ store.petData.name }}</h1>
       <div class="actions" v-if="!isPetDead">
-        <button v-if="store.petData.stats" :class="{ 'alert-button': store.petData.stats.Hunger < 20 }" @click="performAction('feed')" :disabled="isActionInProgress">Füttern</button>
-        <button v-if="store.petData.stats" :class="{ 'alert-button': store.petData.stats.Durst < 20 }" @click="performAction('water')" :disabled="isActionInProgress">Wasser geben</button>
-        <button v-if="store.petData.stats" :class="{ 'alert-button': store.petData.stats.Energie < 20 }" @click="performAction('sleep')" :disabled="isActionInProgress">Schlafen</button>
-        <button v-if="store.petData.stats" :class="{ 'alert-button': store.petData.stats.Komfort < 20 }" @click="performAction('pet')" :disabled="isActionInProgress">Streicheln</button>
-        <button v-if="store.petData.stats" :class="{ 'alert-button': store.petData.stats.Komfort < 20 }" @click="performAction('clean')" :disabled="isActionInProgress">Duschen</button>
-        <button v-if="store.petData.stats" :class="{ 'alert-button': store.petData.stats.Komfort < 20 }" @click="performAction('play')" :disabled="isActionInProgress">Spielen</button>
+        <button v-if="store.petData.stats" :class="{ 'alert-button': store.petData.stats.Hunger < 20 }" @click="performAction('feed')">Füttern</button>
+        <button v-if="store.petData.stats" :class="{ 'alert-button': store.petData.stats.Durst < 20 }" @click="performAction('water')">Wasser geben</button>
+        <button v-if="store.petData.stats" :class="{ 'alert-button': store.petData.stats.Energie < 20 }" @click="performAction('sleep')">Schlafen</button>
+        <button v-if="store.petData.stats" :class="{ 'alert-button': store.petData.stats.Komfort < 20 }" @click="performAction('pet')">Streicheln</button>
+        <button v-if="store.petData.stats" @click="performAction('clean')">Duschen</button>
+        <button v-if="store.petData.stats" @click="performAction('play')">Spielen</button>
       </div>
       <transition name="fade">
         <p v-if="actionText" class="action-text">{{ actionText }}</p>
       </transition>
     </div>
     <div class="stats" v-if="!isPetDead">
-      <h1>{{ daysAlive }} Stunden am Leben</h1>
       <div class="stat-bar" v-if="store.petData.stats" v-for="(value, key) in store.petData.stats" :key="key">
         <label>{{ key }}:</label>
         <div class="progress">
@@ -30,7 +29,7 @@
       </div>
     </div>
     <div class="top-pets">
-      <h3><router-link to="/dead">Top 10 Tiere</router-link></h3>
+      <h3>Top 10 Tiere</h3>
       <table>
         <thead>
         <tr>
@@ -43,6 +42,7 @@
         <tr v-for="(pet, index) in pets" :key="index">
           <td>{{ index + 1 }}</td>
           <td>{{ pet.name }}</td>
+          <td>{{ pet.daysAlive }}</td>
         </tr>
         </tbody>
       </table>
@@ -65,29 +65,20 @@
 </template>
 
 <script setup lang="ts">
-import { ref, nextTick, onMounted, computed } from 'vue';
+import { ref, nextTick, onMounted } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/store';
 import { PetData } from '@/types';
-import router from "@/router";
 
 const API_URL = 'https://virtual-pet-backend.onrender.com/api';
 const pets = ref<any[]>([]);
 const store = useUserStore();
 const actionText = ref<string>('');
 const currentImage = ref<string>('');
+const router = useRouter();
 const isPetDead = ref<boolean>(false);
 const showConfirmDelete = ref<boolean>(false);
-const isActionInProgress = ref<boolean>(false);
-
-defineProps({
-  petData: {
-    type: Object,
-    required: true,
-    default: () => ({})
-  }
-});
 
 const axiosInstance = axios.create({
   baseURL: API_URL,
@@ -150,8 +141,7 @@ const getPetData = async () => {
         lastPetted: petResponse.lastPetted,
         lastShowered: petResponse.lastShowered,
         username: petResponse.username,
-        userId: store.userId,
-        dead: petResponse.dead
+        userId: store.userId
       };
       store.updatePetData(petData);
 
@@ -178,7 +168,7 @@ const setInitialImage = () => {
 
   if (Energie < 30 || Hunger < 30 || Durst < 30 || Komfort < 30) {
     imageName = store.petData.type === 'dog' ? 'dognegativ.png' : 'catnegativ.png';
-  } else if (Energie > 70 && Hunger > 70 && Durst > 70) {
+  } else if (Energie > 70 && Hunger > 70 && Durst > 70 && Komfort > 70) {
     imageName = store.petData.type === 'dog' ? 'dogpositiv.png' : 'catpositiv.png';
   } else {
     imageName = store.petData.type === 'dog' ? 'dogfront.png' : 'catfront.png';
@@ -187,31 +177,27 @@ const setInitialImage = () => {
   currentImage.value = `src/assets/${imageName}`;
 };
 
-const daysAlive = computed(() => {
-  const createdDate = new Date(store.petData.createdDate);
-  const now = new Date();
-  const difference = now.getTime() - createdDate.getTime();
-  return Math.floor(difference / (1000 * 3600));
-});
-
 const handleNewPet = async () => {
   try {
-    // Benutzer-ID und Benutzername sicherstellen
-    if (!store.userId || !store.username) {
+    store.loadUserData();
+    const userId = store.userId;
+    const username = store.username;
+
+    console.log('User ID nach Laden:', userId);
+    console.log('Username nach Laden:', username);
+
+    if (!userId || !username) {
       console.error('Keine Benutzer-ID oder Benutzername übergeben');
       return;
     }
-    // Payload erstellen
-    const payload = { userId: store.userId, username: store.username };
-    console.log('Löschanfrage senden mit:', payload);
 
-    // DELETE Anfrage senden
+    const payload = { userId, username };
+    console.log('Sending delete request with:', payload);
+
     const deleteResponse = await axiosInstance.delete('/delete', { data: payload });
 
-    // Prüfen ob die Antwort erfolgreich war
     if (deleteResponse.status === 200) {
       console.log('Antwort vom Backend:', deleteResponse.data);
-      // Nach erfolgreicher Löschung zur Erstellungsseite weiterleiten
       router.push('/create');
     } else {
       console.error('Fehler beim Löschen des Haustiers:', deleteResponse.data);
@@ -224,8 +210,8 @@ const handleNewPet = async () => {
 const deleteAndLogout = async () => {
   try {
     const payload = { userId: store.userId, username: store.username };
-    console.log('Löschanfrage senden mit:', payload);
-    console.log('Autorisierungsheader:', axiosInstance.defaults.headers.Authorization);
+    console.log('Sending delete request with:', payload);
+    console.log('Authorization header:', axiosInstance.defaults.headers.Authorization);
     await axiosInstance.delete('/delete', { data: payload });
     router.push('/logout');
   } catch (error) {
@@ -243,12 +229,12 @@ const logout = () => {
 
 const reduceStatsOverTime = () => {
   setInterval(() => {
-    store.petData.stats.Energie = Math.max(store.petData.stats.Energie - 1, 0);
-    store.petData.stats.Hunger = Math.max(store.petData.stats.Hunger - 1, 0);
-    store.petData.stats.Durst = Math.max(store.petData.stats.Durst - 1, 0);
-    store.petData.stats.Komfort = Math.max(store.petData.stats.Komfort - 1, 0);
+    store.petData.stats.Energie = Math.max(store.petData.stats.Energie - 5, 0);
+    store.petData.stats.Hunger = Math.max(store.petData.stats.Hunger - 5, 0);
+    store.petData.stats.Durst = Math.max(store.petData.stats.Durst - 5, 0);
+    store.petData.stats.Komfort = Math.max(store.petData.stats.Komfort - 5, 0);
     checkIfPetIsDead();
-  }, 36000); // Alle 5 Sekunden
+  }, 3600000); // Alle 1 Stunde
 };
 
 onMounted(async () => {
@@ -263,9 +249,6 @@ onMounted(async () => {
 });
 
 const performAction = async (action: string) => {
-  if (isActionInProgress.value) return;
-
-  isActionInProgress.value = true;
   const now = new Date().toISOString();
   const actions: { [key: string]: () => void } = {
     feed: () => {
@@ -308,8 +291,7 @@ const performAction = async (action: string) => {
 
   actions[action]();
 
-  console.log('Letzte Fütterung:', store.petData.lastFed, 'Aktuelle Stats:', store.petData.stats);
-  console.log('Aktualisierte Haustierdaten vor dem Senden an das Backend:', JSON.stringify(store.petData));
+  console.log('Aktualisierte Haustierdaten vor dem Senden an das Backend:', store.petData);
 
   updateActionText(action);
 
@@ -317,44 +299,24 @@ const performAction = async (action: string) => {
   await nextTick();
 
   try {
-    // Extrahiere die PetStats-Daten
-    const petStats = {
-      hunger: store.petData.stats.Hunger,
-      durst: store.petData.stats.Durst,
-      energie: store.petData.stats.Energie,
-      komfort: store.petData.stats.Komfort
-    };
-
-    // Konvertiere die petStats zu einem normalen JavaScript-Objekt
-    const plainPetStats = JSON.parse(JSON.stringify(petStats));
-    console.log('Plain Pet Stats:', plainPetStats);
-
-    // Aktualisierte Haustier-Statistiken an das Backend senden
-    const response = await axiosInstance.post('/updateStats', plainPetStats, {
-      params: {
-        userId: store.petData.userId,
-        petName: store.petData.name
-      }
-    });
+    // Aktualisierte Haustierdaten an das Backend senden
+    const response = await axiosInstance.post('/save', store.petData);
     console.log('Antwort vom Backend:', response.data);  // Antwort des Backends überprüfen
     checkIfPetIsDead();
-    setInitialImage();
+    setTimeout(() => {
+      setInitialImage();
+    }, 4000);
   } catch (error) {
     handleError(error);
   }
-
-  console.log('Letzte Fütterung:', store.petData.lastFed, 'Aktuelle Stats:', store.petData.stats);
-
-  setTimeout(() => {
-    isActionInProgress.value = false;
-  }, 4000);
 };
 
 const changeImage = (newImage: string) => {
+  const frontImage = store.petData.type === 'dog' ? 'src/assets/dogfront.png' : 'src/assets/catfront.png';
   currentImage.value = newImage;
   setTimeout(() => {
     setInitialImage();
-  }, 40000);
+  }, 5000);
 };
 
 const updateActionText = (action: string) => {
@@ -369,7 +331,7 @@ const updateActionText = (action: string) => {
   actionText.value = actionMessages[action];
   setTimeout(() => {
     actionText.value = '';
-  }, 4000);
+  }, 3000);
 };
 
 const handleError = (error: unknown) => {
