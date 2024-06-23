@@ -141,7 +141,8 @@ const getPetData = async () => {
         lastPetted: petResponse.lastPetted,
         lastShowered: petResponse.lastShowered,
         username: petResponse.username,
-        userId: store.userId
+        userId: petResponse.userId,
+        dead: petResponse.dead
       };
       store.updatePetData(petData);
 

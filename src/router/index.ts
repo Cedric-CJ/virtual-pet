@@ -2,6 +2,7 @@ import { createRouter, createWebHashHistory } from 'vue-router';
 import HaustierErstellungsseite from '@/components/Haustier-Erstellungsseite.vue';
 import HaustierSeite2 from '@/components/Haustier-Seite2.vue';
 import Anmelde_und_Registrierungsseite from '@/components/Anmelde_und_Registrierungsseite.vue';
+import DeadPet from '@/components/ALLPetsSeite.vue';
 import { useUserStore } from "@/store";
 
 const router = createRouter({
@@ -34,8 +35,12 @@ const router = createRouter({
       path: '/pet',
       name: 'Pet',
       component: HaustierSeite2
-    }
-  ]
+    },
+    {
+      path: '/dead',
+      name: 'Dead',
+      component: DeadPet
+    }]
 });
 
 export default router;

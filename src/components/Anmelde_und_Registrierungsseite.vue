@@ -108,8 +108,7 @@ const handleLogin = async () => {
 
       setTimeout(() => {
         if (response.data.hasPet) {
-          const petData = response.data.pet ? JSON.stringify(response.data.pet) : "{}";
-          router.push({ name: 'pet', query: { petData: encodeURIComponent(petData) } });
+          router.push({ name: 'Pet'});
         } else {
           router.push('/create');
         }
