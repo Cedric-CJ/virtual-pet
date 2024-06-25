@@ -86,7 +86,7 @@ const createPet = async (event: Event) => {
     message.value = '';
     try {
       console.log('Sending data to backend:', petData.value);
-      const response = await axios.post("https://virtual-pet-backend.onrender.com/api/create", petData.value);
+      const response = await axios.post("https://virtual-pet-backend.onrender.com/api/checkAndCreate", petData.value);
       if (response.status === 200) {
         message.value = 'Haustier erfolgreich erstellt!';
         messageType.value = 'success';
