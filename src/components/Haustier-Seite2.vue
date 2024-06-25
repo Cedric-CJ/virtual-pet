@@ -102,11 +102,17 @@ const checkUserData = () => {
 const getTopPets = async () => {
   try {
     const response = await axiosInstance.get('/top');
-    pets.value = response.data.map((pet: any, index: number) => ({
-      name: pet.name,
-      daysAlive: pet.daysAlive,
-      index: index + 1
-    }));
+    pets.value = response.data.map((pet: any, index: number) => {
+      const createdDate = new Date(pet.createdDate);
+      const currentDate = new Date();
+      const daysAlive = Math.floor((currentDate.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24));
+
+      return {
+        name: pet.name,
+        daysAlive: daysAlive,
+        index: index + 1
+      };
+    });
   } catch (error) {
     handleError(error);
   }
@@ -175,7 +181,7 @@ const setInitialImage = () => {
     imageName = store.petData.type === 'dog' ? 'dogfront.png' : 'catfront.png';
   }
 
-  currentImage.value = `src/assets/${imageName}`;
+  currentImage.value = new URL(`../assets/${imageName}`, import.meta.url).href;
 };
 
 const handleNewPet = async () => {
@@ -256,37 +262,37 @@ const performAction = async (action: string) => {
       const newHunger = Math.min(store.petData.stats.Hunger + 50, 100);
       store.updatePetStat('Hunger', newHunger);
       store.petData.lastFed = now;
-      changeImage(store.petData.type === 'dog' ? 'src/assets/dogessen.png' : 'src/assets/catessen.png');
+      changeImage(store.petData.type === 'dog' ? new URL('../assets/dogessen.png', import.meta.url).href : new URL('../assets/catessen.png', import.meta.url).href);
     },
     water: () => {
       const newDurst = Math.min(store.petData.stats.Durst + 100, 100);
       store.updatePetStat('Durst', newDurst);
       store.petData.lastWatered = now;
-      changeImage(store.petData.type === 'dog' ? 'src/assets/dogtrinken.png' : 'src/assets/cattrinken.png');
+      changeImage(store.petData.type === 'dog' ? new URL('../assets/dogtrinken.png', import.meta.url).href : new URL('../assets/cattrinken.png', import.meta.url).href);
     },
     sleep: () => {
       store.updatePetStat('Energie', 100);
       store.petData.lastSlept = now;
-      changeImage(store.petData.type === 'dog' ? 'src/assets/dogschlafen.png' : 'src/assets/catschlafen.png');
+      changeImage(store.petData.type === 'dog' ? new URL('../assets/dogschlafen.png', import.meta.url).href : new URL('../assets/catschlafen.png', import.meta.url).href);
     },
     pet: () => {
       const newKomfort = Math.min(store.petData.stats.Komfort + 10, 100);
       store.updatePetStat('Komfort', newKomfort);
       store.petData.lastPetted = now;
-      changeImage(store.petData.type === 'dog' ? 'src/assets/dogstreicheln.png' : 'src/assets/catstreicheln.png');
+      changeImage(store.petData.type === 'dog' ? new URL('../assets/dogstreicheln.png', import.meta.url).href : new URL('../assets/catstreicheln.png', import.meta.url).href);
     },
     clean: () => {
       const newKomfort = Math.min(store.petData.stats.Komfort + 100, 100);
       store.updatePetStat('Komfort', newKomfort);
       store.petData.lastShowered = now;
-      changeImage(store.petData.type === 'dog' ? 'src/assets/dogduschen.png' : 'src/assets/catduschen.png');
+      changeImage(store.petData.type === 'dog' ? new URL('../assets/dogduschen.png', import.meta.url).href : new URL('../assets/catduschen.png', import.meta.url).href);
     },
     play: () => {
       const newEnergie = Math.max(store.petData.stats.Energie - 10, 0);
       const newKomfort = Math.min(store.petData.stats.Komfort + 10, 100);
       store.updatePetStat('Energie', newEnergie);
       store.updatePetStat('Komfort', newKomfort);
-      changeImage(store.petData.type === 'dog' ? 'src/assets/dogspielen.png' : 'src/assets/catspielen.png');
+      changeImage(store.petData.type === 'dog' ? new URL('../assets/dogspielen.png', import.meta.url).href : new URL('../assets/catspielen.png', import.meta.url).href);
     }
   };
 
@@ -306,14 +312,14 @@ const performAction = async (action: string) => {
     checkIfPetIsDead();
     setTimeout(() => {
       setInitialImage();
-    }, 4000);
+    }, 2000);
   } catch (error) {
     handleError(error);
   }
 };
 
 const changeImage = (newImage: string) => {
-  const frontImage = store.petData.type === 'dog' ? 'src/assets/dogfront.png' : 'src/assets/catfront.png';
+  const frontImage = store.petData.type === 'dog' ? new URL('../assets/dogfront.png', import.meta.url).href : new URL('../assets/catfront.png', import.meta.url).href;
   currentImage.value = newImage;
   setTimeout(() => {
     setInitialImage();
