@@ -6,7 +6,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -30,14 +32,35 @@ public class PetController {
 
     @PostMapping("/updateStats")
     @Transactional
-    public ResponseEntity<?> updatePetStats(@RequestBody PetStats stats, @RequestParam Long userId, @RequestParam String petName) {
+    public ResponseEntity<?> updatePetStats(@RequestBody Map<String, Object> request) {
+        Long userId = Long.valueOf((Integer) request.get("userId"));
+        String name = (String) request.get("name");
+        Map<String, Integer> stats = (Map<String, Integer>) request.get("stats");
+
         System.out.println("Empfangene Statistiken: " + stats.toString());
 
         try {
-            petService.updatePetStats(userId, petName, stats);
+            petService.updatePetStats(userId, name, stats);
             return ResponseEntity.ok("Statistiken erfolgreich aktualisiert");
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Fehler beim Aktualisieren der Statistiken: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/updateLastActions")
+    @Transactional
+    public ResponseEntity<?> updateLastActions(@RequestBody Map<String, Object> request) {
+        Long userId = Long.valueOf((Integer) request.get("userId"));
+        String name = (String) request.get("name");
+        Map<String, String> lastActions = (Map<String, String>) request.get("lastActions");
+
+        System.out.println("Empfangene letzte Aktionen: " + lastActions.toString());
+
+        try {
+            petService.updateLastActions(userId, name, lastActions);
+            return ResponseEntity.ok("Letzte Aktionen erfolgreich aktualisiert");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Fehler beim Aktualisieren der letzten Aktionen: " + e.getMessage());
         }
     }
 
@@ -46,7 +69,7 @@ public class PetController {
         try {
             boolean petExists = petService.doesPetExist(newPet.getUserId(), newPet.getName());
             if (petExists) {
-                return ResponseEntity.ok("Tiername wurde bereits verwendet benutze bitte einen anderen");
+                return ResponseEntity.status(400).body("Tiername wurde bereits verwendet benutze bitte einen anderen");
             } else {
                 Pet createdPet = petService.createPetInternal(newPet.getType(), newPet.getName(), newPet.getUserId());
                 return ResponseEntity.ok(createdPet);

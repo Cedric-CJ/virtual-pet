@@ -7,10 +7,12 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class PetService {
@@ -74,12 +76,24 @@ public class PetService {
         return pet;
     }
 
-    @Transactional
-    public void updatePetStats(Long userId, String petName, PetStats stats) {
+    public void updatePetStats(Long userId, String petName, Map<String, Integer> stats) {
         String sql = "UPDATE application_pet SET hunger = ?, durst = ?, energie = ?, komfort = ? WHERE user_id = ? AND name = ?";
-        int rowsAffected = jdbcTemplate.update(sql, stats.getHunger(), stats.getDurst(), stats.getEnergie(), stats.getKomfort(), userId, petName);
-
+        int rowsAffected = jdbcTemplate.update(sql, stats.get("hunger"), stats.get("durst"), stats.get("energie"), stats.get("komfort"), userId, petName);
         System.out.println("Anzahl der aktualisierten Zeilen für Statistiken: " + rowsAffected);
+    }
+
+    public void updateLastActions(Long userId, String petName, Map<String, String> lastActions) {
+        String sql = "UPDATE application_pet SET last_fed = ?, last_watered = ?, last_slept = ?, last_petted = ?, last_showered = ? WHERE user_id = ? AND name = ?";
+
+        // Konvertiere die Zeitstempel in das korrekte Format
+        Timestamp lastFed = Timestamp.valueOf(lastActions.get("lastFed").replace("T", " ").substring(0, 19));
+        Timestamp lastWatered = Timestamp.valueOf(lastActions.get("lastWatered").replace("T", " ").substring(0, 19));
+        Timestamp lastSlept = Timestamp.valueOf(lastActions.get("lastSlept").replace("T", " ").substring(0, 19));
+        Timestamp lastPetted = Timestamp.valueOf(lastActions.get("lastPetted").replace("T", " ").substring(0, 19));
+        Timestamp lastShowered = Timestamp.valueOf(lastActions.get("lastShowered").replace("T", " ").substring(0, 19));
+
+        int rowsAffected = jdbcTemplate.update(sql, lastFed, lastWatered, lastSlept, lastPetted, lastShowered, userId, petName);
+        System.out.println("Anzahl der aktualisierten Zeilen für letzte Aktionen: " + rowsAffected);
     }
 
     public Pet createPetInternal(String type, String name, Long userId) {
