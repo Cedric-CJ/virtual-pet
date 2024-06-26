@@ -86,7 +86,7 @@ const createPet = async (event: Event) => {
     message.value = '';
     try {
       console.log('Sending data to backend:', petData.value);
-      const response = await axios.post("http://localhost:8080/api/checkAndCreate", petData.value);
+      const response = await axios.post("https://virtual-pet-backend.onrender.com/api/checkAndCreate", petData.value);
       if (response.status === 200) {
         if (typeof response.data === 'string') {
           // Backend returned a message that should be displayed
