@@ -86,23 +86,37 @@ const createPet = async (event: Event) => {
     message.value = '';
     try {
       console.log('Sending data to backend:', petData.value);
-      const response = await axios.post("https://virtual-pet-backend.onrender.com/api/checkAndCreate", petData.value);
+      const response = await axios.post("http://localhost:8080/api/checkAndCreate", petData.value);
       if (response.status === 200) {
-        message.value = 'Haustier erfolgreich erstellt!';
-        messageType.value = 'success';
-        console.log('Pet created successfully, navigating to pet page with data:', response.data);
-        router.push({ name: 'Pet' });
-        loading.value = false;
+        if (typeof response.data === 'string') {
+          // Backend returned a message that should be displayed
+          message.value = response.data;
+          messageType.value = 'error';
+        } else {
+          // Backend returned the created pet data
+          message.value = 'Haustier erfolgreich erstellt!';
+          messageType.value = 'success';
+          console.log('Pet created successfully, navigating to pet page with data:', response.data);
+          router.push({ name: 'Pet' });
+        }
       } else {
         console.error('Unexpected response status:', response.status);
         message.value = 'Fehler beim Erstellen des Haustiers';
         messageType.value = 'error';
-        loading.value = false;
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Fehler beim Erstellen des Haustiers:', error);
-      message.value = 'Fehler beim Erstellen des Haustiers';
+      if (axios.isAxiosError(error)) {
+        if (error.response && error.response.status === 400) {
+          message.value = error.response.data as string;
+        } else {
+          message.value = 'Fehler beim Erstellen des Haustiers';
+        }
+      } else {
+        message.value = 'Ein unbekannter Fehler ist aufgetreten';
+      }
       messageType.value = 'error';
+    } finally {
       loading.value = false;
     }
   } else {

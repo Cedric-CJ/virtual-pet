@@ -22,7 +22,7 @@ export const useUserStore = defineStore('user', {
             lastShowered: '',
             username: '',
             userId: null,
-            dead: false // Neu hinzugefügt
+            dead: false
         }
     }),
     actions: {

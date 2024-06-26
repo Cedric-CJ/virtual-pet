@@ -8,12 +8,12 @@
       </div>
       <h1>{{ store.petData.name }}</h1>
       <div class="actions" v-if="!isPetDead">
-        <button v-if="store.petData.stats" :class="{ 'alert-button': store.petData.stats.Hunger < 20 }" @click="performAction('feed')">Füttern</button>
-        <button v-if="store.petData.stats" :class="{ 'alert-button': store.petData.stats.Durst < 20 }" @click="performAction('water')">Wasser geben</button>
-        <button v-if="store.petData.stats" :class="{ 'alert-button': store.petData.stats.Energie < 20 }" @click="performAction('sleep')">Schlafen</button>
-        <button v-if="store.petData.stats" :class="{ 'alert-button': store.petData.stats.Komfort < 20 }" @click="performAction('pet')">Streicheln</button>
-        <button v-if="store.petData.stats" @click="performAction('clean')">Duschen</button>
-        <button v-if="store.petData.stats" @click="performAction('play')">Spielen</button>
+        <button v-if="store.petData.stats" :class="{ 'alert-button': store.petData.stats.Hunger < 20 }" @click="performAction('feed')":disabled="isActionInProgress">Füttern</button>
+        <button v-if="store.petData.stats" :class="{ 'alert-button': store.petData.stats.Durst < 20 }" @click="performAction('water')":disabled="isActionInProgress">Wasser geben</button>
+        <button v-if="store.petData.stats" :class="{ 'alert-button': store.petData.stats.Energie < 20 }" @click="performAction('sleep')":disabled="isActionInProgress">Schlafen</button>
+        <button v-if="store.petData.stats" :class="{ 'alert-button': store.petData.stats.Komfort < 20 }" @click="performAction('pet')":disabled="isActionInProgress">Streicheln</button>
+        <button v-if="store.petData.stats" :class="{ 'alert-button': store.petData.stats.Komfort < 20 }" @click="performAction('clean')":disabled="isActionInProgress">Duschen</button>
+        <button v-if="store.petData.stats" :class="{ 'alert-button': store.petData.stats.Komfort < 20 }" @click="performAction('play')":disabled="isActionInProgress">Spielen</button>
       </div>
       <transition name="fade">
         <p v-if="actionText" class="action-text">{{ actionText }}</p>
@@ -71,7 +71,7 @@ import { useRouter } from 'vue-router';
 import { useUserStore } from '@/store';
 import { PetData } from '@/types';
 
-const API_URL = 'https://virtual-pet-backend.onrender.com/api';
+const API_URL = 'http://localhost:8080/api';
 const pets = ref<any[]>([]);
 const store = useUserStore();
 const actionText = ref<string>('');
@@ -79,6 +79,7 @@ const currentImage = ref<string>('');
 const router = useRouter();
 const isPetDead = ref<boolean>(false);
 const showConfirmDelete = ref<boolean>(false);
+const isActionInProgress = ref<boolean>(false);
 
 const axiosInstance = axios.create({
   baseURL: API_URL,
@@ -236,10 +237,10 @@ const logout = () => {
 
 const reduceStatsOverTime = () => {
   setInterval(() => {
-    store.petData.stats.Energie = Math.max(store.petData.stats.Energie - 5, 0);
-    store.petData.stats.Hunger = Math.max(store.petData.stats.Hunger - 5, 0);
-    store.petData.stats.Durst = Math.max(store.petData.stats.Durst - 5, 0);
-    store.petData.stats.Komfort = Math.max(store.petData.stats.Komfort - 5, 0);
+    store.petData.stats.Energie = Math.max(store.petData.stats.Energie - 1, 0);
+    store.petData.stats.Hunger = Math.max(store.petData.stats.Hunger - 1, 0);
+    store.petData.stats.Durst = Math.max(store.petData.stats.Durst - 1, 0);
+    store.petData.stats.Komfort = Math.max(store.petData.stats.Komfort - 1, 0);
     checkIfPetIsDead();
   }, 3600000); // Alle 1 Stunde
 };
@@ -256,6 +257,8 @@ onMounted(async () => {
 });
 
 const performAction = async (action: string) => {
+  if (isActionInProgress.value) return;
+  isActionInProgress.value = true;
   const now = new Date().toISOString();
   const actions: { [key: string]: () => void } = {
     feed: () => {
@@ -305,16 +308,39 @@ const performAction = async (action: string) => {
   // Sicherstellen, dass der Zustand vor dem API-Aufruf aktualisiert wird
   await nextTick();
 
+  // Vorbereiten der Daten zum Senden
+  const statsToSend = {
+    hunger: store.petData.stats.Hunger,
+    durst: store.petData.stats.Durst,
+    energie: store.petData.stats.Energie,
+    komfort: store.petData.stats.Komfort
+  };
+
+  const lastActionDatesToSend = {
+    lastFed: store.petData.lastFed,
+    lastWatered: store.petData.lastWatered,
+    lastSlept: store.petData.lastSlept,
+    lastPetted: store.petData.lastPetted,
+    lastShowered: store.petData.lastShowered
+  };
+
   try {
-    // Aktualisierte Haustierdaten an das Backend senden
-    const response = await axiosInstance.post('/save', store.petData);
-    console.log('Antwort vom Backend:', response.data);  // Antwort des Backends überprüfen
+    // Senden der aktualisierten Statistiken an das Backend
+    const responseStats = await axiosInstance.post('/updateStats', { stats: statsToSend, userId: store.petData.userId, name: store.petData.name });
+    console.log('Antwort vom Backend (Statistiken):', responseStats.data);
+
+    // Senden der letzten Aktionsdaten an das Backend
+    const responseLastActions = await axiosInstance.post('/updateLastActions', { lastActions: lastActionDatesToSend, userId: store.petData.userId, name: store.petData.name });
+    console.log('Antwort vom Backend (letzte Aktionen):', responseLastActions.data);
+
     checkIfPetIsDead();
     setTimeout(() => {
       setInitialImage();
     }, 2000);
   } catch (error) {
     handleError(error);
+  } finally {
+    isActionInProgress.value = false;
   }
 };
 
@@ -322,8 +348,9 @@ const changeImage = (newImage: string) => {
   const frontImage = store.petData.type === 'dog' ? new URL('../assets/dogfront.png', import.meta.url).href : new URL('../assets/catfront.png', import.meta.url).href;
   currentImage.value = newImage;
   setTimeout(() => {
+    isActionInProgress.value = false;
     setInitialImage();
-  }, 5000);
+  }, 3000);
 };
 
 const updateActionText = (action: string) => {
