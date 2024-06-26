@@ -1,8 +1,20 @@
 # virtual pet
-Hier sollte sich der Benutzer anmelden und die Möglichkeit haben, zwischen zwei verschiedenen Tieren zu wählen.
+Hier kann sich der Benutzer anmelden und die Möglichkeit haben, zwischen zwei verschiedenen Tieren zu wählen.
 Diese Tiere können benannt werden. Zudem ist es möglich, die virtuellen Tiere zu füttern, trinken zu geben, zu streicheln, zu duschen und mit ihnen zu spielen.
-Über den Tieren befinden sich Statusleisten, die anzeigen, wie sich das Tier fühlt und was es benötigt.
+Über den Tieren befinden sich Statusleisten, die anzeigen, wie sich das Tier fühlt und was es benötigt. Die Bedürfnisse können mit den Buttons befriedigt werden.
+Das Tier kann auch sterben, wenn es nicht genug Aufmerksamkeit bekommt. Danach muss ein neues Tier erstellt werden. Es gibt eine Top-Tabelle für alle Tiere.
 
+UseCases:
+1. Anmelden
+2. Registrieren
+3. Abmelden
+4. Auswahl von Tier
+5. Name für das Tier
+6. Interaktion mit Tier (Füttern, Trinken)
+7. Top Tabelle
+8. Darkmode
+9. Menü als Logo
+10. nach dem Tod des Tieres kann ein neues erstellt werden
 
 Milestones:
 M1: Thema überlegt, Paar gefunden, GitHub-
