@@ -71,7 +71,7 @@ import { useRouter } from 'vue-router';
 import { useUserStore } from '@/store';
 import { PetData } from '@/types';
 
-const API_URL = 'http://localhost:8080/api';
+const API_URL = 'https://virtual-pet-backend.onrender.com/api';
 const pets = ref<any[]>([]);
 const store = useUserStore();
 const actionText = ref<string>('');
@@ -570,7 +570,24 @@ th {
   text-align: center;
 }
 
+body.dark-mode .modal-content {
+  background: #333;
+  color: #fff;
+}
+
 .modal-content button {
   margin: 10px;
+}
+
+/* Dark Mode Styles for Other Elements */
+body.dark-mode .stats,
+body.dark-mode .top-pets {
+  background-color: #333;
+  color: #fff;
+}
+
+body.dark-mode .action-text {
+  background-color: #000;
+  color: #fff;
 }
 </style>
