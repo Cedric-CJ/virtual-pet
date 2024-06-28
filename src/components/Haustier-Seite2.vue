@@ -39,7 +39,7 @@
         </tr>
         </thead>
         <tbody>
-        <tr v-for="(pet, index) in pets" :key="index">
+        <tr v-for="(pet, index) in sortedPets" :key="index">
           <td>{{ index + 1 }}</td>
           <td>{{ pet.name }}</td>
           <td>{{ pet.daysAlive }}</td>
@@ -65,7 +65,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, nextTick, onMounted } from 'vue';
+import { ref, nextTick, onMounted, computed } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/store';
@@ -118,6 +118,10 @@ const getTopPets = async () => {
     handleError(error);
   }
 };
+
+const sortedPets = computed(() => {
+  return pets.value.slice().sort((a, b) => b.daysAlive - a.daysAlive);
+});
 
 const getPetData = async () => {
   try {
