@@ -1,0 +1,61 @@
+application_dead: table
+    + columns
+        user_id: bigint NN
+        username: varchar(255) NN
+        name: varchar(255) NN
+        type: varchar(255) NN
+        hunger: integer NN default 5
+        durst: integer NN default 5
+        energie: integer NN default 5
+        komfort: integer NN default 5
+        created_date: date NN
+        last_fed: timestamp
+        last_watered: timestamp
+        last_slept: timestamp
+        last_petted: timestamp
+        last_showered: timestamp
+    + indices
+        #1: unique (user_id, name)
+    + keys
+        #1: PK (user_id, name) (underlying index #1)
+    + foreign-keys
+        fk_user: foreign key (user_id) -> application_user (id)
+
+
+
+
+application_pet: table
+    + columns
+        user_id: bigint NN
+        username: varchar(255) NN
+        name: varchar(255) NN
+        type: varchar(255) NN
+        hunger: integer NN default 5
+        durst: integer NN default 5
+        energie: integer NN default 5
+        komfort: integer NN default 5
+        created_date: date NN
+        last_fed: timestamp
+        last_watered: timestamp
+        last_slept: timestamp
+        last_petted: timestamp
+        last_showered: timestamp
+    + indices
+        #1: unique (user_id, name)
+    + keys
+        #1: PK (user_id, name) (underlying index #1)
+    + foreign-keys
+        fk_user: foreign key (user_id) -> application_user (id)
+
+
+application_user: table
+    + columns
+        id: bigint NN default nextval('application_user_id_seq'::regclass)
+            . references
+                sequence = application_user_id_seq
+        username: varchar(255) NN
+        password: varchar(255) NN
+    + indices
+        #1: unique (id)
+    + keys
+        #1: PK (id) (underlying index #1)
