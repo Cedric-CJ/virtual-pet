@@ -1,61 +1,53 @@
-application_dead: table
-    + columns
-        user_id: bigint NN
-        username: varchar(255) NN
-        name: varchar(255) NN
-        type: varchar(255) NN
-        hunger: integer NN default 5
-        durst: integer NN default 5
-        energie: integer NN default 5
-        komfort: integer NN default 5
-        created_date: date NN
-        last_fed: timestamp
-        last_watered: timestamp
-        last_slept: timestamp
-        last_petted: timestamp
-        last_showered: timestamp
-    + indices
-        #1: unique (user_id, name)
-    + keys
-        #1: PK (user_id, name) (underlying index #1)
-    + foreign-keys
-        fk_user: foreign key (user_id) -> application_user (id)
+-- Erstellen der Sequenz für die ID der Tabelle application_user
+CREATE SEQUENCE application_user_id_seq;
 
+-- Erstellen der Tabelle application_user
+CREATE TABLE application_user (
+                                  id BIGINT NOT NULL DEFAULT nextval('application_user_id_seq'),
+                                  username VARCHAR(255) NOT NULL,
+                                  password VARCHAR(255) NOT NULL,
+                                  CONSTRAINT pk_application_user PRIMARY KEY (id),
+                                  CONSTRAINT unq_application_user_id UNIQUE (id)
+);
 
+-- Erstellen der Tabelle application_dead
+CREATE TABLE application_dead (
+                                  user_id BIGINT NOT NULL,
+                                  username VARCHAR(255) NOT NULL,
+                                  name VARCHAR(255) NOT NULL,
+                                  type VARCHAR(255) NOT NULL,
+                                  hunger INTEGER NOT NULL DEFAULT 5,
+                                  durst INTEGER NOT NULL DEFAULT 5,
+                                  energie INTEGER NOT NULL DEFAULT 5,
+                                  komfort INTEGER NOT NULL DEFAULT 5,
+                                  created_date DATE NOT NULL,
+                                  last_fed TIMESTAMP,
+                                  last_watered TIMESTAMP,
+                                  last_slept TIMESTAMP,
+                                  last_petted TIMESTAMP,
+                                  last_showered TIMESTAMP,
+                                  CONSTRAINT pk_application_dead PRIMARY KEY (user_id, name),
+                                  CONSTRAINT unq_application_dead_user_name UNIQUE (user_id, name),
+                                  CONSTRAINT fk_application_dead_user FOREIGN KEY (user_id) REFERENCES application_user(id)
+);
 
-
-application_pet: table
-    + columns
-        user_id: bigint NN
-        username: varchar(255) NN
-        name: varchar(255) NN
-        type: varchar(255) NN
-        hunger: integer NN default 5
-        durst: integer NN default 5
-        energie: integer NN default 5
-        komfort: integer NN default 5
-        created_date: date NN
-        last_fed: timestamp
-        last_watered: timestamp
-        last_slept: timestamp
-        last_petted: timestamp
-        last_showered: timestamp
-    + indices
-        #1: unique (user_id, name)
-    + keys
-        #1: PK (user_id, name) (underlying index #1)
-    + foreign-keys
-        fk_user: foreign key (user_id) -> application_user (id)
-
-
-application_user: table
-    + columns
-        id: bigint NN default nextval('application_user_id_seq'::regclass)
-            . references
-                sequence = application_user_id_seq
-        username: varchar(255) NN
-        password: varchar(255) NN
-    + indices
-        #1: unique (id)
-    + keys
-        #1: PK (id) (underlying index #1)
+-- Erstellen der Tabelle application_pet
+CREATE TABLE application_pet (
+                                 user_id BIGINT NOT NULL,
+                                 username VARCHAR(255) NOT NULL,
+                                 name VARCHAR(255) NOT NULL,
+                                 type VARCHAR(255) NOT NULL,
+                                 hunger INTEGER NOT NULL DEFAULT 5,
+                                 durst INTEGER NOT NULL DEFAULT 5,
+                                 energie INTEGER NOT NULL DEFAULT 5,
+                                 komfort INTEGER NOT NULL DEFAULT 5,
+                                 created_date DATE NOT NULL,
+                                 last_fed TIMESTAMP,
+                                 last_watered TIMESTAMP,
+                                 last_slept TIMESTAMP,
+                                 last_petted TIMESTAMP,
+                                 last_showered TIMESTAMP,
+                                 CONSTRAINT pk_application_pet PRIMARY KEY (user_id, name),
+                                 CONSTRAINT unq_application_pet_user_name UNIQUE (user_id, name),
+                                 CONSTRAINT fk_application_pet_user FOREIGN KEY (user_id) REFERENCES application_user(id)
+);
