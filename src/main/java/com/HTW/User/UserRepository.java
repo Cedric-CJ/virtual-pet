@@ -8,6 +8,6 @@ public interface UserRepository extends JpaRepository<ApplicationUser, Long> {
 
     Optional<ApplicationUser> findByUsername(String username);
 
-    @Query("SELECT u.username FROM ApplicationUser u WHERE u.id = ?1")
+    @Query(value = "SELECT u.username FROM v_pet.user u WHERE u.id = ?1", nativeQuery = true)
     String findUsernameById(Long id);
 }
