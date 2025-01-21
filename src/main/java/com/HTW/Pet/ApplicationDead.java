@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "application_dead")
+@Table(name = "v_pet.dead")
 public class ApplicationDead {
 
     @Id

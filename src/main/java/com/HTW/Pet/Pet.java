@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "application_pet")
+@Table(name = "v_pet.pet")
 @IdClass(PetId.class)
 public class Pet {
 
