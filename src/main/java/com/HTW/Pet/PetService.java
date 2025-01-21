@@ -31,7 +31,7 @@ public class PetService {
     @Transactional
     public Pet savePet(Pet pet) {
         // Überprüfen, ob das Haustier existiert
-        String checkSql = "SELECT * FROM pet WHERE user_id = ? AND name = ?";
+        String checkSql = "SELECT * FROM v_pet.pet WHERE user_id = ? AND name = ?";
         Pet existingPet;
         try {
             existingPet = jdbcTemplate.queryForObject(checkSql, new Object[]{pet.getUserId(), pet.getName()}, (rs, rowNum) -> {
@@ -64,7 +64,7 @@ public class PetService {
         System.out.println("Aktualisiere Haustierdaten in der Datenbank: " + pet.toString());
 
         // Update SQL für die Haustierdaten
-        String sql = "UPDATE pet SET hunger = ?, durst = ?, energie = ?, komfort = ?, created_date = ?, last_fed = ?, last_watered = ?, last_slept = ?, last_petted = ?, last_showered = ? WHERE user_id = ? AND name = ?";
+        String sql = "UPDATE v_pet.pet SET hunger = ?, durst = ?, energie = ?, komfort = ?, created_date = ?, last_fed = ?, last_watered = ?, last_slept = ?, last_petted = ?, last_showered = ? WHERE user_id = ? AND name = ?";
         int rowsAffected = jdbcTemplate.update(sql, pet.getHunger(), pet.getDurst(), pet.getEnergie(), pet.getKomfort(), pet.getCreatedDate(), pet.getLastFed(), pet.getLastWatered(), pet.getLastSlept(), pet.getLastPetted(), pet.getLastShowered(), pet.getUserId(), pet.getName());
 
         System.out.println("Anzahl der aktualisierten Zeilen: " + rowsAffected);
@@ -77,13 +77,13 @@ public class PetService {
     }
 
     public void updatePetStats(Long userId, String petName, Map<String, Integer> stats) {
-        String sql = "UPDATE pet SET hunger = ?, durst = ?, energie = ?, komfort = ? WHERE user_id = ? AND name = ?";
+        String sql = "UPDATE v_pet.pet SET hunger = ?, durst = ?, energie = ?, komfort = ? WHERE user_id = ? AND name = ?";
         int rowsAffected = jdbcTemplate.update(sql, stats.get("hunger"), stats.get("durst"), stats.get("energie"), stats.get("komfort"), userId, petName);
         System.out.println("Anzahl der aktualisierten Zeilen für Statistiken: " + rowsAffected);
     }
 
     public void updateLastActions(Long userId, String petName, Map<String, String> lastActions) {
-        String sql = "UPDATE pet SET last_fed = ?, last_watered = ?, last_slept = ?, last_petted = ?, last_showered = ? WHERE user_id = ? AND name = ?";
+        String sql = "UPDATE v_pet.pet SET last_fed = ?, last_watered = ?, last_slept = ?, last_petted = ?, last_showered = ? WHERE user_id = ? AND name = ?";
 
         // Konvertiere die Zeitstempel in das korrekte Format
         Timestamp lastFed = Timestamp.valueOf(lastActions.get("lastFed").replace("T", " ").substring(0, 19));
@@ -122,7 +122,7 @@ public class PetService {
     }
 
     public Pet getPetDetailsInternal(Long userId, String username) {
-        String sql = "SELECT * FROM pet WHERE user_id = ? AND username = ?";
+        String sql = "SELECT * FROM v_pet.pet WHERE user_id = ? AND username = ?";
         Pet pet;
         try {
             pet = jdbcTemplate.queryForObject(sql, new Object[]{userId, username}, (rs, rowNum) -> {
@@ -152,18 +152,18 @@ public class PetService {
     }
 
     public boolean doesPetExist(Long userId, String name) {
-        String sqlPet = "SELECT COUNT(*) FROM pet WHERE user_id = ? AND name = ?";
+        String sqlPet = "SELECT COUNT(*) FROM v_pet.pet WHERE user_id = ? AND name = ?";
         Integer countPet = jdbcTemplate.queryForObject(sqlPet, new Object[]{userId, name}, Integer.class);
 
-        String sqlDead = "SELECT COUNT(*) FROM dead WHERE user_id = ? AND name = ?";
+        String sqlDead = "SELECT COUNT(*) FROM v_pet.dead WHERE user_id = ? AND name = ?";
         Integer countDead = jdbcTemplate.queryForObject(sqlDead, new Object[]{userId, name}, Integer.class);
 
         return (countPet != null && countPet > 0) || (countDead != null && countDead > 0);
     }
 
     public List<Pet> getAllPets() {
-        String sqlAlive = "SELECT user_id, username, name, type, hunger, durst, energie, komfort, created_date, last_fed, last_watered, last_slept, last_petted, last_showered, false AS dead FROM pet";
-        String sqlDead = "SELECT user_id, username, name, type, hunger, durst, energie, komfort, created_date, last_fed, last_watered, last_slept, last_petted, last_showered, true AS dead FROM dead";
+        String sqlAlive = "SELECT user_id, username, name, type, hunger, durst, energie, komfort, created_date, last_fed, last_watered, last_slept, last_petted, last_showered, false AS dead FROM v_pet.pet";
+        String sqlDead = "SELECT user_id, username, name, type, hunger, durst, energie, komfort, created_date, last_fed, last_watered, last_slept, last_petted, last_showered, true AS dead FROM v_pet.dead";
 
         List<Pet> alivePets = jdbcTemplate.query(sqlAlive, (rs, rowNum) -> {
             Pet pet = new Pet();
@@ -210,7 +210,7 @@ public class PetService {
     }
 
     public List<Pet> getAllPetsInternal() {
-        String sql = "SELECT * FROM pet";
+        String sql = "SELECT * FROM v_pet.pet";
         return jdbcTemplate.query(sql, (rs, rowNum) -> {
             Pet pet = new Pet();
             pet.setUserId(rs.getLong("user_id"));
@@ -239,12 +239,12 @@ public class PetService {
     }
 
     private void moveToDeadTable(Pet pet) {
-        String sql = "INSERT INTO dead (user_id, username, name, type, hunger, durst, energie, komfort, created_date, last_fed, last_watered, last_slept, last_petted, last_showered) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO v_pet.dead (user_id, username, name, type, hunger, durst, energie, komfort, created_date, last_fed, last_watered, last_slept, last_petted, last_showered) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         jdbcTemplate.update(sql, pet.getUserId(), pet.getUsername(), pet.getName(), pet.getType(), pet.getHunger(), pet.getDurst(), pet.getEnergie(), pet.getKomfort(), pet.getCreatedDate(), pet.getLastFed(), pet.getLastWatered(), pet.getLastSlept(), pet.getLastPetted(), pet.getLastShowered());
     }
 
     private void deleteFromPetTable(Long userId, String username) {
-        String sql = "DELETE FROM pet WHERE user_id = ? AND username = ?";
+        String sql = "DELETE FROM v_pet.pet WHERE user_id = ? AND username = ?";
         int rowsAffected = jdbcTemplate.update(sql, userId, username);
 
         if (rowsAffected == 0) {
