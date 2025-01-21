@@ -32,7 +32,7 @@ public class UserController {
         }
 
         try {
-            String checkUserQuery = "SELECT COUNT(*) FROM application_user WHERE username = ?";
+            String checkUserQuery = "SELECT COUNT(*) FROM user WHERE username = ?";
             int count = jdbcTemplate.queryForObject(checkUserQuery, new Object[]{newUser.getUsername()}, Integer.class);
 
             if (count > 0) {
@@ -41,11 +41,11 @@ public class UserController {
             }
 
             String hashedPassword = bCryptPasswordEncoder.encode(newUser.getPassword());
-            String insertUserQuery = "INSERT INTO application_user (username, password) VALUES (?, ?)";
+            String insertUserQuery = "INSERT INTO user (username, password) VALUES (?, ?)";
             int rowsAffected = jdbcTemplate.update(insertUserQuery, newUser.getUsername(), hashedPassword);
 
             if (rowsAffected > 0) {
-                String getUserIdQuery = "SELECT id FROM application_user WHERE username = ?";
+                String getUserIdQuery = "SELECT id FROM user WHERE username = ?";
                 Integer userId = jdbcTemplate.queryForObject(getUserIdQuery, new Object[]{newUser.getUsername()}, Integer.class);
                 logger.info("Benutzer erfolgreich registriert mit ID: {}", userId);
                 Map<String, Object> response = new HashMap<>();
@@ -71,7 +71,7 @@ public class UserController {
         logger.info("Login attempt for username: {}", username);
 
         try {
-            String findUserQuery = "SELECT id, username, password FROM application_user WHERE username = ?";
+            String findUserQuery = "SELECT id, username, password FROM user WHERE username = ?";
             Map<String, Object> userRecord = jdbcTemplate.queryForMap(findUserQuery, username);
 
             Long userId = ((Number) userRecord.get("id")).longValue();
@@ -90,7 +90,7 @@ public class UserController {
             }
 
             // Überprüfen, ob der Benutzer bereits ein Haustier hat
-            String checkPetQuery = "SELECT COUNT(*) FROM application_pet WHERE username = ?";
+            String checkPetQuery = "SELECT COUNT(*) FROM pet WHERE username = ?";
             int petCount = jdbcTemplate.queryForObject(checkPetQuery, new Object[]{username}, Integer.class);
             logger.debug("Pet count for user {}: {}", username, petCount);
 
