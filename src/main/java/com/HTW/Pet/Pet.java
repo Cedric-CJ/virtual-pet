@@ -6,15 +6,17 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "pet", schema = "v_pet")
-@IdClass(PetId.class)
 public class Pet {
 
     @Id
-    @Column(name = "user_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Long id;
+
+    @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    @Id
-    @Column(name = "name")
+    @Column(name = "name", nullable = false)
     private String name;
 
     @Column(name = "type", nullable = false)
@@ -53,13 +55,21 @@ public class Pet {
     @Column(name = "username", nullable = false)
     private String username;
 
-    @Transient
-    private boolean dead;
+    @Column(name = "is_dead", nullable = false)
+    private boolean isDead = false;
 
     // Default constructor
     public Pet() {}
 
     // Getters and setters
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public Long getUserId() {
         return userId;
     }
@@ -173,10 +183,10 @@ public class Pet {
     }
 
     public boolean isDead() {
-        return dead;
+        return isDead;
     }
 
     public void setDead(boolean dead) {
-        this.dead = dead;
+        isDead = dead;
     }
 }
