@@ -52,8 +52,8 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 import { useUserStore } from '@/store';
-import dogBarkSound from '@/assets/sounds/Hund_kurz_jung.mp3';
-import catMeowSound from '@/assets/sounds/Katze_kurz_jung.mp3';
+import dogBarkSound from './public/sounds/Hund_kurz_jung.mp3';
+import catMeowSound from './public/sounds/Katze_kurz_jung.mp3';
 const petData = ref({
   name: '',
   type: '',
