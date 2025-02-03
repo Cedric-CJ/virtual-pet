@@ -1,116 +1,16 @@
 body {
-    font-family: 'Arial', sans-serif;
+    font-family: 'Comic Sans MS', sans-serif;
     transition: background-color 0.3s, color 0.3s;
 }
 
 body.light-mode {
-    --dropdown-bg: #ffffff;
-    --link-color: black;
-    --link-hover-bg: #ddd;
-    --logo-bg: Transparent; /* Hintergrundfarbe für das Logo im Light Mode */
-    background-color: #ffffff;
-    color: #000000;
+    --text-color: black;
+    --text-invert-color: Black;
+    background-color: rgba(18, 18, 18, 0.1);
 }
 
 body.dark-mode {
-    --dropdown-bg: #333;
-    --link-color: #fff;
-    --link-hover-bg: #555;
-    --logo-bg: Transparent; /* Hintergrundfarbe für das Logo im Dark Mode */
-    background-color: #121212;
-    color: #ffffff;
-}
-
-.navbar {
-    position: fixed;
-    top: 10px;
-    right: 10px;
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-}
-
-.menu-icon {
-    cursor: pointer;
-    font-size: 24px;
-}
-
-.dropdown {
-    position: absolute;
-    top: 60px;
-    right: 0;
-    background-color: #ffffff;
-    border: 1px solid #ccc;
-    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    padding: 10px;
-    z-index: 1000;
-}
-
-.dropdown.show {
-    display: flex;
-}
-
-.dropdown h1 {
-    margin: 10px 0;
-}
-
-nav {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    justify-content: center;
-    align-items: center;
-}
-
-nav a {
-    text-decoration: none;
-    color: black;
-    padding: 10px;
-    width: 100%;
-    text-align: center;
-}
-
-nav a:hover {
-    background-color: #ddd;
-}
-
-.dropdown a {
-    text-decoration: none;
-    color: black;
-    padding: 10px;
-    width: 100%;
-    text-align: center;
-}
-
-.dropdown a:hover {
-    background-color: #ddd;
-}
-
-/* Dark Mode Styles */
-body.dark-mode .navbar {
-    background-color: transparent;
-}
-
-body.dark-mode .dropdown {
-    background-color: #333;
-    color: #fff;
-}
-
-body.dark-mode nav a {
-    color: #fff;
-}
-
-body.dark-mode nav a:hover {
-    background-color: #555;
-}
-
-/* Transition for fade effect */
-.fade-enter-active, .fade-leave-active {
-    transition: opacity 0.5s;
-}
-.fade-enter, .fade-leave-to {
-    opacity: 0;
+    --text-color: black;
+    --text-invert-color: white;
+    background-color: rgba(18, 18, 18, 0.9);
 }

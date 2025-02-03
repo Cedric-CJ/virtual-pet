@@ -1,261 +1,249 @@
 <template>
   <div class="pet-creation">
-    <div class="h1">
-      <h1>Erstelle dein Haustier</h1>
+    <div class="title-container">
+      <h1 class="title left">C<br>r<br>e<br>a<br>t<br>e<br><br>y<br>o<br>u<br>r<br><br>p<br>e<br>t</h1>
+      <h1 class="title right">C<br>r<br>e<br>a<br>t<br>e<br><br>y<br>o<br>u<br>r<br><br>p<br>e<br>t</h1>
     </div>
-    <div class="pet-selection">
-      <div class="pet-option" @click="selectPet('dog')">
-        <img
-            src="@/assets/dogpositiv.png"
-            alt="Hund"
-            :class="{ selected: petData.type === 'dog' }"
+    <div class="content">
+      <div class="pet-selection">
+        <div class="pet-option1" @mouseenter="hoverPet('dog')" @mouseleave="leavePet" @click="selectPet('dog')">
+          <img
+              src="@/assets/pictures/dogpositiv.png"
+              alt="Hund"
+              :class="{ selected: petData.type === 'dog', hovering: hoveredPet === 'dog' }"
+          />
+        </div>
+        <div class="pet-option2" @mouseenter="hoverPet('cat')" @mouseleave="leavePet" @click="selectPet('cat')">
+          <img
+              src="@/assets/pictures/catpositiv.png"
+              alt="Katze"
+              :class="{ selected: petData.type === 'cat', hovering: hoveredPet === 'cat' }"
+          />
+        </div>
+      </div>
+      <div class="input-container">
+        <input
+            id="petName"
+            v-model="petData.name"
+            placeholder="Your pet's name"
+            required
+            @input="handleInput"
+            @keydown.enter="createPet"
+            class="animated-input"
         />
       </div>
-      <div class="pet-option" @click="selectPet('cat')">
-        <img
-            src="@/assets/catpositiv.png"
-            alt="Katze"
-            :class="{ selected: petData.type === 'cat' }"
-        />
+      <button
+          v-if="petData.name"
+          @click="createPet"
+          :disabled="!petData.type || !petData.name || loading"
+          class="glow-button"
+      >
+        <span v-if="!loading">Create</span>
+        <span v-else class="loader"></span>
+      </button>
+      <div v-if="message" class="message" :class="{'error': messageType === 'error', 'success': messageType === 'success'}">
+        {{ message }}
       </div>
-    </div>
-    <input
-        id="petName"
-        v-model="petData.name"
-        placeholder="Name des Haustieres"
-        required
-        @input="handleInput"
-        @keydown.enter="createPet"
-    />
-    <button
-        @click="createPet"
-        :disabled="!petData.type || !petData.name || loading"
-        :class="{ 'glow-button': petData.name }"
-    >
-      <span v-if="!loading">Erstellen</span>
-      <span v-else class="loader"></span>
-    </button>
-    <div class="explosion" ref="explosion"></div>
-    <div v-if="message" class="message" :class="{'error': messageType === 'error', 'success': messageType === 'success'}">
-      {{ message }}
     </div>
   </div>
 </template>
-
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 import { useUserStore } from '@/store';
-
+import dogBarkSound from '@/assets/sounds/Hund_kurz_jung.mp3';
+import catMeowSound from '@/assets/sounds/Katze_kurz_jung.mp3';
 const petData = ref({
   name: '',
   type: '',
   userId: ''
 });
 const router = useRouter();
-const explosion = ref<HTMLDivElement | null>(null);
 const loading = ref(false);
 const message = ref('');
 const messageType = ref('');
+const hoveredPet = ref<string | null>(null);
 const store = useUserStore();
-
+const dogBark = new Audio(dogBarkSound);
+const catMeow = new Audio(catMeowSound);
 onMounted(() => {
   petData.value.userId = store.userId;
-  console.log('UserId set to:', petData.value.userId);
 });
-
 const selectPet = (type: string) => {
   petData.value.type = type;
-  console.log('Pet type selected:', type);
+  if (type === 'dog') {
+    dogBark.currentTime = 0;
+    dogBark.play();
+  }
+  if (type === 'cat') {
+    catMeow.currentTime = 0;
+    catMeow.play();
+  }
 };
-
-const handleInput = (event: Event) => {
-  if ((event.target as HTMLInputElement).value) {
+const hoverPet = (type: string) => {
+  hoveredPet.value = type;
+};
+const leavePet = () => {
+  hoveredPet.value = null;
+};
+const handleInput = () => {
+  if (petData.value.name) {
     document.querySelector('button')?.classList.add('glow-button');
   } else {
     document.querySelector('button')?.classList.remove('glow-button');
   }
 };
-
 const createPet = async (event: Event) => {
-  console.log('CreatePet method called');
   event.preventDefault();
   if (petData.value.name && petData.value.type && petData.value.userId) {
     loading.value = true;
     message.value = '';
     try {
-      console.log('Sending data to backend:', petData.value);
       const response = await axios.post("https://virtual-pet-backend.onrender.com/api/checkAndCreate", petData.value);
       if (response.status === 200) {
-        if (typeof response.data === 'string') {
-          // Backend returned a message that should be displayed
-          message.value = response.data;
-          messageType.value = 'error';
-        } else {
-          // Backend returned the created pet data
-          message.value = 'Haustier erfolgreich erstellt!';
-          messageType.value = 'success';
-          console.log('Pet created successfully, navigating to pet page with data:', response.data);
-          router.push({ name: 'Pet' });
+        message.value = typeof response.data === 'string' ? response.data : 'Haustier erfolgreich erstellt!';
+        messageType.value = typeof response.data === 'string' ? 'error' : 'success';
+        if (messageType.value === 'success') {
+          await router.push({ name: 'Pet' });
         }
       } else {
-        console.error('Unexpected response status:', response.status);
         message.value = 'Fehler beim Erstellen des Haustiers';
         messageType.value = 'error';
       }
     } catch (error: unknown) {
-      console.error('Fehler beim Erstellen des Haustiers:', error);
-      if (axios.isAxiosError(error)) {
-        if (error.response && error.response.status === 400) {
-          message.value = error.response.data as string;
-        } else {
-          message.value = 'Fehler beim Erstellen des Haustiers';
-        }
-      } else {
-        message.value = 'Ein unbekannter Fehler ist aufgetreten';
-      }
+      message.value = axios.isAxiosError(error) ? error.response?.data || 'Fehler beim Erstellen' : 'Ein unbekannter Fehler ist aufgetreten';
       messageType.value = 'error';
     } finally {
       loading.value = false;
     }
   } else {
-    console.warn('Pet data is incomplete:', petData.value);
     message.value = 'Bitte alle Felder ausfüllen';
     messageType.value = 'error';
   }
 };
-
 </script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Special+Elite&display=swap');
 
-<style scoped>
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Special Elite', cursive;
+}
 .pet-creation {
-  max-width: 100%;
-  margin: auto;
-  padding: 20px;
+  width: auto;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
   text-align: center;
   font-size: calc(16px + 0.5vw);
+  background: linear-gradient(-45deg, #c19a6b, #e6c27a, #d2a679, #a67c52);
+  background-size: 400% 400%;
+  animation: gradientMove 5s ease infinite;
 }
-
+@keyframes gradientMove {
+  0% { background-position: 0 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
+}
+.title-container {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 95%;
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+}
+.title {
+  font-size: 2rem;
+  opacity: 0.5;
+  text-transform: uppercase;
+  line-height: 1.9rem;
+  text-align: center;
+}
+.pet-option1 img.selected, .pet-option2 img.selected {
+  transform: scale(1.2);
+  filter: drop-shadow(0 0 15px rgba(255, 0, 150, 0.8)) drop-shadow(0 0 30px rgba(0, 255, 255, 0.8));
+  animation: rainbow-border 2s linear infinite;
+}
+.input-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+.animated-input {
+  width: 280px;
+  padding: 12px;
+  font-size: 1.2rem;
+  text-align: center;
+  border: 2px solid transparent;
+  border-radius: 50px;
+  background: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+  color: white;
+  transition: 0.3s ease-in-out;
+  outline: none;
+  position: relative;
+}
+.glow-button {
+  padding: 12px 25px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: white;
+  background: linear-gradient(90deg, #ff0000, #ff7300, #ffeb00, #00ff00, #00ffff, #0000ff, #8000ff);
+  background-size: 400% 400%;
+  border: none;
+  border-radius: 50px;
+  box-shadow: 0 0 10px rgb(255, 255, 255);
+  transition: all 0.3s ease-in-out;
+  cursor: pointer;
+  animation: rainbowAnimation 15s linear infinite;
+}
+.glow-button:disabled {
+  filter: grayscale(100%);
+  opacity: 0;
+  cursor: not-allowed;
+}
+@keyframes rainbowAnimation {
+  0% { background-position: 0 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
+}
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 .pet-selection {
   display: flex;
   justify-content: center;
-  gap: 20px;
+  gap: 10vw;
   margin-bottom: 20px;
-  flex-wrap: wrap;
 }
-
-.pet-option {
-  position: relative;
+.pet-option1, .pet-option2 {
   cursor: pointer;
   flex: 1 1 100px;
-  max-width: 150px;
+  max-width: 20vw;
+  transition: transform 0.3s ease-in-out;
 }
-
-.pet-option img {
+.pet-option1 img, .pet-option2 img {
   width: 100%;
   transition: transform 0.3s, filter 0.3s;
 }
-
-.pet-option img.selected {
-  transform: scale(1.1);
-  filter: drop-shadow(0 0 10px #4CAF50);
+.pet-option1 img.selected, .pet-option2 img.selected {
+  transform: scale(1.2);
+  filter: drop-shadow(0 0 25px #ffffff);
 }
-
-input[type="text"] {
-  width: 70%;
-  padding: 10px;
-  margin-bottom: 20px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+.pet-option1 img.hovering {
+  transform: scale(1.1) rotate(-10deg);
 }
-
-button {
-  width: 20%;
-  padding: 10px;
-  border: none;
-  background-color: #4CAF50;
-  color: #fff;
-  cursor: pointer;
-  border-radius: 5px;
-  transition: background-color 0.3s;
-  margin-left: 5%;
-  position: relative;
-}
-
-button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-}
-
-button:not(:disabled):hover {
-  background-color: #45a049;
-}
-
-button.glow-button {
-  box-shadow: 0 0 10px 2px rgba(0, 255, 0, 0.6);
-}
-
-.loader {
-  border: 4px solid #f3f3f3;
-  border-radius: 50%;
-  border-top: 4px solid #3498db;
-  width: 12px;
-  height: 12px;
-  -webkit-animation: spin 1s linear infinite;
-  animation: spin 1s linear infinite;
-  display: inline-block;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-@keyframes explosion {
-  0% {
-    opacity: 1;
-    transform: scale(0);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(3);
-  }
-}
-
-.explosion {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-  background: radial-gradient(
-      circle,
-      rgba(255, 255, 0, 1) 0%,
-      rgba(255, 0, 0, 1) 50%,
-      rgba(0, 0, 0, 0) 70%
-  );
-  opacity: 0;
-  pointer-events: none;
-}
-
-.explosion-active {
-  animation: explosion 0.5s ease-out forwards;
-}
-
-.message {
-  margin-top: 20px;
-  padding: 10px;
-  border-radius: 5px;
-}
-
-.message.success {
-  background-color: #dff0d8;
-  color: #3c763d;
-}
-
-.message.error {
-  background-color: #f2dede;
-  color: #a94442;
+.pet-option2 img.hovering {
+  transform: scale(1.1) rotate(10deg);
 }
 </style>

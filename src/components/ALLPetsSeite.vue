@@ -1,19 +1,19 @@
 <template>
   <div class="dead-pets">
-    <h1>Tierliste</h1>
+    <h1>All Animals</h1>
     <table>
       <thead>
       <tr>
         <th @click="sortTable('index')">#</th>
         <th @click="sortTable('name')">Name</th>
-        <th @click="sortTable('type')">Typ</th>
-        <th @click="sortTable('username')">Benutzername</th>
-        <th @click="sortTable('createdDate')">Erstellungsdatum</th>
-        <th @click="sortTable('lastFed')">Letzte Fütterung</th>
-        <th @click="sortTable('lastWatered')">Letzte Bewässerung</th>
-        <th @click="sortTable('lastSlept')">Letztes Schlafen</th>
-        <th @click="sortTable('lastPetted')">Letztes Streicheln</th>
-        <th @click="sortTable('lastShowered')">Letzte Dusche</th>
+        <th @click="sortTable('type')">Type</th>
+        <th @click="sortTable('username')">User</th>
+        <th @click="sortTable('createdDate')">Creation</th>
+        <th @click="sortTable('lastFed')">last feed</th>
+        <th @click="sortTable('lastWatered')">last drink</th>
+        <th @click="sortTable('lastSlept')">last sleep</th>
+        <th @click="sortTable('lastPetted')">last caress</th>
+        <th @click="sortTable('lastShowered')">last shower</th>
       </tr>
       </thead>
       <tbody>
@@ -33,12 +33,11 @@
     </table>
   </div>
 </template>
-
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { formatDistanceToNow, parseISO } from 'date-fns';
-import { de } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
 
 const deadPets = ref<any[]>([]);
 const sortedPets = ref<any[]>([]);
@@ -55,19 +54,16 @@ const getDeadPets = async () => {
     }));
     sortTable('index');
   } catch (error) {
-    console.error('Fehler beim Laden der Tiere:', error);
+    console.error('Error by loading animals:', error);
   }
 };
-
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('de-DE');
 };
-
 const formatTimeAgo = (dateString: string | null) => {
-  if (!dateString) return 'Nie';
-  return formatDistanceToNow(parseISO(dateString), { addSuffix: true, locale: de });
+  if (!dateString) return 'never';
+  return formatDistanceToNow(parseISO(dateString), { addSuffix: true, locale: enUS });
 };
-
 const sortTable = (key: string) => {
   if (sortKey.value === key) {
     sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
@@ -81,30 +77,28 @@ const sortTable = (key: string) => {
     return 0;
   });
 };
-
 onMounted(() => {
   getDeadPets();
 });
 </script>
-
 <style scoped>
 .dead-pets {
-  padding: 20px;
-  padding: 50px 20px 20px;
+  padding-top: 10vh;
 }
-
+h1{
+  color: var(--text-invert-color);
+}
 table {
   width: 100%;
   border-collapse: collapse;
 }
-
 th, td {
   border: 1px solid #ddd;
   padding: 8px;
   text-align: left;
   cursor: pointer;
+  color: var(--text-invert-color);
 }
-
 th {
   background-color: #333;
   color: #fff;

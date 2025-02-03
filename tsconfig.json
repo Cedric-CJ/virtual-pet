@@ -1,5 +1,23 @@
 {
-  "files": [],
+  "compilerOptions": {
+    "baseUrl": ".", // Basisverzeichnis des Projekts
+    "paths": {
+      "@/*": ["src/*"] // Alias für "src"
+    },
+    "typeRoots": [
+      "./node_modules/@types", // Typdefinitionen aus Node.js-Modulen
+      "./src/types"           // Benutzerdefinierte Typdefinitionen
+    ],
+    "strict": true,           // Aktiviert den strengen Modus
+    "esModuleInterop": true,  // Ermöglicht den Import von CommonJS-Modulen
+    "moduleResolution": "node", // Sucht Module wie Node.js
+    "resolveJsonModule": true, // Ermöglicht das Importieren von JSON-Dateien
+    "skipLibCheck": true,      // Überspringt die Typprüfung für Bibliotheken
+    "allowJs": true            // Unterstützt JavaScript-Dateien
+  },
+  "include": ["src/**/*"],     // Enthält alle Dateien im src-Verzeichnis
+  "exclude": ["node_modules"], // Schließt node_modules aus
+  "files": [],                 // Optional: direkt hinzuzufügende Dateien
   "references": [
     {
       "path": "./tsconfig.node.json"

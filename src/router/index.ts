@@ -1,8 +1,10 @@
 import { createRouter, createWebHashHistory } from 'vue-router';
 import HaustierErstellungsseite from '@/components/Haustier-Erstellungsseite.vue';
-import HaustierSeite2 from '@/components/Haustier-Seite2.vue';
+import HaustierSeite from '@/components/Haustier-Seite.vue';
 import Anmelde_und_Registrierungsseite from '@/components/Anmelde_und_Registrierungsseite.vue';
-import DeadPet from '@/components/ALLPetsSeite.vue';
+import AllPets from '@/components/ALLPetsSeite.vue';
+import AnimatedDog from "@/components/AnimatedDog.vue";
+
 import { useUserStore } from "@/store";
 
 const router = createRouter({
@@ -12,6 +14,8 @@ const router = createRouter({
       path: '/',
       redirect: '/login'
     },
+    { path: '/test',
+      component: AnimatedDog },
     {
       path: '/create',
       name: 'Erstellen',
@@ -34,12 +38,12 @@ const router = createRouter({
     {
       path: '/pet',
       name: 'Pet',
-      component: HaustierSeite2
+      component: HaustierSeite
     },
     {
-      path: '/dead',
-      name: 'Dead',
-      component: DeadPet
+      path: '/All',
+      name: 'All',
+      component: AllPets
     }]
 });
 

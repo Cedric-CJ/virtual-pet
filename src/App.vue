@@ -1,141 +1,222 @@
 <template>
   <div class="navbar">
-    <div class="logo" @click="toggleDropdown">
-      <img src="@/assets/Logo.png" alt="Virtuelles Haustier Logo">
+    <div class="logo" @click.stop="toggleDropdown">
+      <img src="@/assets/Logo.png" alt="Virtuell Pet Logo" />
     </div>
-    <transition name="fade">
+    <transition name="roll">
       <div class="dropdown" v-if="dropdownVisible">
-        <h1>Herzlich Willkommen</h1>
+        <h1>Virtual Pet</h1>
         <nav>
-          <RouterLink to="/login">Login</RouterLink>
-          <RouterLink to="/dead">Bestenliste</RouterLink>
-          <button class="dropdown-button" @click="Logout">Abmelden</button>
-          <button @click="toggleDarkMode" class="dark-mode-link">Dark Mode</button>
+          <button
+              v-if="!isUserLoggedIn"
+              class="dropdown-button"
+              @click="delayedNavigate('/login')"
+              @mouseenter="showUnderline($event)"
+              @mouseleave="hideUnderline"
+          >
+            Login
+          </button>
+          <button
+              v-else
+              class="dropdown-button"
+              @click="delayedLogout"
+              @mouseenter="showUnderline($event)"
+              @mouseleave="hideUnderline"
+          >
+            Logout
+          </button>
+          <button
+              class="dropdown-button"
+              @click="delayedNavigate('/All')"
+              @mouseenter="showUnderline($event)"
+              @mouseleave="hideUnderline"
+          >
+            Topscore
+          </button>
+          <button
+              @mouseenter="showUnderline($event)"
+              @mouseleave="hideUnderline"
+              @click="toggleDarkMode"
+              class="dark-mode-link"
+          >
+            {{ darkModeText }}
+          </button>
         </nav>
       </div>
     </transition>
   </div>
-  <RouterView/>
-</template>
+  <RouterView />
+</template><script setup>
+import { ref, computed, onMounted, onUnmounted } from "vue";
+import { annotate } from "https://unpkg.com/rough-notation?module";
+import { useRouter } from "vue-router";
+import { useUserStore } from "@/store";
 
-<script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
-import { useRouter } from 'vue-router';
-import axios from 'axios';
-import { useUserStore } from '@/store';  // Importiere den Store
+const store = useUserStore();
+const darkModeText = computed(() => (store.darkMode === "dark-mode" ? "Light Mode" : "Dark Mode"));
+const toggleDarkMode = () => store.toggleDarkMode();
 
 const dropdownVisible = ref(false);
-const store = useUserStore();  // Initialisiere den Store
+const router = useRouter();
+let currentAnnotation = null;
 
+const isUserLoggedIn = computed(() => !!store.userId && !!store.username);
 const toggleDropdown = () => {
   dropdownVisible.value = !dropdownVisible.value;
 };
-
-const toggleDarkMode = () => {
-  const currentMode = document.body.classList.contains('dark-mode') ? 'dark-mode' : 'light-mode';
-  const newMode = currentMode === 'dark-mode' ? 'light-mode' : 'dark-mode';
-  document.body.classList.remove(currentMode);
-  document.body.classList.add(newMode);
-  localStorage.setItem('mode', newMode); // Speichern des aktuellen Modus in localStorage
-  dropdownVisible.value = false; // Dropdown schließen, nachdem der Modus umgeschaltet wurde
+const delayedNavigate = (path) => {
+  dropdownVisible.value = false;
+  setTimeout(() => {
+    router.push(path);
+  }, 1000);
 };
-
-const router = useRouter();
-
-onMounted(() => {
-  // Prüfen und anwenden des Modus beim Laden der Seite
-  const savedMode = localStorage.getItem('mode') || 'light-mode';
-  document.body.classList.add(savedMode);
-
-  router.beforeEach((to, from, next) => {
-    dropdownVisible.value = false;
-    next();
+const delayedLogout = () => {
+  dropdownVisible.value = false;
+  setTimeout(async () => {
+    store.clearUserData();
+    await router.push("/login");
+  }, 1000);
+};
+const showUnderline = (event) => {
+  const element = event.target;
+  const annotation = annotate(element, {
+    type: "underline",
+    color: "black",
+    strokeWidth: 2,
+    animationDuration: 500,
+    padding: -10,
   });
-});
-
-onUnmounted(() => {
-  router.beforeEach(null);
-});
-
-const Logout = async () => {
-    store.clearUserData();  // Lösche die Benutzerdaten aus dem Store
-    router.push('/login');
+  if (currentAnnotation) {
+    currentAnnotation.remove();
+  }
+  currentAnnotation = annotation;
+  currentAnnotation.show();
 };
+const hideUnderline = () => {
+  if (currentAnnotation) {
+    currentAnnotation.remove();
+    currentAnnotation = null;
+  }
+};
+const handleClickOutside = (event) => {
+  const dropdownElement = document.querySelector(".dropdown");
+  const logoElement = document.querySelector(".logo");
+  if (
+      dropdownVisible.value &&
+      dropdownElement &&
+      !dropdownElement.contains(event.target) &&
+      logoElement &&
+      !logoElement.contains(event.target)
+  ) {
+    dropdownVisible.value = false;
+  }
+};
+const checkUserData = () => {
+  store.loadUserData();
+  if (!store.userId || !store.username) {
+    console.error("UserID oder Benutzername fehlt");
+  }
+};
+onMounted(() => {
+  document.addEventListener("click", handleClickOutside);
+  checkUserData();
+});
+onUnmounted(() => {
+  document.removeEventListener("click", handleClickOutside);
+});
 </script>
-
 <style scoped>
+.roll-enter-active {
+  animation: rollIn 0.6s ease forwards;
+}
+.roll-leave-active {
+  animation: rollOut 0.6s ease forwards;
+}
+@keyframes rollIn {
+  from {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+  to {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+@keyframes rollOut {
+  from {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+  to {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+}
 .navbar {
   position: fixed;
-  top: 10px;
-  right: 10px;
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-}
-
-.logo {
-  cursor: pointer;
-  background-color: Transparent;
-}
-
-.logo img {
-  max-width: 150px;
-}
-
-.dropdown {
-  position: absolute;
-  top: 160px;
-  right: 0;
-  background-color: var(--dropdown-bg, #ffffff);
-  border: 1px solid #ccc;
-  box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 10px;
   z-index: 1000;
 }
-
-.dropdown h1 {
-  margin: 10px 0;
+.logo {
+  cursor: pointer;
+  height: 20vh;
+  margin-bottom: 10px;
+  transition: transform 0.3s ease;
 }
-
+.logo img {
+  max-height: 20vh;
+  object-fit: contain;
+  border-radius: 50%;
+}
+.logo:hover {
+  transform: scale(1.1);
+}
+.dropdown {
+  position: relative;
+  background-image: url('@/assets/pictures/Schriftrolle.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  border-radius: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 50px 20px;
+  width: 250px;
+  text-align: center;
+  overflow: hidden;
+}
+.dropdown h1 {
+  color: var(--text-color);
+  font-family: 'Viner Hand ITC', cursive;
+  font-weight: bold;
+}
 nav {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  justify-content: center;
+  gap: 20px;
+  width: 100%;
   align-items: center;
 }
-
-nav a, .dropdown-button, .dark-mode-link {
+nav a,
+.dropdown-button,
+.dark-mode-link {
+  font-size: 1.2rem;
   text-decoration: none;
-  color: var(--link-color, black);
-  padding: 10px;
-  width: 100%;
-  text-align: center;
+  color: var(--text-color);
+  padding: 5px 10px;
   background: none;
-  border: none;
+  border: 2px solid transparent;
+  border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-nav a:hover, .dropdown-button:hover, .dark-mode-link:hover {
-  background-color: var(--link-hover-bg, #ddd);
-}
-
-/* Dark Mode Variables */
-body.dark-mode {
-  --dropdown-bg: #333;
-  --link-color: #fff;
-  --link-hover-bg: #555;
-  --text-color-dark: #ffffff;
-}
-
-.fade-enter-active, .fade-leave-active {
-  transition: opacity 0.5s;
-}
-.fade-enter, .fade-leave-to {
-  opacity: 0;
+  width: fit-content;
+  text-align: center;
+  transition: all 0.3s ease-in-out;
+  font-family: 'Viner Hand ITC', cursive;
+  font-weight: bold;
 }
 </style>
