@@ -24,11 +24,11 @@ public class UserController {
 
     @PostMapping("/registration")
     public ResponseEntity<?> registerUser(@RequestBody ApplicationUser newUser) {
-        logger.info("Erhaltene Daten: {} - {}", newUser.getUsername(), newUser.getPassword());
+        logger.info("Data received: {} - {}", newUser.getUsername(), newUser.getPassword());
 
         if (newUser.getUsername() == null || newUser.getPassword() == null || newUser.getUsername().isEmpty() || newUser.getPassword().isEmpty()) {
-            logger.warn("Benutzername oder Passwort sind leer.");
-            return ResponseEntity.badRequest().body("Benutzername und Passwort dürfen nicht leer sein.");
+            logger.warn("Username or password are empty.");
+            return ResponseEntity.badRequest().body("Username and password cannot be empty.");
         }
 
         try {
@@ -36,8 +36,8 @@ public class UserController {
             int count = jdbcTemplate.queryForObject(checkUserQuery, new Object[]{newUser.getUsername()}, Integer.class);
 
             if (count > 0) {
-                logger.warn("Benutzername ist bereits vergeben.");
-                return ResponseEntity.badRequest().body("Benutzername ist bereits vergeben.");
+                logger.warn("Username is already taken.");
+                return ResponseEntity.badRequest().body("Username is already taken.");
             }
 
             String hashedPassword = bCryptPasswordEncoder.encode(newUser.getPassword());
@@ -47,19 +47,19 @@ public class UserController {
             if (rowsAffected > 0) {
                 String getUserIdQuery = "SELECT id FROM v_pet.user WHERE username = ?";
                 Integer userId = jdbcTemplate.queryForObject(getUserIdQuery, new Object[]{newUser.getUsername()}, Integer.class);
-                logger.info("Benutzer erfolgreich registriert mit ID: {}", userId);
+                logger.info("User successfully registered with ID: {}", userId);
                 Map<String, Object> response = new HashMap<>();
-                response.put("message", "Benutzer erfolgreich registriert");
+                response.put("message", "User registered successfully");
                 response.put("userId", userId);
                 return ResponseEntity.ok(response);
             } else {
-                logger.error("Benutzer konnte nicht registriert werden");
-                return ResponseEntity.status(500).body("Fehler bei der Registrierung");
+                logger.error("User could not be registered");
+                return ResponseEntity.status(500).body("Registration error");
             }
 
         } catch (Exception e) {
-            logger.error("Fehler bei der Registrierung", e);
-            return ResponseEntity.status(500).body("Fehler bei der Registrierung");
+            logger.error("Registration error", e);
+            return ResponseEntity.status(500).body("Registration error");
         }
     }
 
@@ -80,13 +80,13 @@ public class UserController {
             logger.debug("Stored hashed password for user {}: {}", username, storedHashedPassword);
 
             if (storedHashedPassword == null) {
-                logger.warn("Benutzer nicht gefunden: {}", username);
-                return ResponseEntity.badRequest().body("Ungültiger Benutzername oder Passwort.");
+                logger.warn("User not found: {}", username);
+                return ResponseEntity.badRequest().body("Invalid username or password.");
             }
 
             if (!bCryptPasswordEncoder.matches(password, storedHashedPassword)) {
-                logger.warn("Ungültiges Passwort für Benutzer: {}", username);
-                return ResponseEntity.badRequest().body("Ungültiger Benutzername oder Passwort.");
+                logger.warn("Invalid password for user: {}", username);
+                return ResponseEntity.badRequest().body("Invalid username or password.");
             }
 
             // Überprüfen, ob der Benutzer bereits ein Haustier hat
@@ -95,20 +95,20 @@ public class UserController {
             logger.debug("Pet count for user {}: {}", username, petCount);
 
             Map<String, Object> response = new HashMap<>();
-            response.put("message", "Anmeldung erfolgreich");
+            response.put("message", "Registration successful");
             response.put("userId", userId);
             response.put("username", storedUsername); // Benutzername hinzufügen
             response.put("hasPet", petCount > 0);
 
-            logger.info("Anmeldung erfolgreich und Benutzer hat bereits ein Haustier: {}", petCount > 0);
+            logger.info("Registration successful and user already has a pet: {}", petCount > 0);
             return ResponseEntity.ok(response);
 
         } catch (org.springframework.dao.IncorrectResultSizeDataAccessException e) {
-            logger.error("Benutzer nicht gefunden oder zu viele Ergebnisse für Benutzer: {}", username, e);
-            return ResponseEntity.badRequest().body("Ungültiger Benutzername oder Passwort.");
+            logger.error("User not found or too many results for user: {}", username, e);
+            return ResponseEntity.badRequest().body("Invalid username or password.");
         } catch (Exception e) {
-            logger.error("Fehler bei der Anmeldung für Benutzer: " + username, e);
-            return ResponseEntity.status(500).body("Fehler bei der Anmeldung: " + e.getMessage());
+            logger.error("User login error: " + username, e);
+            return ResponseEntity.status(500).body("User login error: " + e.getMessage());
         }
     }
 

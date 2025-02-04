@@ -19,13 +19,13 @@ public class PetController {
     @PostMapping("/save")
     @Transactional
     public ResponseEntity<?> savePet(@RequestBody Pet pet) {
-        System.out.println("Empfangene Haustierdaten: " + pet.toString());
+        System.out.println("Pet data received: " + pet.toString());
 
         try {
             Pet savedPet = petService.savePet(pet);
             return ResponseEntity.ok(savedPet);
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Fehler beim Speichern der Haustierdaten: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error by saving pet data: " + e.getMessage());
         }
     }
 
@@ -36,13 +36,13 @@ public class PetController {
         String name = (String) request.get("name");
         Map<String, Integer> stats = (Map<String, Integer>) request.get("stats");
 
-        System.out.println("Empfangene Statistiken: " + stats.toString());
+        System.out.println("Statistics received: " + stats.toString());
 
         try {
             petService.updatePetStats(userId, name, stats);
-            return ResponseEntity.ok("Statistiken erfolgreich aktualisiert");
+            return ResponseEntity.ok("Statistics updated successfully");
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Fehler beim Aktualisieren der Statistiken: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error by updating statistics: " + e.getMessage());
         }
     }
 
@@ -53,13 +53,13 @@ public class PetController {
         String name = (String) request.get("name");
         Map<String, String> lastActions = (Map<String, String>) request.get("lastActions");
 
-        System.out.println("Empfangene letzte Aktionen: " + lastActions.toString());
+        System.out.println("Recent actions received: " + lastActions.toString());
 
         try {
             petService.updateLastActions(userId, name, lastActions);
-            return ResponseEntity.ok("Letzte Aktionen erfolgreich aktualisiert");
+            return ResponseEntity.ok("Last actions updated successfully");
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Fehler beim Aktualisieren der letzten Aktionen: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error by updating recent actions: " + e.getMessage());
         }
     }
 
@@ -68,13 +68,13 @@ public class PetController {
         try {
             boolean petExists = petService.doesPetExist(newPet.getUserId(), newPet.getName());
             if (petExists) {
-                return ResponseEntity.status(400).body("Tiername wurde bereits verwendet benutze bitte einen anderen");
+                return ResponseEntity.status(400).body("Pet name has already been used please use a different one");
             } else {
                 Pet createdPet = petService.createPetInternal(newPet.getType(), newPet.getName(), newPet.getUserId());
                 return ResponseEntity.ok(createdPet);
             }
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Fehler bei der Überprüfung oder Erstellung des Haustiers: " + e.getMessage());
+            return ResponseEntity.status(500).body("Errors by verifying or creating the pet: " + e.getMessage());
         }
     }
 
@@ -104,9 +104,9 @@ public class PetController {
             Pet pet = petService.getPetDetailsInternal(petRequest.getUserId(), petRequest.getUsername());
             return ResponseEntity.ok(pet);
         } catch (PetService.PetNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Tier nicht gefunden");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Pet not found");
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Interner Serverfehler");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error");
         }
     }
 
@@ -115,11 +115,11 @@ public class PetController {
     public ResponseEntity<?> deletePet(@RequestBody PetRequest petRequest) {
         try {
             petService.deletePet(petRequest.getUserId(), petRequest.getUsername());
-            return ResponseEntity.ok("Tier erfolgreich gelöscht und in die application_dead Tabelle verschoben");
+            return ResponseEntity.ok("Animal successfully deleted and moved to the dead table");
         } catch (PetService.PetNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Tier nicht gefunden");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Pet not found");
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Interner Serverfehler");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error");
         }
     }
 }
