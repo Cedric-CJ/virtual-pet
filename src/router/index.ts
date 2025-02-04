@@ -3,7 +3,6 @@ import HaustierErstellungsseite from '@/components/Haustier-Erstellungsseite.vue
 import HaustierSeite from '@/components/Haustier-Seite.vue';
 import Anmelde_und_Registrierungsseite from '@/components/Anmelde_und_Registrierungsseite.vue';
 import AllPets from '@/components/ALLPetsSeite.vue';
-import AnimatedDog from "@/components/AnimatedDog.vue";
 
 import { useUserStore } from "@/store";
 
@@ -14,8 +13,6 @@ const router = createRouter({
       path: '/',
       redirect: '/login'
     },
-    { path: '/test',
-      component: AnimatedDog },
     {
       path: '/create',
       name: 'Erstellen',

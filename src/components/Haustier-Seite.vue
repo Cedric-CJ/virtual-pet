@@ -182,7 +182,7 @@ const handleNewPet = async () => {
     const deleteResponse = await axiosInstance.delete('/delete', { data: payload });
     if (deleteResponse.status === 200) {
       console.log('Antwort vom Backend:', deleteResponse.data);
-      router.push('/create');
+      await router.push('/create');
     } else {
       console.error('Fehler beim Löschen des Haustiers:', deleteResponse.data);
     }
@@ -196,7 +196,7 @@ const deleteAndLogout = async () => {
     console.log('Sending delete request with:', payload);
     console.log('Authorization header:', axiosInstance.defaults.headers.Authorization);
     await axiosInstance.delete('/delete', { data: payload });
-    router.push('/logout');
+    await router.push('/logout');
   } catch (error) {
     handleError(error);
   }
@@ -211,7 +211,7 @@ const reduceStatsOverTime = () => {
   }, 3600000); // Alle 1 Stunde
 };
 onMounted(async () => {
-  await checkUserData();
+  checkUserData();
   if (store.userId && store.username) {
     await getPetData();
   } else {

@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "module": "esnext",
     "baseUrl": ".", // Basisverzeichnis des Projekts
     "paths": {
       "@/*": ["src/*"] // Alias für "src"
@@ -8,6 +9,7 @@
       "./node_modules/@types", // Typdefinitionen aus Node.js-Modulen
       "./src/types"           // Benutzerdefinierte Typdefinitionen
     ],
+    "noEmit": true,           // Keine Ausgabe von Dateien
     "strict": true,           // Aktiviert den strengen Modus
     "esModuleInterop": true,  // Ermöglicht den Import von CommonJS-Modulen
     "moduleResolution": "node", // Sucht Module wie Node.js
@@ -17,16 +19,4 @@
   },
   "include": ["src/**/*"],     // Enthält alle Dateien im src-Verzeichnis
   "exclude": ["node_modules"], // Schließt node_modules aus
-  "files": [],                 // Optional: direkt hinzuzufügende Dateien
-  "references": [
-    {
-      "path": "./tsconfig.node.json"
-    },
-    {
-      "path": "./tsconfig.app.json"
-    },
-    {
-      "path": "./tsconfig.vitest.json"
-    }
-  ]
 }

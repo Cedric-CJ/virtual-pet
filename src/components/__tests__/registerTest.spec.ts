@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { describe, it, expect } from 'vitest';
 import { mount } from '@vue/test-utils';
-import Registrierungsseite from '@/views/Registrierung.vue';
+import Registrierungsseite from '@/components/Anmelde_und_Registrierungsseite.vue';
 
 // Erstelle einen Router-Mock
 const routes = [

@@ -46,77 +46,91 @@
     </transition>
   </div>
   <RouterView />
-</template><script setup>
+</template>
+<script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from "vue";
-import { annotate } from "https://unpkg.com/rough-notation?module";
+import { annotate } from "rough-notation";
 import { useRouter } from "vue-router";
 import { useUserStore } from "@/store";
 
+// Wir definieren einen Typ für die Annotation, den rough-notation zurückgibt
+interface Annotation {
+  remove: () => void;
+  show: () => void;
+}
+
 const store = useUserStore();
 const darkModeText = computed(() => (store.darkMode === "dark-mode" ? "Light Mode" : "Dark Mode"));
-const toggleDarkMode = () => store.toggleDarkMode();
+const toggleDarkMode = (): void => store.toggleDarkMode();
 
-const dropdownVisible = ref(false);
+const dropdownVisible = ref<boolean>(false);
 const router = useRouter();
-let currentAnnotation = null;
+let currentAnnotation: Annotation | null = null;
 
 const isUserLoggedIn = computed(() => !!store.userId && !!store.username);
-const toggleDropdown = () => {
+const toggleDropdown = (): void => {
   dropdownVisible.value = !dropdownVisible.value;
 };
-const delayedNavigate = (path) => {
+
+const delayedNavigate = (path: string): void => {
   dropdownVisible.value = false;
   setTimeout(() => {
     router.push(path);
   }, 1000);
 };
-const delayedLogout = () => {
+
+const delayedLogout = (): void => {
   dropdownVisible.value = false;
   setTimeout(async () => {
     store.clearUserData();
     await router.push("/login");
   }, 1000);
 };
-const showUnderline = (event) => {
-  const element = event.target;
+
+const showUnderline = (event: MouseEvent): void => {
+  const element = event.target as HTMLElement;
   const annotation = annotate(element, {
     type: "underline",
     color: "black",
     strokeWidth: 2,
     animationDuration: 500,
     padding: -10,
-  });
+  }) as Annotation;
   if (currentAnnotation) {
     currentAnnotation.remove();
   }
   currentAnnotation = annotation;
   currentAnnotation.show();
 };
-const hideUnderline = () => {
+
+const hideUnderline = (): void => {
   if (currentAnnotation) {
     currentAnnotation.remove();
     currentAnnotation = null;
   }
 };
-const handleClickOutside = (event) => {
-  const dropdownElement = document.querySelector(".dropdown");
-  const logoElement = document.querySelector(".logo");
+
+const handleClickOutside = (event: MouseEvent): void => {
+  const dropdownElement = document.querySelector(".dropdown") as HTMLElement | null;
+  const logoElement = document.querySelector(".logo") as HTMLElement | null;
   if (
       dropdownVisible.value &&
       dropdownElement &&
-      !dropdownElement.contains(event.target) &&
+      !dropdownElement.contains(event.target as Node) &&
       logoElement &&
-      !logoElement.contains(event.target)
+      !logoElement.contains(event.target as Node)
   ) {
     dropdownVisible.value = false;
   }
 };
-const checkUserData = () => {
+
+const checkUserData = (): void => {
   store.loadUserData();
   if (!store.userId || !store.username) {
     console.error("UserID oder Benutzername fehlt");
   }
 };
+
 onMounted(() => {
   document.addEventListener("click", handleClickOutside);
   checkUserData();
