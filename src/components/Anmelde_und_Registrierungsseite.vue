@@ -69,16 +69,16 @@ const handleRegister = async () => {
   try {
     const response = await axios.post("https://virtual-pet-backend.onrender.com/api/registration", registerData.value);
     if (response.status === 200) {
-      message.value = 'Registrierung erfolgreich!';
+      message.value = 'Registration successful!';
       isError.value = false;
     } else {
       throw new Error(response.data);
     }
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      message.value = 'Registrierung fehlgeschlagen: ' + (error.response?.data || 'Unbekannter Fehler');
+      message.value = 'Registration failed: ' + (error.response?.data || 'Unknown error');
     } else {
-      message.value = 'Registrierung fehlgeschlagen: Unbekannter Fehler';
+      message.value = 'Registration failed: Unknown error';
     }
     isError.value = true;
   } finally {
@@ -95,7 +95,7 @@ const handleLogin = async () => {
   try {
     const response = await axios.post("https://virtual-pet-backend.onrender.com/api/login", loginData.value);
     if (response.status === 200) {
-      message.value = response.data.message;
+      message.value = 'Login successful!';
       isError.value = false;
       localStorage.setItem('token', response.data.token);
       const userId = response.data.userId;
@@ -115,10 +115,10 @@ const handleLogin = async () => {
     }
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      const errorMessage = error.response?.data.message || error.response?.data || 'Unbekannter Fehler';
-      message.value = 'Login fehlgeschlagen: ' + errorMessage;
+      const errorMessage = error.response?.data.message || error.response?.data || 'Unknown error';
+      message.value = 'Login failed: ' + errorMessage;
     } else {
-      message.value = 'Login fehlgeschlagen: Unbekannter Fehler';
+      message.value = 'Login failed: Unknown error';
     }
     isError.value = true;
     isLoading.value = false;
