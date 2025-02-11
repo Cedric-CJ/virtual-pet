@@ -226,10 +226,11 @@ const toggleForm = () => {
   transition: all 0.3s ease;
   background-color: rgba(255, 255, 255, 0.8);
   width: auto;
-  height: 5%;
+  height: 5vh;
   text-align: center;
   padding: 5px;
-  line-height: 0;
+  align-items: center;
+  justify-content: center;
 }
 .signup.slide-up .form-holder, .login.slide-up .form-holder {
   opacity: 0;
@@ -258,10 +259,11 @@ const toggleForm = () => {
 }
 .signup .form-title, .login .form-title {
   color: var(--text-color);
-  font-size: 1.7em;
+  font-size: 5vh;
   text-align: center;
   cursor: pointer;
   white-space: nowrap;
+  margin: 0;
 }
 .signup .input, .login .input {
   border: 0;
